@@ -1,0 +1,806 @@
+/* Faixa de Opções: estilos da janela de composição (documento privilegiado).
+ * Injetado como <style> (a CSP da janela aceita 'unsafe-inline' em style-src).
+ * Cores vêm dos tokens do Thunderbird quando existem, para acompanhar tema claro/escuro. */
+
+#faixa-root,
+#faixa-send,
+.fx-layer {
+  --fx-bg: var(--toolbar-background-color, light-dark(#EEF0F3, #2B2A33));
+  --fx-card: var(--layout-background-0, light-dark(#FFFFFF, #1C1B22));
+  --fx-text: var(--layout-color-1, light-dark(#1D2330, #E6E9EE));
+  --fx-muted: var(--layout-color-2, light-dark(#566173, #A7AFBC));
+  --fx-faint: light-dark(#A2AAB6, #6B7380);
+  --fx-line: light-dark(#DADFE6, #3A3F49);
+  --fx-line2: light-dark(#C3CAD4, #4C525D);
+  --fx-hover: light-dark(rgba(20, 40, 80, 0.07), rgba(255, 255, 255, 0.09));
+  --fx-pressed: light-dark(#D8E4F7, #3A4960);
+  --fx-accent: light-dark(#2F6FD1, #86AEF7);
+  --fx-accent-weak: light-dark(#E3ECFB, #2E3B52);
+  --fx-danger: light-dark(#C4262E, #FF7B80);
+  --fx-shadow: 0 10px 28px rgba(19, 30, 52, 0.18), 0 2px 6px rgba(19, 30, 52, 0.1);
+  --fx-radius: 6px;
+}
+
+/* Barras nativas substituídas pela faixa. */
+#FormatToolbox {
+  display: none !important;
+}
+
+/* Barra de menus oculta (opção da faixa ou do Thunderbird): some por inteiro enquanto
+ * nenhum menu está aberto; o Alt a mostra (AutoHideMenubar do Thunderbird). */
+#compose-toolbar-menubar2[autohide][inactive="true"]:not([customizing="true"]) {
+  min-height: 0 !important;
+  height: 0 !important;
+  padding-block: 0 !important;
+  margin-block: 0 !important;
+  border-block: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ===== raiz ===== */
+#faixa-root {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--fx-bg);
+  color: var(--fx-text);
+  font: message-box;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--fx-line);
+  user-select: none;
+  min-width: 0;
+}
+#faixa-root *,
+.fx-layer * {
+  box-sizing: border-box;
+}
+:where(#faixa-root, .fx-layer) button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+  text-align: inherit;
+  appearance: none;
+  min-width: 0;
+  min-height: 0;
+}
+:where(#faixa-root, .fx-layer) button:disabled {
+  color: var(--fx-faint);
+}
+#faixa-root button:focus-visible,
+#faixa-root input:focus-visible,
+.fx-layer button:focus-visible {
+  outline: 2px solid var(--fx-accent);
+  outline-offset: 1px;
+}
+.fx-ic {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+}
+.fx-ic.fx-lg { width: 28px; height: 28px; stroke-width: 1.45; }
+.fx-ic.fx-chev { width: 9px; height: 9px; stroke-width: 2.6; }
+.fx-ic.fx-accent { color: var(--fx-accent); }
+.fx-ic.fx-red { color: var(--fx-danger); }
+button:disabled .fx-ic.fx-accent,
+button:disabled .fx-ic.fx-red { color: var(--fx-faint); }
+
+/* ===== abas ===== */
+.fx-tabbar {
+  height: 32px;
+  display: flex;
+  align-items: stretch;
+  padding: 0 8px;
+  gap: 1px;
+  min-width: 0;
+}
+.fx-qat { display: flex; align-items: center; gap: 1px; }
+.fx-qb {
+  width: 28px;
+  height: 26px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+.fx-qb:hover:not(:disabled) { background: var(--fx-hover); }
+.fx-vsep { width: 1px; background: var(--fx-line2); margin: 8px 6px; }
+.fx-tabs { display: flex; align-items: stretch; gap: 1px; }
+.fx-tab {
+  padding: 0 11px;
+  font-size: 13px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 4px 4px 0 0;
+  white-space: nowrap;
+}
+.fx-tab:hover { background: var(--fx-hover); }
+.fx-tab[aria-selected="true"] { color: var(--fx-accent); font-weight: 600; }
+.fx-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--fx-accent);
+}
+/* Arquivo: abre o menu de arquivo (no Outlook, o Backstage). Cor de destaque, sem sublinhado. */
+.fx-tab.fx-filetab { color: var(--fx-accent); font-weight: 600; margin-inline-end: 2px; }
+.fx-tab.fx-filetab[aria-expanded="true"] { background: var(--fx-pressed); }
+#faixa-root .fx-tab:focus-visible { outline-offset: -3px; }
+/* Faixa recolhida: nenhuma aba parece escolhida até abrir uma por cima da mensagem. */
+#faixa-root.fx-collapsed:not(.fx-peek) .fx-tab[aria-selected="true"] { color: inherit; font-weight: inherit; }
+#faixa-root.fx-collapsed:not(.fx-peek) .fx-tab[aria-selected="true"]::after { display: none; }
+.fx-spacer { flex: 1; min-width: 8px; }
+.fx-status {
+  align-self: center;
+  color: var(--fx-muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px;
+}
+.fx-status:empty { display: none; }
+
+/* ===== painel ===== */
+.fx-panel {
+  flex: none;
+  height: 100px;
+  margin: 0 8px;
+  background: var(--fx-card);
+  border: 1px solid var(--fx-line);
+  border-radius: 8px;
+  display: flex;
+  align-items: stretch;
+  padding: 4px 4px 0;
+  box-shadow: 0 1px 2px rgba(19, 30, 52, 0.06);
+  overflow: hidden;
+  min-width: 0;
+}
+.fx-panel[hidden],
+#faixa-root.fx-collapsed .fx-panel { display: none; }
+/* Faixa recolhida: a aba clicada abre por cima da mensagem até o próximo comando ou clique fora. */
+#faixa-root { position: relative; }
+#faixa-root.fx-collapsed.fx-peek .fx-panel:not([hidden]) {
+  display: flex;
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: var(--fx-shadow);
+}
+#faixa-root.fx-scroll .fx-panel {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.fx-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 4px;
+  border-inline-end: 1px solid var(--fx-line);
+  flex: none;
+}
+.fx-group:last-child { border-inline-end: 0; }
+.fx-gbody {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  padding-top: 2px;
+}
+.fx-glabel {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--fx-muted);
+  white-space: nowrap;
+  padding: 0 6px;
+}
+
+/* botões grandes */
+.fx-large {
+  min-width: 48px;
+  max-width: 92px;
+  height: 72px;
+  padding: 4px 4px 2px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.fx-large .fx-lbl { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+/* Rótulo em duas linhas: quebra nos espaços; só palavra longa (12+ letras, comum em
+ * alemão) é hifenizada, como no Office: "Carte de / visite", "Nachverfol-gung". */
+.fx-large .fx-lbl > span,
+.fx-lsplit > .fx-drop > span { overflow-wrap: anywhere; hyphens: auto; hyphenate-limit-chars: 12 5 5; }
+/* Seta dos botões grandes com menu: na linha de baixo, como no Office; na faixa estreita,
+ * logo depois da última palavra (rótulo em duas linhas sem passar da altura do botão). */
+.fx-large .fx-lbl > span > .fx-chev,
+.fx-lsplit > .fx-drop > span > .fx-chev { display: block; margin: 3px auto 0; }
+#faixa-root.fx-c2 .fx-large .fx-lbl > span > .fx-chev,
+#faixa-root.fx-c2 .fx-lsplit > .fx-drop > span > .fx-chev { display: inline-block; vertical-align: middle; margin: 0 0 1px 3px; }
+.fx-gbtn { display: none; margin-top: 2px; }
+.fx-group.fx-gcollapsed > .fx-gbtn { display: flex; }
+.fx-group.fx-gcollapsed > .fx-gbody { display: none; }
+.fx-mgroup { min-width: 0; padding: 6px 8px; }
+.fx-gpop > .fx-gbody { padding-top: 0; }
+.fx-lsplit {
+  display: flex;
+  flex-direction: column;
+  height: 72px;
+  border-radius: 5px;
+  min-width: 52px;
+}
+.fx-lsplit:hover { box-shadow: inset 0 0 0 1px var(--fx-line2); }
+.fx-lsplit > .fx-main {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px 5px 0 0;
+}
+.fx-lsplit > .fx-drop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 1px;
+  border-radius: 0 0 5px 5px;
+  font-size: 12px;
+  gap: 2px;
+}
+
+/* botões pequenos */
+.fx-col { display: flex; flex-direction: column; gap: 1px; padding-top: 1px; }
+.fx-small {
+  height: 23px;
+  padding: 0 6px 0 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.fx-small.fx-icononly,
+.fx-group.fx-compactgroup .fx-small { width: 30px; padding: 0; justify-content: center; }
+.fx-small.fx-icononly .fx-lbl,
+.fx-group.fx-compactgroup .fx-small .fx-lbl { display: none; }
+
+/* linhas de ícones */
+.fx-rows { display: flex; flex-direction: column; gap: 4px; padding-top: 4px; }
+.fx-row { display: flex; align-items: center; gap: 1px; height: 28px; }
+.fx-icon {
+  width: 27px;
+  height: 26px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.fx-icon .fx-ic { width: 17px; height: 17px; }
+.fx-icon.fx-wide { width: 38px; gap: 2px; }
+.fx-rsep { width: 1px; height: 18px; background: var(--fx-line); margin: 0 4px; flex: none; }
+.fx-split {
+  display: flex;
+  align-items: stretch;
+  border-radius: 4px;
+  height: 26px;
+}
+.fx-split:hover { box-shadow: inset 0 0 0 1px var(--fx-line2); }
+.fx-split > .fx-icon { border-radius: 4px 0 0 4px; width: 26px; }
+.fx-arrow {
+  width: 13px;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fx-cbar {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 3px;
+  height: 4px;
+  border-radius: 1px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+.fx-icon.fx-hasbar .fx-ic { margin-top: -5px; }
+
+/* estados comuns */
+.fx-large:hover:not(:disabled),
+.fx-small:hover:not(:disabled),
+.fx-icon:hover:not(:disabled),
+.fx-arrow:hover:not(:disabled),
+.fx-lsplit > button:hover:not(:disabled) { background: var(--fx-hover); }
+[aria-pressed="true"].fx-large,
+[aria-pressed="true"].fx-small,
+[aria-pressed="true"].fx-icon { background: var(--fx-pressed); }
+[aria-pressed="true"].fx-large:hover,
+[aria-pressed="true"].fx-small:hover,
+[aria-pressed="true"].fx-icon:hover { background: var(--fx-pressed); box-shadow: inset 0 0 0 1px var(--fx-accent); }
+#faixa-root button:disabled[aria-pressed="true"] { background: transparent; box-shadow: none; }
+.fx-phase { opacity: 0.8; }
+
+/* caixas de fonte e tamanho */
+.fx-combo {
+  display: flex;
+  align-items: center;
+  height: 25px;
+  border: 1px solid var(--fx-line2);
+  border-radius: 4px;
+  background: var(--fx-card);
+  flex: none;
+}
+.fx-combo input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--fx-text);
+  padding: 0 5px;
+  min-width: 0;
+  width: 100%;
+  height: 23px;
+  margin: 0;
+  appearance: none;
+}
+.fx-combo:focus-within { border-color: var(--fx-accent); box-shadow: 0 0 0 1px var(--fx-accent); }
+.fx-combo > .fx-arrow { height: 23px; width: 16px; border-inline-start: 1px solid var(--fx-line); border-radius: 0 3px 3px 0; }
+.fx-combo.fx-disabled { opacity: 0.55; }
+.fx-cfont { width: 118px; }
+.fx-csize { width: 48px; margin-inline-start: 3px; }
+
+/* galeria de estilos */
+.fx-gallery {
+  display: flex;
+  align-items: stretch;
+  height: 68px;
+  border: 1px solid var(--fx-line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--fx-card);
+  margin-top: 2px;
+}
+.fx-tiles { display: flex; gap: 2px; padding: 2px; overflow: hidden; }
+.fx-tile {
+  width: 70px;
+  flex: none;
+  height: 62px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 5px;
+  overflow: hidden;
+}
+.fx-tile:hover:not(:disabled) { border-color: var(--fx-line2); background: var(--fx-hover); }
+.fx-tile[aria-pressed="true"] { border-color: var(--fx-accent); background: var(--fx-accent-weak); }
+.fx-tile:disabled { opacity: 0.55; }
+.fx-tile[hidden] { display: none; }
+.fx-tprev {
+  height: 25px;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: Calibri, Carlito, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: light-dark(#1D2330, #E6E9EE);
+}
+.fx-tname {
+  align-self: center;
+  font-size: 11px;
+  color: var(--fx-muted);
+  white-space: nowrap;
+  max-width: 66px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fx-gnav { width: 18px; display: flex; flex-direction: column; border-inline-start: 1px solid var(--fx-line); }
+.fx-gnav button { flex: 1; display: flex; align-items: center; justify-content: center; }
+.fx-gnav button:hover:not(:disabled) { background: var(--fx-hover); }
+
+/* modo compacto quando a janela é estreita */
+#faixa-root.fx-c1 .fx-small:not(.fx-keeplabel) .fx-lbl { display: none; }
+#faixa-root.fx-c1 .fx-small:not(.fx-keeplabel) { width: 30px; padding: 0; justify-content: center; }
+#faixa-root.fx-c2 .fx-large,
+#faixa-root.fx-c2 .fx-lsplit { min-width: 40px; max-width: 72px; }
+#faixa-root.fx-c2 .fx-large .fx-lbl,
+#faixa-root.fx-c2 .fx-lsplit .fx-drop { font-size: 11px; }
+/* Botões estreitos: a palavra não se parte no meio sem hífen (o botão alarga até ela
+ * caber); palavra de 7 letras ou mais pode ser hifenizada ("Text-marke", "Mensa-gem"). */
+#faixa-root.fx-c2 .fx-large .fx-lbl > span,
+#faixa-root.fx-c2 .fx-lsplit > .fx-drop > span { overflow-wrap: break-word; hyphenate-limit-chars: 7 3 3; }
+#faixa-root.fx-c2 .fx-tile:nth-child(n + 4) { display: none; }
+#faixa-root.fx-c2 .fx-cfont { width: 96px; }
+
+/* ===== camadas: menus, dicas, aviso do pincel ===== */
+.fx-layer {
+  color: var(--fx-text);
+  font: message-box;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.fx-popup {
+  position: fixed;
+  z-index: 2147483000;
+  min-width: 200px;
+  max-height: 70vh;
+  overflow: auto;
+  background: var(--fx-card);
+  color: var(--fx-text);
+  border: 1px solid var(--fx-line2);
+  border-radius: 8px;
+  box-shadow: var(--fx-shadow);
+  padding: 4px;
+}
+.fx-mi {
+  width: 100%;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 6px;
+  border-radius: 5px;
+  text-align: start;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.fx-mi:hover:not(:disabled),
+.fx-mi.fx-active:not(:disabled) { background: var(--fx-hover); }
+.fx-mck { width: 18px; flex: none; display: flex; justify-content: center; color: var(--fx-accent); }
+.fx-mck .fx-mic { width: 15px; height: 15px; color: var(--fx-muted); }
+.fx-mi:disabled .fx-mic { color: var(--fx-faint); }
+.fx-mfile { min-width: 240px; }
+.fx-mfile .fx-mi { min-height: 32px; font-size: 13px; }
+.fx-mlab { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.fx-mkey { color: var(--fx-muted); font-size: 11.5px; padding-inline-start: 22px; }
+.fx-mhead { font-size: 11.5px; font-weight: 600; color: var(--fx-muted); padding: 8px 10px 4px; }
+.fx-msep { height: 1px; background: var(--fx-line); margin: 4px 6px; }
+.fx-mnote { font-size: 11px; color: var(--fx-muted); padding: 2px 10px 6px; white-space: normal; max-width: 280px; }
+.fx-mfont { width: 260px; }
+.fx-mfont .fx-mlab { font-size: 14px; }
+.fx-msize { min-width: 0; width: 72px; }
+.fx-msize .fx-mi { justify-content: center; padding: 0 6px; }
+.fx-mi.fx-current { background: var(--fx-pressed); }
+.fx-mcolor { width: 256px; min-width: 0; padding: 6px; }
+.fx-tgrid { display: flex; flex-direction: column; padding: 2px 6px 6px; }
+.fx-trow { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
+.fx-trow.fx-base { margin-bottom: 6px; }
+.fx-sw { height: 18px; border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 2px; }
+.fx-sw:hover { outline: 2px solid var(--fx-accent); outline-offset: 1px; position: relative; z-index: 1; }
+.fx-swb { width: 18px; height: 18px; border-radius: 2px; border: 1px solid rgba(0, 0, 0, 0.25); flex: none; }
+.fx-hgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding: 2px 2px 6px; }
+.fx-sw.fx-swlg { height: 26px; }
+.fx-mstyles { width: 330px; }
+.fx-sgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; }
+.fx-sgrid .fx-tile { width: auto; }
+
+/* Item de menu com duas linhas (Partes Rápidas: nome e começo do texto). */
+.fx-mi.fx-mi2 { min-height: 40px; align-items: center; }
+.fx-mtwo { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 3px 0; }
+.fx-mtwo .fx-mlab { flex: none; }
+.fx-msub { font-size: 11px; color: var(--fx-muted); overflow: hidden; text-overflow: ellipsis; max-width: 340px; }
+
+/* Grade de Tabela (colunas × linhas). */
+.fx-tgbox { padding: 0 2px 4px; }
+.fx-tglabel { padding: 6px 8px 6px; }
+.fx-tablegrid { display: grid; grid-template-columns: repeat(var(--fx-tgcols, 10), 18px); gap: 3px; padding: 0 8px 4px; }
+.fx-tgcell { width: 18px; height: 18px; border: 1px solid var(--fx-line2); border-radius: 1px; background: var(--fx-card); }
+.fx-tgcell.fx-on { border-color: var(--fx-accent); background: var(--fx-accent-weak); }
+.fx-layer .fx-tgcell:focus-visible { outline-offset: 0; }
+
+/* Grades de Emoji e Símbolo. */
+.fx-glyphs { display: grid; grid-template-columns: repeat(10, 30px); gap: 2px; padding: 2px 6px 6px; }
+.fx-glyph { width: 30px; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; }
+.fx-glyphs.fx-emojis .fx-glyph { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; font-size: 18px; }
+.fx-glyph:hover:not(:disabled) { background: var(--fx-hover); box-shadow: inset 0 0 0 1px var(--fx-line2); }
+
+/* Aviso dentro de um grupo (Formato: "Formatação desativada"). */
+.fx-note { display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 6px; color: var(--fx-muted); font-size: 11.5px; white-space: nowrap; }
+.fx-note[hidden] { display: none; }
+.fx-note .fx-ic { width: 14px; height: 14px; color: var(--fx-accent); }
+#faixa-root.fx-c1 .fx-note .fx-lbl { display: none; }
+
+.fx-tip {
+  position: fixed;
+  z-index: 2147483001;
+  width: 300px;
+  background: var(--fx-card);
+  color: var(--fx-text);
+  border: 1px solid var(--fx-line2);
+  border-radius: 6px;
+  box-shadow: var(--fx-shadow);
+  padding: 9px 11px;
+  font-size: 12px;
+  pointer-events: none;
+}
+.fx-tt1 { font-weight: 600; margin-bottom: 3px; }
+.fx-tk { font-weight: 400; color: var(--fx-muted); }
+.fx-tm { margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--fx-line); color: var(--fx-muted); font-size: 11.5px; }
+
+.fx-hint {
+  position: fixed;
+  z-index: 2147482999;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 11px;
+  border-radius: 16px;
+  background: #1D2330;
+  color: #FFFFFF;
+  font-size: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.fx-hint[hidden] { display: none; }
+.fx-hint .fx-ic { width: 15px; height: 15px; }
+
+/* ===== botão Enviar ao lado dos destinatários ===== */
+#MsgHeadersToolbar:has(> #faixa-send) {
+  grid-template-columns: auto minmax(0, 1fr) !important;
+}
+#MsgHeadersToolbar:has(> #faixa-send) > :not(#faixa-send) {
+  grid-column: 2;
+}
+#faixa-send {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: stretch;
+  width: 72px;
+  min-height: 64px;
+  margin: 6px 4px 6px 8px;
+  border: 1px solid var(--fx-line2);
+  border-radius: var(--fx-radius);
+  background: var(--fx-card);
+  color: var(--fx-text);
+  font: message-box;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  appearance: none;
+  padding: 0;
+}
+#faixa-send:hover:not(:disabled) { background: var(--fx-hover); border-color: var(--fx-accent); }
+#faixa-send:active:not(:disabled) { background: var(--fx-pressed); }
+#faixa-send:disabled { color: var(--fx-faint); }
+#faixa-send .fx-ic { width: 26px; height: 26px; color: var(--fx-accent); stroke-width: 1.6; }
+#faixa-send:disabled .fx-ic { color: var(--fx-faint); }
+#faixa-send:focus-visible { outline: 2px solid var(--fx-accent); outline-offset: 1px; }
+
+/* ===== alto contraste =====
+ * Temas de contraste do Windows (e o modo de cores forçadas): só cores do sistema.
+ * Documentos do Thunderbird não têm as cores trocadas sozinhas, então a troca é aqui. */
+@media (forced-colors: active) {
+  #faixa-root,
+  #faixa-send,
+  .fx-layer {
+    --fx-bg: Canvas;
+    --fx-card: Canvas;
+    --fx-text: CanvasText;
+    --fx-muted: CanvasText;
+    --fx-faint: GrayText;
+    --fx-line: CanvasText;
+    --fx-line2: CanvasText;
+    --fx-hover: Canvas;
+    --fx-pressed: Highlight;
+    --fx-accent: Highlight;
+    --fx-accent-weak: Canvas;
+    --fx-danger: CanvasText;
+    --fx-shadow: none;
+  }
+  #faixa-root,
+  .fx-layer,
+  .fx-popup,
+  .fx-tip,
+  #faixa-send { forced-color-adjust: none; }
+  :where(#faixa-root, .fx-layer) button:disabled,
+  #faixa-send:disabled { color: GrayText; }
+  :where(#faixa-root, .fx-layer) button:hover:not(:disabled),
+  .fx-lsplit:hover,
+  .fx-split:hover,
+  #faixa-send:hover:not(:disabled) { outline: 1px solid Highlight; outline-offset: -1px; background: Canvas; }
+  [aria-pressed="true"].fx-large,
+  [aria-pressed="true"].fx-small,
+  [aria-pressed="true"].fx-icon,
+  [aria-pressed="true"].fx-large:hover,
+  [aria-pressed="true"].fx-small:hover,
+  [aria-pressed="true"].fx-icon:hover,
+  .fx-mi.fx-current,
+  .fx-mi:hover:not(:disabled),
+  .fx-mi:focus-visible,
+  .fx-tab.fx-filetab[aria-expanded="true"] { background: Highlight; color: HighlightText; box-shadow: none; }
+  .fx-mi:hover:not(:disabled) .fx-mic,
+  .fx-mi:focus-visible .fx-mic,
+  .fx-mi.fx-current .fx-mck { color: HighlightText; }
+  #faixa-root button:disabled[aria-pressed="true"] { background: Canvas; color: GrayText; outline: 1px dashed GrayText; }
+  .fx-tab[aria-selected="true"] { color: Highlight; }
+  .fx-tab[aria-selected="true"]::after { background: Highlight; }
+  .fx-tile[aria-pressed="true"] { border-color: Highlight; outline: 2px solid Highlight; outline-offset: -2px; }
+  #faixa-root button:focus-visible,
+  #faixa-root input:focus-visible,
+  .fx-layer button:focus-visible,
+  #faixa-send:focus-visible { outline: 2px solid Highlight; outline-offset: 1px; }
+  .fx-combo,
+  .fx-combo input { background: Field; color: FieldText; }
+  .fx-combo:focus-within { border-color: Highlight; box-shadow: none; outline: 1px solid Highlight; }
+  .fx-hint { background: Canvas; color: CanvasText; border: 1px solid CanvasText; box-shadow: none; }
+  .fx-panel,
+  .fx-popup,
+  .fx-tip { box-shadow: none; }
+  #faixa-send .fx-ic { color: CanvasText; }
+  /* Amostras de cor e prévias de estilo mostram a cor de verdade, com borda. */
+  .fx-sw,
+  .fx-swb,
+  .fx-cbar { border: 1px solid CanvasText; box-shadow: none; }
+  .fx-tprev { color: CanvasText; }
+}
+
+/* Contraste aumentado (macOS, Windows): linhas e textos apagados mais fortes. */
+@media (prefers-contrast: more) {
+  #faixa-root,
+  #faixa-send,
+  .fx-layer {
+    --fx-faint: light-dark(#6B7380, #9AA3AF);
+    --fx-line: light-dark(#8C95A3, #7A8290);
+    --fx-line2: light-dark(#6B7380, #9AA3AF);
+    --fx-muted: light-dark(#3A4352, #C9CFD8);
+  }
+}
+
+/* ===== janelas da faixa: Verificar Nomes e Selecionar Nomes ===== */
+.fx-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483100;
+  background: rgba(15, 20, 30, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fx-dialog {
+  background: var(--fx-card);
+  color: var(--fx-text);
+  border: 1px solid var(--fx-line2);
+  border-radius: 10px;
+  box-shadow: var(--fx-shadow);
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  font: message-box;
+  font-size: 12.5px;
+  line-height: 1.4;
+  user-select: text;
+}
+.fx-dselect { width: min(780px, calc(100vw - 32px)); height: min(580px, calc(100vh - 32px)); }
+.fx-dhead { display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 4px 16px; }
+.fx-dtitle { font-size: 15px; font-weight: 600; }
+.fx-dclose { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+.fx-dclose:hover { background: var(--fx-hover); }
+.fx-dbody { padding: 4px 16px 10px; display: flex; flex-direction: column; gap: 8px; min-height: 0; flex: 1; }
+.fx-dfoot { display: flex; justify-content: space-between; gap: 8px; padding: 10px 16px 14px; border-top: 1px solid var(--fx-line); }
+.fx-dfootl, .fx-dfootr { display: flex; gap: 8px; }
+.fx-dbtn {
+  min-width: 84px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--fx-line2);
+  border-radius: 5px;
+  background: var(--fx-card);
+  text-align: center;
+  white-space: nowrap;
+}
+.fx-dbtn:hover:not(:disabled) { border-color: var(--fx-accent); background: var(--fx-hover); }
+.fx-dbtn.fx-dpri { background: var(--fx-accent); border-color: var(--fx-accent); color: light-dark(#FFFFFF, #10151E); }
+.fx-dmsg { margin: 0; }
+.fx-drow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fx-dlabel { color: var(--fx-muted); }
+.fx-dsearch { flex: 1; min-width: 180px; }
+.fx-dsearch,
+.fx-dbook,
+.fx-dfield {
+  height: 28px;
+  border: 1px solid var(--fx-line2);
+  border-radius: 5px;
+  background: var(--fx-card);
+  color: var(--fx-text);
+  padding: 0 8px;
+  font: inherit;
+  margin: 0;
+}
+.fx-dsearch:focus-visible,
+.fx-dbook:focus-visible,
+.fx-dfield:focus-visible,
+.fx-plist:focus-visible,
+.fx-dbtn:focus-visible { outline: 2px solid var(--fx-accent); outline-offset: 1px; }
+.fx-plist { flex: 1; min-height: 120px; overflow: auto; border: 1px solid var(--fx-line2); border-radius: 6px; }
+.fx-dchoose .fx-plist { max-height: 260px; min-height: 90px; }
+.fx-prow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr);
+  gap: 10px;
+  padding: 4px 10px;
+  min-height: 26px;
+  align-items: center;
+}
+.fx-prow > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-pmail,
+.fx-pbook { color: var(--fx-muted); }
+.fx-prow[aria-selected="true"] { background: var(--fx-pressed); }
+.fx-plist:focus .fx-prow.fx-pcur { box-shadow: inset 0 0 0 2px var(--fx-accent); }
+.fx-dnote { color: var(--fx-muted); min-height: 16px; }
+.fx-dtargets { display: grid; grid-template-columns: max-content 1fr; gap: 6px 8px; align-items: center; }
+/* Janelas pequenas (pergunta, nome, Sobre, Suporte) e as de Inserir. */
+.fx-dsmall { width: min(460px, calc(100vw - 32px)); }
+.fx-dwide { width: 100%; }
+.fx-derr { color: var(--fx-danger); min-height: 16px; }
+.fx-ddate { width: min(420px, calc(100vw - 32px)); height: min(460px, calc(100vh - 32px)); }
+.fx-prow.fx-1col { grid-template-columns: minmax(0, 1fr); }
+.fx-prow.fx-mrow { grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 0.9fr); }
+.fx-prow.fx-phead { color: var(--fx-muted); font-size: 11.5px; min-height: 18px; padding-block: 0; }
+.fx-dfolder { max-width: 240px; }
+.fx-dbrand { display: flex; align-items: center; gap: 12px; }
+.fx-dlogo { width: 44px; height: 44px; border-radius: 10px; background: var(--fx-accent-weak); color: var(--fx-accent); display: flex; align-items: center; justify-content: center; flex: none; }
+.fx-dlogo .fx-ic { width: 26px; height: 26px; }
+.fx-dname { font-size: 14px; font-weight: 600; }
+.fx-dkv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; }
+.fx-dkv dt { color: var(--fx-muted); }
+.fx-dkv dd { margin: 0; user-select: text; overflow-wrap: anywhere; }
+@media (forced-colors: active) {
+  .fx-backdrop { background: transparent; }
+  .fx-dialog { border: 2px solid CanvasText; box-shadow: none; }
+  .fx-prow[aria-selected="true"] { background: Highlight; color: HighlightText; }
+  .fx-prow[aria-selected="true"] .fx-pmail,
+  .fx-prow[aria-selected="true"] .fx-pbook { color: HighlightText; }
+  .fx-dbtn.fx-dpri { background: Highlight; color: HighlightText; border-color: Highlight; }
+  .fx-dsearch, .fx-dbook, .fx-dfield { background: Field; color: FieldText; border-color: CanvasText; }
+  .fx-tgcell { border-color: CanvasText; background: Canvas; }
+  .fx-layer .fx-tgcell.fx-on,
+  .fx-layer .fx-tgcell.fx-on:hover { background: Highlight; border-color: Highlight; }
+  .fx-note .fx-ic { color: CanvasText; }
+  .fx-dlogo { background: Canvas; color: CanvasText; border: 1px solid CanvasText; }
+}

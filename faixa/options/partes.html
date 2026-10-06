@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR" data-pagina="partes">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="qp.title">Partes Rápidas</title>
+<link rel="stylesheet" href="diagnostico.css">
+<link rel="stylesheet" href="opcoes.css">
+<link rel="stylesheet" href="assinaturas.css">
+<script src="../experiments/faixa/icons.js"></script>
+<script src="../experiments/faixa/ui.js"></script>
+<script src="../experiments/faixa/sanitize.js"></script>
+<script src="../experiments/faixa/signatures.js"></script>
+<script src="../experiments/faixa/quickparts.js"></script>
+<script type="module" src="assinaturas.js"></script>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1 data-i18n="qp.h1">Partes Rápidas</h1>
+      <p class="lead" data-i18n="qp.lead">Trechos prontos para pôr na mensagem pela aba Inserir, em Partes Rápidas, como no Outlook. Para criar um a partir da mensagem, selecione o texto e use Salvar Seleção na Galeria de Partes Rápidas. Cada mudança é salva na hora.</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="assinaturas.html" data-i18n="qp.signatures">Assinaturas</a>
+      <a class="btn" href="opcoes.html" data-i18n="sig.options">Opções da Faixa</a>
+    </div>
+  </header>
+
+  <p id="policy" class="note" hidden data-i18n="qp.policy">A sua organização definiu Partes Rápidas que não podem ser mudadas aqui.</p>
+  <p id="flash" class="flash" role="status" hidden></p>
+
+  <section aria-labelledby="h-list">
+    <div class="sec-head">
+      <h2 id="h-list" data-i18n="qp.list">Parte Rápida para editar</h2>
+      <span id="status" class="muted" role="status"></span>
+    </div>
+    <div class="sig-grid">
+      <div class="sig-side">
+        <div id="list" class="sig-list" role="listbox" tabindex="0" aria-labelledby="h-list"></div>
+        <div class="sig-actions">
+          <button id="new" type="button" data-i18n="sig.new">Nova</button>
+          <button id="dup" type="button" data-i18n="sig.dup">Duplicar</button>
+          <button id="del" type="button" data-i18n="sig.del">Excluir</button>
+        </div>
+      </div>
+      <div class="sig-main">
+        <p id="empty" class="sig-empty" data-i18n="qp.empty">Ainda não há Partes Rápidas. Clique em Nova, ou selecione um texto numa mensagem e use Inserir → Partes Rápidas → Salvar Seleção na Galeria de Partes Rápidas.</p>
+        <div id="edit" hidden>
+          <div class="field">
+            <label for="name" data-i18n="sig.name">Nome</label>
+            <input id="name" type="text" autocomplete="off" spellcheck="false">
+          </div>
+          <div id="toolbar" class="sig-tools" role="toolbar" aria-label="Formatação da Parte Rápida" data-i18n-aria-label="qp.toolbar">
+            <input id="t-font" class="t-font" list="fonts" aria-label="Fonte" data-i18n-aria-label="sig.font" autocomplete="off" spellcheck="false">
+            <datalist id="fonts"></datalist>
+            <select id="t-size" aria-label="Tamanho da fonte (pt)" data-i18n-aria-label="sig.size"></select>
+            <span class="t-sep" aria-hidden="true"></span>
+            <button id="t-bold" class="t-btn" type="button" data-cmd="bold" aria-pressed="false" title="Negrito (Ctrl+B)" data-i18n-title="sig.bold"></button>
+            <button id="t-italic" class="t-btn" type="button" data-cmd="italic" aria-pressed="false" title="Itálico (Ctrl+I)" data-i18n-title="sig.italic"></button>
+            <button id="t-underline" class="t-btn" type="button" data-cmd="underline" aria-pressed="false" title="Sublinhado (Ctrl+U)" data-i18n-title="sig.underline"></button>
+            <label class="t-btn t-color" title="Cor da fonte" data-i18n-title="sig.color"><span id="t-color-icon"></span><input id="t-color" type="color" value="#1F3864" aria-label="Cor da fonte" data-i18n-aria-label="sig.color"></label>
+            <span class="t-sep" aria-hidden="true"></span>
+            <button id="t-left" class="t-btn" type="button" data-cmd="justifyLeft" aria-pressed="false" title="Alinhar à esquerda" data-i18n-title="sig.left"></button>
+            <button id="t-center" class="t-btn" type="button" data-cmd="justifyCenter" aria-pressed="false" title="Centralizar" data-i18n-title="sig.center"></button>
+            <button id="t-right" class="t-btn" type="button" data-cmd="justifyRight" aria-pressed="false" title="Alinhar à direita" data-i18n-title="sig.right"></button>
+            <span class="t-sep" aria-hidden="true"></span>
+            <button id="t-link" class="t-btn" type="button" title="Link" data-i18n-title="sig.link"></button>
+            <button id="t-image" class="t-btn" type="button" title="Imagem" data-i18n-title="qp.image"></button>
+            <input id="t-file" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+            <select id="t-field" aria-label="Inserir campo" data-i18n-aria-label="sig.field"></select>
+            <button id="t-clear" class="t-btn" type="button" title="Limpar formatação" data-i18n-title="sig.clear"></button>
+          </div>
+          <div id="editor" class="sig-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Texto da Parte Rápida" data-i18n-aria-label="qp.editor" spellcheck="true"
+               placeholder="Escreva aqui o texto da Parte Rápida. Em Inserir campo ficam o nome, o cargo e o telefone de cada conta." data-i18n-placeholder="qp.editor.placeholder"></div>
+          <p id="managed" class="help" hidden data-i18n="qp.managedNote">Esta Parte Rápida é da sua organização: dá para usar e duplicar, mas não para editar.</p>
+          <div class="row prev-row">
+            <label for="who" data-i18n="sig.previewFor">Como fica na conta</label>
+            <select id="who"></select>
+          </div>
+          <div id="preview" class="sig-preview" aria-label="Pré-visualização" data-i18n-aria-label="sig.preview"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-fields">
+    <h2 id="h-fields" data-i18n="sig.fields">Campos</h2>
+    <p class="help" data-i18n="qp.fields.help">Escritos entre chaves, são trocados pelos dados da conta do De: da mensagem: o nome e o e-mail da identidade e o resto do cartão de visita (vCard) dela, em Configurações da conta. A linha cujos campos ficarem vazios sai do texto.</p>
+    <table id="fields" class="grid">
+      <thead><tr><th scope="col" data-i18n="sig.col.field">Campo</th><th scope="col" data-i18n="sig.col.source">De onde vem</th><th scope="col" id="fields-who" data-i18n="sig.col.value">Nesta conta</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <footer class="foot">
+    <span></span>
+    <span id="version" class="muted"></span>
+  </footer>
+
+  <dialog id="link-dlg" aria-labelledby="link-title">
+    <form method="dialog">
+      <h2 id="link-title" data-i18n="sig.link.title">Link</h2>
+      <div class="field">
+        <label for="link-url" data-i18n="sig.link.url">Endereço (site, e-mail ou telefone)</label>
+        <input id="link-url" type="text" autocomplete="off" spellcheck="false" placeholder="https://www.empresa.com.br" data-i18n-placeholder="sig.link.placeholder">
+      </div>
+      <p id="link-error" class="help bad" hidden></p>
+      <div class="dlg-foot">
+        <button value="cancel" type="submit" formnovalidate data-i18n="sig.cancel">Cancelar</button>
+        <button id="link-ok" value="ok" type="submit" class="pri" data-i18n="sig.ok">OK</button>
+      </div>
+    </form>
+  </dialog>
+</main>
+</body>
+</html>

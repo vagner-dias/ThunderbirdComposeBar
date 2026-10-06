@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="opt.title">Opções da Faixa</title>
+<link rel="stylesheet" href="diagnostico.css">
+<link rel="stylesheet" href="opcoes.css">
+<script src="../experiments/faixa/ui.js"></script>
+<script type="module" src="opcoes.js"></script>
+</head>
+<body>
+<main class="narrow">
+  <header class="top">
+    <div>
+      <h1 data-i18n="opt.h1">Opções da Faixa</h1>
+      <p class="lead" data-i18n="opt.lead">Valem para as mensagens que você escrever neste Thunderbird. Cada mudança é salva na hora e já vale nas janelas de composição abertas.</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="ajuda.html" data-i18n="opt.help">Ajuda</a>
+      <a class="btn" href="diagnostico.html" data-i18n="opt.diag">Diagnóstico da Faixa</a>
+    </div>
+  </header>
+
+  <p id="policy" class="note" hidden data-i18n="opt.policy">Algumas opções foram definidas pela sua organização e não podem ser mudadas aqui.</p>
+  <p id="flash" class="flash" role="status" hidden></p>
+
+  <section aria-labelledby="h-faixa">
+    <h2 id="h-faixa" data-i18n="opt.ribbon">Faixa de Opções</h2>
+    <div class="field">
+      <label for="idioma" data-i18n="opt.lang">Idioma da faixa</label>
+      <select id="idioma">
+        <option value="auto" data-i18n="opt.lang.auto">Automático (o mesmo do Thunderbird)</option>
+        <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+        <option value="en-US" lang="en-US">English (United States)</option>
+        <option value="es" lang="es">Español</option>
+        <option value="it" lang="it">Italiano</option>
+        <option value="de" lang="de">Deutsch</option>
+        <option value="fr" lang="fr">Français</option>
+      </select>
+      <p class="help" data-i18n="opt.lang.help">Muda também o idioma destas páginas.</p>
+    </div>
+    <div class="field">
+      <label for="abaInicial" data-i18n="opt.tab">Aba que abre primeiro</label>
+      <select id="abaInicial"></select>
+    </div>
+    <div class="check">
+      <input type="checkbox" id="recolhida">
+      <label for="recolhida" data-i18n="opt.collapsed">Abrir com a faixa recolhida (só os nomes das abas)</label>
+    </div>
+    <p class="help indent" data-i18n="opt.collapsed.help">Recolher ou fixar a faixa numa mensagem (Ctrl+F1) também muda esta opção, como no Outlook.</p>
+    <div class="check">
+      <input type="checkbox" id="mostrarBarra">
+      <label for="mostrarBarra" data-i18n="opt.tbBar">Mostrar também a barra de ferramentas do Thunderbird</label>
+    </div>
+    <div id="menus-box">
+      <div class="check">
+        <input type="checkbox" id="mostrarMenus" aria-describedby="menus-help">
+        <label for="mostrarMenus" data-i18n="opt.menubar">Mostrar a barra de menus (Arquivo, Editar, Exibir, Inserir, Formatar…)</label>
+      </div>
+      <p class="help indent" id="menus-help" data-i18n="opt.menubar.help">Desmarcada, a barra de menus some da janela de mensagem e a faixa fica no topo. A tecla Alt mostra os menus enquanto você precisa deles.</p>
+    </div>
+    <div class="check">
+      <input type="checkbox" id="visualizacao">
+      <label for="visualizacao" data-i18n="opt.livePreview">Habilitar Visualização Dinâmica</label>
+    </div>
+    <p class="help indent" data-i18n="opt.livePreview.help">Com o mouse numa fonte, num tamanho, numa cor ou num estilo da faixa, o texto mostra como vai ficar antes do clique, como no Office. A prévia não entra no Desfazer.</p>
+  </section>
+
+  <section aria-labelledby="h-msg">
+    <h2 id="h-msg" data-i18n="opt.newMsg">Mensagens novas</h2>
+    <div class="field">
+      <span class="label" id="font-label" data-i18n="opt.font">Fonte padrão</span>
+      <div class="row">
+        <input id="familia" list="fontes" aria-labelledby="font-label" autocomplete="off" spellcheck="false">
+        <datalist id="fontes"></datalist>
+        <select id="tamanho" aria-label="Tamanho da fonte" data-i18n-aria-label="opt.size"></select>
+        <span class="unit">pt</span>
+      </div>
+      <p id="font-note" class="help" data-i18n="opt.font.help">Vale para mensagens novas, respostas e encaminhamentos. Rascunhos e modelos continuam com a fonte com que foram salvos.</p>
+      <p id="font-preview" class="preview" data-i18n="opt.font.preview">Prezada Mariana, segue a proposta atualizada para aprovação.</p>
+    </div>
+    <div class="check">
+      <input type="checkbox" id="paragrafo">
+      <label for="paragrafo" data-i18n="opt.para">Enter cria um parágrafo sem espaço antes e depois, como no Outlook</label>
+    </div>
+    <p class="help indent" data-i18n="opt.para.help">Desligado, o Enter segue o que está em Configurações → Redação do Thunderbird.</p>
+  </section>
+
+  <section aria-labelledby="h-sig">
+    <h2 id="h-sig" data-i18n="opt.sig">Assinaturas</h2>
+    <p class="help" data-i18n="opt.sig.help">Crie as suas assinaturas e escolha a padrão de cada conta, para mensagens novas e para respostas e encaminhamentos, como no Outlook.</p>
+    <p class="row"><a class="btn" href="assinaturas.html" data-i18n="opt.sig.open">Assinaturas…</a></p>
+  </section>
+
+  <section aria-labelledby="h-qp">
+    <h2 id="h-qp" data-i18n="opt.qp">Partes Rápidas</h2>
+    <p class="help" data-i18n="opt.qp.help">Trechos prontos para pôr na mensagem pela aba Inserir. Para criar um, selecione o texto na mensagem e use Salvar Seleção na Galeria de Partes Rápidas, ou escreva aqui.</p>
+    <p class="row"><a class="btn" href="partes.html" data-i18n="opt.qp.open">Partes Rápidas…</a></p>
+  </section>
+
+  <section aria-labelledby="h-keys">
+    <h2 id="h-keys" data-i18n="opt.keys">Atalhos de teclado</h2>
+    <div id="perfis" class="radios" role="radiogroup" aria-labelledby="h-keys"></div>
+    <p class="help" data-i18n="opt.keys.help">Nos conflitos, o Thunderbird continua com a tecla. O Diagnóstico da Faixa mostra o que cada atalho do Office faz aqui.</p>
+  </section>
+
+  <footer class="foot">
+    <button id="reset" type="button" data-i18n="opt.reset">Restaurar os padrões</button>
+    <span id="version" class="muted"></span>
+  </footer>
+</main>
+</body>
+</html>

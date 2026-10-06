@@ -1,0 +1,4 @@
+/* Ajuda da Faixa de Opções (sobre diagnostico.css e opcoes.css). */
+.help-tabs { grid-template-columns: minmax(120px, max-content) 1fr; gap: 10px 18px; }
+.help-tabs dt { font-weight: 600; color: var(--text); }
+section > .row:last-child { margin: 12px 0 0; }

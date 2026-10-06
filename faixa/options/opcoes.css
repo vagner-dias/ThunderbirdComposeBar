@@ -1,0 +1,56 @@
+/* Opções da Faixa (sobre diagnostico.css, que tem as cores e a base). */
+main.narrow { max-width: 760px; }
+a.btn {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+a.btn:hover { border-color: var(--accent); }
+a.btn:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.note {
+  margin: 14px 0 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--warn);
+  color: var(--text);
+}
+.field { margin: 0 0 14px; }
+.field > label,
+.field > .label { display: block; font-weight: 600; margin-bottom: 4px; }
+.field select { min-width: 280px; }
+.field .row { margin-bottom: 4px; }
+#familia { width: 240px; }
+.unit { color: var(--muted); }
+.check { display: flex; align-items: flex-start; gap: 8px; margin: 10px 0 4px; }
+.check input { margin: 3px 0 0; }
+.help { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.help.indent { margin: 0 0 8px 26px; }
+.preview {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: light-dark(#FFFFFF, #1C1B22);
+  color: light-dark(#1D2330, #E6E9EE);
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+}
+.radios { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.radio { display: flex; align-items: flex-start; gap: 8px; }
+.radio input { margin: 3px 0 0; }
+.radio label { display: flex; flex-direction: column; gap: 2px; }
+.rlabel { font-weight: 600; }
+.locked { opacity: 0.8; }
+.check.locked > label::after,
+.field.locked > label::after,
+.field.locked > .label::after,
+section:has(.radios.locked) h2::after { content: " 🔒"; }
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+@media (forced-colors: active) {
+  .note, .preview { border-color: CanvasText; }
+}

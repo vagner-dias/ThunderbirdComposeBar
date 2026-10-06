@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Faixa de Opções (Menüband)",
+    "description": "Name des Add-ons."
+  },
+  "extDescription": {
+    "message": "Menüband im Stil von Outlook für das Verfassen-Fenster von Thunderbird, mit Format übertragen, Datei-Menü und Office-Tastenkombinationen.",
+    "description": "Beschreibung des Add-ons."
+  }
+}

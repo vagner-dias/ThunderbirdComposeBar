@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Faixa de Opções (ruban)",
+    "description": "Nom du module complémentaire."
+  },
+  "extDescription": {
+    "message": "Ruban dans le style d’Outlook pour la fenêtre de rédaction de Thunderbird, avec Reproduire la mise en forme, le menu Fichier et les raccourcis d’Office.",
+    "description": "Description du module complémentaire."
+  }
+}

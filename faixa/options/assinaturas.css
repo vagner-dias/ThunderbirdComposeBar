@@ -1,0 +1,119 @@
+/* Assinaturas (sobre diagnostico.css e opcoes.css). */
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sig-grid { display: grid; grid-template-columns: minmax(180px, 240px) 1fr; gap: 18px; align-items: start; }
+.sig-side { display: flex; flex-direction: column; gap: 8px; }
+.sig-list {
+  min-height: 180px;
+  max-height: 340px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px;
+  background: var(--card);
+}
+.sig-list:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sig-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: default;
+  user-select: none;
+}
+.sig-opt .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sig-opt .badge { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.sig-opt:hover { background: light-dark(#EEF3FC, #34363F); }
+.sig-opt[aria-selected="true"] { background: light-dark(#D6E4FA, #2E3B52); }
+.sig-list:focus-visible .sig-opt[aria-selected="true"] { box-shadow: inset 0 0 0 1px var(--accent); }
+.sig-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.sig-empty { margin: 8px 0; color: var(--muted); }
+.sig-main .field { margin-bottom: 10px; }
+#name { width: 100%; max-width: 360px; }
+
+.sig-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: light-dark(#F7F8FA, #25242B);
+}
+.sig-tools select, .sig-tools input { padding: 3px 6px; height: 28px; }
+.t-font { width: 128px; }
+#t-size { width: 58px; }
+#t-field { max-width: 140px; }
+.t-sep { width: 1px; height: 20px; background: var(--line); margin: 0 3px; }
+.t-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  position: relative;
+}
+.t-btn:hover:not(:disabled) { border-color: var(--line); background: var(--card); }
+.t-btn[aria-pressed="true"] { background: light-dark(#D6E4FA, #2E3B52); border-color: light-dark(#9DBAEA, #4A6391); }
+.t-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.t-color { cursor: pointer; border: 1px solid transparent; border-radius: 6px; }
+.t-color input { position: absolute; inset: auto 3px 2px 3px; width: auto; height: 4px; padding: 0; border: 0; opacity: 1; cursor: pointer; }
+.t-color input::-moz-color-swatch { border: 0; }
+.t-color input::-webkit-color-swatch-wrapper { padding: 0; }
+.t-color input::-webkit-color-swatch { border: 0; }
+.t-color:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* O editor e a pré-visualização ficam em fundo branco, como a mensagem. */
+.sig-editor, .sig-preview {
+  background: #FFFFFF;
+  color: #000000;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+.sig-editor { min-height: 150px; max-height: 420px; border-radius: 0 0 6px 6px; outline: none; }
+.sig-editor:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.sig-editor:empty::before { content: attr(placeholder); color: #6B7280; pointer-events: none; }
+.sig-editor[contenteditable="false"] { background: #FAFAFA; }
+.sig-editor img, .sig-preview img { max-width: 100%; }
+.sig-preview { border-radius: 6px; min-height: 60px; }
+.sig-preview .moz-signature { margin: 0; }
+.prev-row { margin: 14px 0 6px; }
+.prev-row select { min-width: 280px; }
+.sig-field { font: 12px ui-monospace, Consolas, monospace; white-space: nowrap; }
+#defaults select { width: 100%; min-width: 180px; }
+#defaults td.acc .who { display: block; font-weight: 600; }
+#defaults td.acc .acct { display: block; color: var(--muted); font-size: 12px; }
+#defaults td.locked select { opacity: 0.85; }
+#defaults td.locked::after { content: " 🔒"; }
+.bad { color: var(--bad); }
+
+dialog {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: var(--card);
+  color: var(--text);
+  width: min(460px, calc(100vw - 32px));
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
+dialog h2 { margin-top: 0; }
+dialog input { width: 100%; }
+.dlg-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+@media (max-width: 760px) {
+  .sig-grid { grid-template-columns: 1fr; }
+  .sig-list { min-height: 0; max-height: 200px; }
+}
+@media (forced-colors: active) {
+  .sig-editor, .sig-preview { background: Canvas; color: CanvasText; border-color: CanvasText; }
+  .sig-opt[aria-selected="true"] { background: Highlight; color: HighlightText; forced-color-adjust: none; }
+  .t-btn[aria-pressed="true"] { border-color: Highlight; outline: 1px solid Highlight; }
+  .t-sep { background: CanvasText; }
+}

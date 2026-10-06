@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Faixa de Opções (Ribbon)",
+    "description": "Add-on name."
+  },
+  "extDescription": {
+    "message": "Outlook-style ribbon for Thunderbird's compose window, with Format Painter, a File menu and Office shortcuts.",
+    "description": "Add-on description."
+  }
+}

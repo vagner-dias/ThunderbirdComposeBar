@@ -1,0 +1,97 @@
+[
+  {
+    "namespace": "faixa",
+    "description": "Faixa de Opções na janela de composição (experiment da Bluecker).",
+    "functions": [
+      {
+        "name": "configure",
+        "type": "function",
+        "async": true,
+        "description": "Aplica a configuração efetiva (padrões, política e usuário) às janelas de composição.",
+        "parameters": [
+          {
+            "name": "config",
+            "type": "object",
+            "additionalProperties": { "type": "any" }
+          }
+        ]
+      },
+      {
+        "name": "setMessageState",
+        "type": "function",
+        "async": true,
+        "description": "Informa à faixa o estado das opções da mensagem (prioridade, formato de envio).",
+        "parameters": [
+          { "name": "tabId", "type": "integer", "minimum": 0 },
+          {
+            "name": "state",
+            "type": "object",
+            "additionalProperties": { "type": "any" }
+          }
+        ]
+      },
+      {
+        "name": "getDiagnostics",
+        "type": "function",
+        "async": true,
+        "description": "Retorna o diagnóstico da faixa: versão, janelas, teclas, perfil de atalhos, idioma e fontes.",
+        "parameters": []
+      },
+      {
+        "name": "runSelfTest",
+        "type": "function",
+        "async": true,
+        "description": "Roda o autoteste da faixa numa janela de composição.",
+        "parameters": [
+          { "name": "tabId", "type": "integer", "minimum": 0 }
+        ]
+      },
+      {
+        "name": "listFonts",
+        "type": "function",
+        "async": true,
+        "description": "Lista as fontes instaladas no sistema.",
+        "parameters": []
+      },
+      {
+        "name": "listIdentities",
+        "type": "function",
+        "async": true,
+        "description": "Lista as identidades das contas (nome, e-mail, organização, cartão de visita) com a assinatura que o Thunderbird tem para cada uma.",
+        "parameters": []
+      },
+      {
+        "name": "getMenubarState",
+        "type": "function",
+        "async": true,
+        "description": "Barra de menus da janela de composição: se existe nesta plataforma (não no macOS) e se o Thunderbird a guardou oculta.",
+        "parameters": []
+      }
+    ],
+    "events": [
+      {
+        "name": "onCommand",
+        "type": "function",
+        "description": "Um comando da faixa que precisa da API compose (executado pelo background).",
+        "parameters": [
+          { "name": "tabId", "type": "integer" },
+          { "name": "command", "type": "string" },
+          {
+            "name": "args",
+            "type": "object",
+            "optional": true,
+            "additionalProperties": { "type": "any" }
+          }
+        ]
+      },
+      {
+        "name": "onComposeReady",
+        "type": "function",
+        "description": "A faixa terminou de montar numa janela de composição com o editor pronto.",
+        "parameters": [
+          { "name": "tabId", "type": "integer" }
+        ]
+      }
+    ]
+  }
+]

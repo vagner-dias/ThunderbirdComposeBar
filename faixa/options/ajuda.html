@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="help.title">Ajuda da Faixa de Opções</title>
+<link rel="stylesheet" href="diagnostico.css">
+<link rel="stylesheet" href="opcoes.css">
+<link rel="stylesheet" href="ajuda.css">
+<script src="../experiments/faixa/ui.js"></script>
+<script type="module" src="ajuda.js"></script>
+</head>
+<body>
+<main class="narrow">
+  <header class="top">
+    <div>
+      <h1 data-i18n="help.h1">Ajuda da Faixa de Opções</h1>
+      <p class="lead" data-i18n="help.lead">A faixa recria no Thunderbird a faixa de opções da janela de composição do Outlook. Aqui está o que cada aba faz e onde ficam as opções.</p>
+    </div>
+    <div class="actions">
+      <a class="btn" href="opcoes.html" data-i18n="help.options">Opções da Faixa</a>
+      <a class="btn" href="diagnostico.html" data-i18n="help.diag">Diagnóstico da Faixa</a>
+    </div>
+  </header>
+
+  <section id="suporte" aria-labelledby="h-sup" hidden>
+    <h2 id="h-sup" data-i18n="help.support">Suporte da sua organização</h2>
+    <dl id="sup-list" class="kv"></dl>
+  </section>
+
+  <section aria-labelledby="h-tabs">
+    <h2 id="h-tabs" data-i18n="help.tabs">As abas</h2>
+    <dl class="kv help-tabs">
+      <dt data-i18n="help.tab.msg">Mensagem</dt>
+      <dd data-i18n="help.tab.msg.text">Colar, fonte e parágrafo, Catálogo de Endereços e Verificar Nomes, anexos, link, imagem, assinatura, prioridade, Acompanhamento e as confirmações de entrega e de leitura: o que se usa em quase toda mensagem.</dd>
+      <dt data-i18n="help.tab.ins">Inserir</dt>
+      <dd data-i18n="help.tab.ins.text">Anexar arquivos e mensagens, cartões de visita, assinatura, tabela, imagens, link e indicador, Partes Rápidas, data e hora, emoji, símbolo e linha horizontal.</dd>
+      <dt data-i18n="help.tab.fmt">Formatar Texto</dt>
+      <dd data-i18n="help.tab.fmt.text">HTML ou texto sem formatação, fonte, parágrafo, estilos, localizar e substituir, zoom e o Pincel de Formatação.</dd>
+      <dt data-i18n="help.tab.help">Ajuda</dt>
+      <dd data-i18n="help.tab.help.text">Esta ajuda, os atalhos de teclado, as opções da faixa e o Sobre.</dd>
+    </dl>
+    <p class="help" data-i18n="help.collapse">Para ganhar espaço, recolha a faixa com Ctrl+F1 ou com a seta no canto direito: ficam só os nomes das abas, e um clique numa aba abre os comandos por cima da mensagem.</p>
+  </section>
+
+  <section aria-labelledby="h-how">
+    <h2 id="h-how" data-i18n="help.how">Como fazer</h2>
+    <dl class="kv help-tabs">
+      <dt data-i18n="help.how.names">Destinatários</dt>
+      <dd data-i18n="help.how.names.text">Digite parte do nome no Para e use Verificar Nomes (Ctrl+K): a faixa completa pelos catálogos de endereços e pergunta quando há mais de um. O Catálogo de Endereços abre Selecionar Nomes.</dd>
+      <dt data-i18n="help.how.sig">Assinaturas</dt>
+      <dd data-i18n="help.how.sig.text">Crie quantas quiser e escolha a padrão de cada conta, para mensagens novas e para respostas. Na mensagem, o botão Assinatura troca a que está lá.</dd>
+      <dt data-i18n="help.how.qp">Partes Rápidas</dt>
+      <dd data-i18n="help.how.qp.text">Selecione um texto na mensagem e use Inserir → Partes Rápidas → Salvar Seleção na Galeria. Depois, é só escolher a parte no mesmo menu. Os campos (nome, cargo, telefone...) vêm da conta do De:.</dd>
+      <dt data-i18n="help.how.table">Tabela</dt>
+      <dd data-i18n="help.how.table.text">Em Inserir → Tabela, passe o mouse na grade e clique no tamanho. Com o cursor na tabela, o mesmo menu insere e exclui linhas e colunas.</dd>
+      <dt data-i18n="help.how.preview">Ver antes de aplicar</dt>
+      <dd data-i18n="help.how.preview.text">Passe o mouse numa fonte, num tamanho, numa cor ou num estilo: o texto selecionado mostra como vai ficar, e volta quando o mouse sai. Só o clique aplica. A prévia não entra no Desfazer; ela liga e desliga nas Opções da Faixa (Habilitar Visualização Dinâmica).</dd>
+      <dt data-i18n="help.how.painter">Pincel de Formatação</dt>
+      <dd data-i18n="help.how.painter.text">Selecione o texto com a formatação, clique no pincel e depois no texto que deve ficar igual. Clique duas vezes no pincel para aplicar em vários lugares; Esc encerra.</dd>
+      <dt data-i18n="help.how.plain">Texto sem Formatação</dt>
+      <dd data-i18n="help.how.plain.text">Em Formatar Texto → Formato. A formatação sai do texto na hora (um Ctrl+Z logo depois traz de volta) e a mensagem vai só como texto.</dd>
+      <dt data-i18n="help.how.menubar">Barra de menus</dt>
+      <dd data-i18n="help.how.menubar.text">A barra de menus começa oculta: os menus Arquivo, Editar, Exibir… ficam a um Alt de distância. Para vê-la sempre, marque Mostrar a barra de menus no menu ⋯ da faixa ou nas Opções da Faixa.</dd>
+    </dl>
+    <p class="row">
+      <a class="btn" href="assinaturas.html" data-i18n="help.open.sig">Assinaturas…</a>
+      <a class="btn" href="partes.html" data-i18n="help.open.qp">Partes Rápidas…</a>
+    </p>
+  </section>
+
+  <section aria-labelledby="h-keys">
+    <h2 id="h-keys" data-i18n="help.keys">Teclado</h2>
+    <dl class="kv help-tabs">
+      <dt>F6</dt>
+      <dd data-i18n="help.keys.f6">Entra na faixa (e passa pelas outras áreas da janela). As setas andam pelas abas e pelos comandos; Enter executa; Esc volta.</dd>
+      <dt data-i18n-keys>Ctrl+F1</dt>
+      <dd data-i18n="help.keys.collapse">Recolhe ou fixa a faixa.</dd>
+      <dt data-i18n-keys>Ctrl+K</dt>
+      <dd data-i18n="help.keys.ctrlk">No Para, Cc ou Cco: Verificar Nomes. No corpo: inserir link.</dd>
+      <dt data-i18n-keys>Ctrl+Alt+C / Ctrl+Alt+V</dt>
+      <dd data-i18n="help.keys.painter">Copia e aplica a formatação (Pincel pelo teclado).</dd>
+    </dl>
+    <p class="help" data-i18n="help.keys.more">Os atalhos do Office (negrito, alinhamento, estilos...) seguem o perfil escolhido nas Opções da Faixa. Nos conflitos, o Thunderbird continua com a tecla.</p>
+    <p class="row"><a class="btn" href="diagnostico.html#atalhos" data-i18n="help.keys.table">Tabela de atalhos</a></p>
+  </section>
+
+  <section aria-labelledby="h-trouble">
+    <h2 id="h-trouble" data-i18n="help.trouble">Se algo não funcionar</h2>
+    <p class="help" data-i18n="help.trouble.text">Abra o Diagnóstico da Faixa e clique em Executar autoteste: uma mensagem nova abre, cada item é conferido e a mensagem fecha sem salvar. Use Copiar relatório para mandar o resultado ao suporte.</p>
+  </section>
+
+  <footer class="foot">
+    <span></span>
+    <span id="version" class="muted"></span>
+  </footer>
+</main>
+</body>
+</html>

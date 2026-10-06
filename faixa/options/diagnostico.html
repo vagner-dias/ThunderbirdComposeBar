@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="diag.title">Diagnóstico da Faixa</title>
+<link rel="stylesheet" href="diagnostico.css">
+<script src="../experiments/faixa/ui.js"></script>
+<script type="module" src="diagnostico.js"></script>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1 data-i18n="diag.h1">Diagnóstico da Faixa</h1>
+      <p class="lead" data-i18n="diag.lead">O autoteste abre uma mensagem nova, confere cada item da faixa e fecha a mensagem sem salvar. Use “Copiar relatório” para mandar o resultado ao suporte.</p>
+    </div>
+    <div class="actions">
+      <button id="run" class="pri" type="button" data-i18n="diag.run">Executar autoteste</button>
+      <button id="copy" type="button" data-i18n="diag.copy">Copiar relatório</button>
+      <a class="btn" href="opcoes.html" data-i18n="diag.options">Opções da Faixa</a>
+    </div>
+  </header>
+
+  <p id="flash" class="flash" role="status" hidden></p>
+
+  <section>
+    <h2 data-i18n="diag.env">Ambiente</h2>
+    <dl id="env" class="kv"></dl>
+  </section>
+
+  <section>
+    <h2 data-i18n="diag.test">Autoteste</h2>
+    <p id="test-summary" class="muted" data-i18n="diag.test.none">Ainda não executado nesta sessão.</p>
+    <table id="results" class="grid" hidden>
+      <thead><tr><th scope="col" data-i18n="diag.col.status">Situação</th><th scope="col" data-i18n="diag.col.item">Item</th><th scope="col" data-i18n="diag.col.detail">Detalhe</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="atalhos">
+    <h2 data-i18n="diag.keys">Atalhos de teclado</h2>
+    <p class="muted" data-i18n="diag.keys.lead">O que acontece no corpo da mensagem quando alguém usa o atalho que já conhece do Office. Vale o perfil escolhido abaixo; nos conflitos, o Thunderbird continua com a tecla.</p>
+    <div class="row">
+      <label for="profile" data-i18n="diag.profile">Perfil de atalhos</label>
+      <select id="profile"></select>
+      <span id="keys-source" class="muted"></span>
+    </div>
+    <table id="keytable" class="grid">
+      <thead><tr><th scope="col" data-i18n="diag.col.action">Ação</th><th scope="col">Office</th><th scope="col" data-i18n="diag.col.result">Resultado</th><th scope="col" data-i18n="diag.col.officePt">Office em português</th><th scope="col" data-i18n="diag.col.result">Resultado</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2 data-i18n="diag.probe">Teste de teclado</h2>
+    <p class="muted" data-i18n="diag.probe.lead">Clique no campo e pressione a combinação: aparece como a faixa lê a tecla neste teclado e o que faria no corpo da mensagem. No ABNT2, AltGr+2 e Ctrl+Alt+2 digitam ²; Ctrl+Alt+C com o Ctrl e o Alt da esquerda copia a formatação, e AltGr+C digita ₢.</p>
+    <input id="keyprobe" class="keyprobe" type="text" placeholder="Pressione uma combinação aqui" data-i18n-placeholder="diag.probe.placeholder" autocomplete="off" spellcheck="false" aria-describedby="keylog">
+    <ol id="keylog" class="keylog" aria-live="polite"></ol>
+  </section>
+
+  <section>
+    <h2 data-i18n="diag.fonts">Fontes instaladas</h2>
+    <div class="row">
+      <label for="fontfilter" data-i18n="diag.filter">Filtrar</label>
+      <input id="fontfilter" type="search" placeholder="Nome da fonte" data-i18n-placeholder="diag.filter.placeholder">
+      <span id="fontcount" class="muted"></span>
+    </div>
+    <ul id="fontlist" class="fonts"></ul>
+  </section>
+
+  <section>
+    <h2 data-i18n="diag.cfg">Configuração efetiva</h2>
+    <p class="muted"><span data-i18n="diag.cfg.lead">Padrões da faixa, com as preferências do usuário por cima e a política da organização por cima de tudo</span> (<code>policies.json</code> → <code>3rdparty.Extensions</code>).</p>
+    <pre id="cfg"></pre>
+  </section>
+</main>
+</body>
+</html>

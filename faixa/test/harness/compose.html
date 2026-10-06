@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Simulador — janela de composição do Thunderbird 153</title>
+<style>
+  /* Aproximação do layout real (messengercompose.css do ESR 153). */
+  :root { color-scheme: light; --layout-background-0:#fff; --layout-background-1:#f0f0f4; --layout-color-1:#15141a; --layout-color-2:#5b5b66; --toolbar-background-color:#f0f0f4; font: 12px system-ui, sans-serif; }
+  :root.dark { color-scheme: dark; --layout-background-0:#1c1b22; --layout-background-1:#2b2a33; --layout-color-1:#fbfbfe; --layout-color-2:#cfcfd8; --toolbar-background-color:#2b2a33; }
+  html, body { margin:0; height:100%; }
+  body { display:flex; flex-direction:column; background: var(--layout-background-1); color: var(--layout-color-1); }
+  #compose-toolbox { flex:none; }
+  #compose-toolbar-menubar2 { height:24px; display:flex; gap:14px; align-items:center; padding:0 10px; font-size:12px; }
+  /* Como o messenger.css do Thunderbird: toolbar[type="menubar"][autohide][inactive="true"]. */
+  #compose-toolbar-menubar2[autohide] { overflow:hidden; }
+  #compose-toolbar-menubar2[autohide][inactive="true"] { min-height:0; height:0; }
+  #composeToolbar2 { height:44px; display:flex; gap:8px; align-items:center; padding:0 8px; border-bottom:1px solid #ccc; }
+  #composeToolbar2 span { border:1px solid #bbb; border-radius:4px; padding:6px 10px; }
+  #composeContentBox { flex:1; min-height:0; display:grid;
+    grid-template: "headers" minmax(auto, min-content) "format-toolbar" min-content "message" minmax(33%, 1fr) / minmax(auto, 1fr); }
+  #MsgHeadersToolbar { grid-area: headers; display:grid; grid-template-rows: min-content minmax(0, min-content) min-content; grid-template-columns: auto; background: var(--layout-background-1); }
+  .hrow { display:flex; align-items:center; gap:8px; min-height:34px; padding:0 10px; }
+  .hrow label { width:70px; text-align:right; color: var(--layout-color-2); }
+  .hrow input, .hrow select { flex:1; height:26px; }
+  .address-row.hidden { display:none; }
+  .address-container { flex:1; display:flex; flex-wrap:wrap; gap:4px; align-items:center; border:1px solid #bbb; border-radius:4px; padding:1px 4px; min-height:26px; background:#fff; }
+  .address-container input { border:0; outline:0; min-width:120px; height:22px; flex:1; }
+  .sim-pill { background:#e3ecfb; border-radius:10px; padding:1px 8px; font-size:12px; }
+  .sim-pill.invalid-address { background:#fde2e2; color:#a40000; text-decoration: underline wavy #c00000; }
+  #FormatToolbox { grid-area: format-toolbar; }
+  #FormatToolbar { height:34px; display:flex; align-items:center; gap:6px; padding:0 8px; border-top:1px solid #ccc; }
+  #messageArea { grid-area: message; display:flex; flex-direction:column; min-height:0; }
+  #messageEditor { flex:1; border:0; background:#fff; }
+  #status-bar { height:22px; flex:none; display:flex; align-items:center; padding:0 8px; font-size:11px; border-top:1px solid #ccc; }
+</style>
+<script src="stubs.js"></script>
+<script src="../../experiments/faixa/icons.js"></script>
+<script src="../../experiments/faixa/ui.js"></script>
+<script src="../../experiments/faixa/dialogs.js"></script>
+<script src="../../experiments/faixa/engine.js"></script>
+<script src="../../experiments/faixa/names.js"></script>
+<script src="../../experiments/faixa/sanitize.js"></script>
+<script src="../../experiments/faixa/signatures.js"></script>
+<script src="../../experiments/faixa/quickparts.js"></script>
+<script src="../../experiments/faixa/host.js"></script>
+<script src="../../experiments/faixa/implementation.js"></script>
+<script src="sim-host.js"></script>
+</head>
+<body>
+<div id="cmd_sendButton" hidden></div>
+<!-- Itens do menu Opções do Thunderbird: Confirmação de Leitura e Notificação de Status de Entrega. -->
+<div hidden><span id="returnReceiptMenu" command="cmd_toggleReturnReceipt"></span><span id="dsnMenu"></span></div>
+<div id="compose-toolbox">
+  <div id="compose-toolbar-menubar2" type="menubar" context="toolbar-context-menu"><span>Arquivo</span><span>Editar</span><span>Exibir</span><span>Inserir</span><span>Formatar</span><span>Opções</span><span>Ferramentas</span><span>Ajuda</span></div>
+  <div id="composeToolbar2"><span>Enviar</span><span>Criptografar</span><span>Ortografia</span><span>Salvar</span><span>Contatos</span><span>Anexar</span></div>
+</div>
+<div id="composeContentBox">
+  <div id="MsgHeadersToolbar">
+    <div id="top-gradient-box" class="hrow"><label>De</label><select id="msgIdentity"><option>Ana Souza &lt;ana@exemplo.com.br&gt;</option></select></div>
+    <div id="recipientsContainer">
+      <div class="hrow address-row" id="addressRowTo" data-recipienttype="addr_to"><label>Para</label><div class="address-container"><span class="sim-pill" data-address="mariana@cliente.com.br" data-email="mariana@cliente.com.br">mariana@cliente.com.br</span><input id="to" class="address-row-input mail-input"></div></div>
+      <div class="hrow address-row" id="addressRowCc" data-recipienttype="addr_cc"><label>Cc</label><div class="address-container"><input id="cc" class="address-row-input mail-input"></div></div>
+      <div class="hrow address-row hidden" id="addressRowBcc" data-recipienttype="addr_bcc"><label>Cco</label><div class="address-container"><input id="bcc" class="address-row-input mail-input"></div></div>
+    </div>
+    <div id="subject-box" class="hrow"><label>Assunto</label><input id="msgSubject" value="Proposta de renovação do contrato"></div>
+  </div>
+  <div id="FormatToolbox"><div id="FormatToolbar">[barra de formatação nativa do Thunderbird]</div></div>
+  <div id="messageArea"><iframe id="messageEditor" title="Corpo da mensagem"></iframe></div>
+</div>
+<div id="status-bar">Pronto</div>
+<script src="boot.js"></script>
+</body>
+</html>

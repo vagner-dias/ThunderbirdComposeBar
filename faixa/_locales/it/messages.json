@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Faixa de Opções (barra multifunzione)",
+    "description": "Nome del componente aggiuntivo."
+  },
+  "extDescription": {
+    "message": "Barra multifunzione in stile Outlook per la finestra di composizione di Thunderbird, con Copia formato, menu File e tasti di scelta rapida di Office.",
+    "description": "Descrizione del componente aggiuntivo."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Faixa de Opções",
+    "description": "Nome do complemento."
+  },
+  "extDescription": {
+    "message": "Faixa de opções no estilo do Outlook na janela de composição do Thunderbird, com Pincel de Formatação, menu Arquivo e atalhos do Office.",
+    "description": "Descrição do complemento."
+  }
+}

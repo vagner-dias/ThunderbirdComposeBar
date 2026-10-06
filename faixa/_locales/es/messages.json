@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Faixa de Opções (cinta de opciones)",
+    "description": "Nombre del complemento."
+  },
+  "extDescription": {
+    "message": "Cinta de opciones al estilo de Outlook para la ventana de redacción de Thunderbird, con Copiar formato, menú Archivo y atajos de Office.",
+    "description": "Descripción del complemento."
+  }
+}

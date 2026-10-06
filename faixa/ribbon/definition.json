@@ -1,0 +1,647 @@
+{
+  "version": 1,
+  "comment": "Definição declarativa da Faixa de Opções: registro de comandos, abas, perfis de atalho, paletas e estilos. Rótulos em pt-BR; as traduções ficam em ribbon/locales/<idioma>.json.",
+
+  "commands": {
+    "paste": { "label": "Colar", "icon": "clipboard-paste", "native": "cmd_paste", "tbKeys": ["Ctrl+V"], "tip": "Adiciona o conteúdo da Área de Transferência ao documento." },
+    "pasteNoFormatting": { "label": "Colar sem Formatação", "icon": "type", "native": "cmd_pasteNoFormatting", "focus": "editor", "enabled": "html", "tbKeys": ["Ctrl+Shift+V"], "tip": "Cola somente o texto, sem a formatação de origem." },
+    "pasteQuote": { "label": "Colar como Citação", "icon": "reply", "native": "cmd_pasteQuote", "focus": "editor", "tbKeys": ["Ctrl+Shift+O"], "tip": "Cola o conteúdo como texto citado." },
+    "cut": { "label": "Recortar", "icon": "scissors", "native": "cmd_cut", "enabled": "selection", "tbKeys": ["Ctrl+X"], "tip": "Remove a seleção e a coloca na Área de Transferência." },
+    "copy": { "label": "Copiar", "icon": "copy", "native": "cmd_copy", "enabled": "selection", "tbKeys": ["Ctrl+C"], "tip": "Coloca uma cópia da seleção na Área de Transferência." },
+    "painter": { "label": "Pincel de Formatação", "icon": "paintbrush", "enabled": "html", "pressed": "painter", "tip": "Copia a formatação do trecho selecionado para aplicar em outro. Clique duas vezes para aplicar em vários lugares; Esc encerra. Pelo teclado: Ctrl+Alt+C copia e Ctrl+Alt+V aplica." },
+    "painterCopy": { "label": "Copiar Formatação", "enabled": "html", "hidden": true },
+    "painterApply": { "label": "Colar Formatação", "enabled": "html", "hidden": true },
+
+    "fontName": { "label": "Fonte", "type": "fontCombo", "enabled": "html", "tip": "Escolha uma nova fonte para o texto." },
+    "fontSize": { "label": "Tamanho da Fonte", "type": "sizeCombo", "enabled": "html", "tip": "Altere o tamanho do texto, em pontos." },
+    "growFont": { "label": "Aumentar Tamanho da Fonte", "icon": "a-arrow-up", "enabled": "html", "tip": "Aumenta o tamanho do texto para o próximo tamanho da lista." },
+    "shrinkFont": { "label": "Diminuir Tamanho da Fonte", "icon": "a-arrow-down", "enabled": "html", "tip": "Diminui o tamanho do texto para o tamanho anterior da lista." },
+    "changeCase": { "label": "Maiúsculas e Minúsculas", "icon": "case-sensitive", "tip": "Altera o texto selecionado para maiúsculas, minúsculas ou outros usos comuns. Com o cursor numa palavra, vale para a palavra inteira.", "menu": "changeCase", "enabled": "html" },
+    "clearFormatting": { "label": "Limpar Toda a Formatação", "icon": "remove-formatting", "enabled": "html", "tip": "Remove toda a formatação da seleção e volta o parágrafo ao estilo Normal." },
+
+    "bold": { "label": "Negrito", "icon": "bold", "enabled": "html", "pressed": "bold", "tip": "Aplica negrito ao texto. Com o cursor numa palavra, vale para a palavra inteira." },
+    "italic": { "label": "Itálico", "icon": "italic", "enabled": "html", "pressed": "italic", "tip": "Aplica itálico ao texto." },
+    "underline": { "label": "Sublinhado", "icon": "underline", "enabled": "html", "pressed": "underline", "tip": "Sublinha o texto." },
+    "strikethrough": { "label": "Tachado", "icon": "strikethrough", "enabled": "html", "pressed": "strike", "tip": "Risca o texto com uma linha no meio." },
+    "subscript": { "label": "Subscrito", "icon": "subscript", "enabled": "html", "pressed": "sub", "tip": "Digita letras bem pequenas abaixo da linha de texto." },
+    "superscript": { "label": "Sobrescrito", "icon": "superscript", "enabled": "html", "pressed": "sup", "tip": "Digita letras bem pequenas acima da linha de texto." },
+    "hilite": { "label": "Cor do Realce do Texto", "icon": "highlighter", "type": "color", "palette": "highlight", "default": "#FFFF00", "enabled": "html", "tip": "Realça o texto com uma cor, como um marca-texto." },
+    "foreColor": { "label": "Cor da Fonte", "icon": "baseline", "type": "color", "palette": "font", "default": "#C00000", "enabled": "html", "tip": "Altera a cor do texto." },
+
+    "bullets": { "label": "Marcadores", "icon": "list", "enabled": "html", "pressed": { "list": "ul" }, "menu": "bulletLibrary", "tip": "Cria uma lista com marcadores." },
+    "numbering": { "label": "Numeração", "icon": "list-ordered", "enabled": "html", "pressed": { "list": "ol" }, "menu": "numberLibrary", "tip": "Cria uma lista numerada." },
+    "multilevel": { "label": "Lista de Vários Níveis", "icon": "list-tree", "phase": 2, "tip": "Organiza itens em vários níveis (1. → a. → i.)." },
+    "outdent": { "label": "Diminuir Recuo", "icon": "list-indent-decrease", "enabled": "html", "tip": "Aproxima o parágrafo da margem." },
+    "indent": { "label": "Aumentar Recuo", "icon": "list-indent-increase", "enabled": "html", "tip": "Afasta o parágrafo da margem." },
+    "sort": { "label": "Classificar", "icon": "arrow-down-a-z", "phase": 2, "tip": "Coloca parágrafos ou itens em ordem alfabética." },
+    "showMarks": { "label": "Mostrar Tudo", "icon": "pilcrow", "enabled": "html", "pressed": "marks", "tip": "Mostra as marcas de parágrafo. As marcas não vão na mensagem.", "anyFocus": true },
+    "alignLeft": { "label": "Alinhar à Esquerda", "icon": "text-align-start", "enabled": "html", "pressed": { "align": "left" }, "tip": "Alinha o conteúdo à margem esquerda." },
+    "alignCenter": { "label": "Centralizar", "icon": "text-align-center", "enabled": "html", "pressed": { "align": "center" }, "tip": "Centraliza o conteúdo na página." },
+    "alignRight": { "label": "Alinhar à Direita", "icon": "text-align-end", "enabled": "html", "pressed": { "align": "right" }, "tip": "Alinha o conteúdo à margem direita." },
+    "alignJustify": { "label": "Justificar", "icon": "text-align-justify", "enabled": "html", "pressed": { "align": "justify" }, "tip": "Distribui o texto igualmente entre as margens." },
+    "lineSpacing": { "label": "Espaçamento de Linha e Parágrafo", "icon": "spacing", "type": "menu", "menu": "lineSpacing", "enabled": "html", "tip": "Escolhe o espaço entre as linhas do parágrafo." },
+    "shading": { "label": "Sombreamento", "icon": "paint-bucket", "phase": 2, "tip": "Colore o fundo do parágrafo." },
+    "borders": { "label": "Bordas", "icon": "square-dashed", "phase": 2, "tip": "Adiciona bordas ao parágrafo." },
+
+    "styles": { "label": "Estilos", "type": "gallery", "enabled": "html", "tip": "Aplica um estilo ao parágrafo." },
+    "style": { "label": "Estilo", "enabled": "html", "hidden": true },
+    "changeStyles": { "label": "Alterar Estilos", "icon": "swatch-book", "phase": 2, "tip": "Troca o conjunto de estilos, cores e fontes do tema." },
+
+    "find": { "label": "Localizar", "icon": "search", "native": "cmd_find", "focus": "editor", "tbKeys": ["Ctrl+F"], "tip": "Localiza texto na mensagem." },
+    "replace": { "label": "Substituir", "icon": "replace", "native": "cmd_findReplace", "focus": "editor", "enabled": "editor", "tbKeys": ["Ctrl+H"], "tip": "Pesquisa e substitui texto na mensagem." },
+    "select": { "label": "Selecionar", "icon": "text-select", "type": "menu", "menu": "select", "tip": "Seleciona texto na mensagem." },
+    "selectAll": { "label": "Selecionar Tudo", "native": "cmd_selectAll", "focus": "editor", "tbKeys": ["Ctrl+A"], "hidden": true },
+    "selectSimilar": { "label": "Selecionar Texto com Formatação Semelhante", "phase": 2, "hidden": true },
+    "zoom": { "label": "Zoom", "icon": "zoom-in", "type": "menu", "menu": "zoom", "tip": "Aumenta ou diminui a exibição da mensagem. Não altera o que é enviado." },
+
+    "addressBook": { "label": "Catálogo de Endereços", "icon": "book-user", "tip": "Escolhe destinatários para Para, Cc e Cco nos catálogos de endereços. O F9 mostra os contatos ao lado da mensagem." },
+    "checkNames": { "label": "Verificar Nomes", "icon": "user-check", "tip": "Confere nos catálogos de endereços os nomes digitados em Para, Cc e Cco. No Para, o atalho é Ctrl+K." },
+    "attachFile": { "label": "Anexar Arquivo", "icon": "paperclip", "native": "cmd_attachFile", "tip": "Anexa arquivos do computador, pelo Filelink, uma página da web ou o seu cartão de visita.", "menu": "attach" },
+    "insertLink": { "label": "Link", "icon": "link", "native": "cmd_link", "focus": "editor", "enabled": "html", "tbKeys": ["Ctrl+K"], "tip": "Cria um link no texto selecionado." },
+    "insertImage": { "label": "Imagem", "icon": "image", "native": "cmd_image", "focus": "editor", "enabled": "html", "tip": "Insere uma imagem no corpo da mensagem." },
+    "signature": { "label": "Assinatura", "icon": "signature", "menu": "signature", "enabled": "htmlEditor", "tip": "Insere uma das suas assinaturas. Em Assinaturas… você cria as assinaturas e escolhe a padrão de cada conta, para mensagens novas e para respostas e encaminhamentos." },
+    "insertSignature": { "label": "Inserir Assinatura", "icon": "signature", "enabled": "htmlEditor", "hidden": true },
+    "signatureOptions": { "label": "Assinaturas…", "icon": "settings", "hidden": true },
+    "followUp": { "label": "Acompanha\u00admento", "icon": "flag", "pressed": "followUp", "tip": "Sinaliza a mensagem para acompanhamento: depois do envio, a cópia em Enviados fica com estrela, para você lembrar de cobrar a resposta. No menu, também para os destinatários." },
+    "followUpMe": { "label": "Sinalizar para Mim", "icon": "flag", "hidden": true },
+    "followUpRecipients": { "label": "Sinalizar para os Destinatários", "icon": "users", "hidden": true },
+    "followUpClear": { "label": "Limpar Sinalizador", "icon": "x", "hidden": true },
+    "deliveryReceipt": { "label": "Solicitar Confirmação de Entrega", "shortLabel": "Confirmação de Entrega", "icon": "mail-check", "pressed": "dsn", "tip": "Pede ao servidor de e-mail de quem recebe um aviso de que a mensagem foi entregue (notificação de status de entrega). Nem todo servidor manda o aviso." },
+    "returnReceipt": { "label": "Solicitar Confirmação de Leitura", "shortLabel": "Confirmação de Leitura", "icon": "mail-open", "pressed": "returnReceipt", "tip": "Pede a quem recebe que confirme quando abrir a mensagem. A pessoa pode recusar, e alguns programas de e-mail não respondem." },
+    "priorityHigh": { "label": "Alta Prioridade", "icon": "exclaim", "target": "background", "pressed": { "priority": "highest" }, "tip": "Marca a mensagem como de alta prioridade (X-Priority 1)." },
+    "priorityLow": { "label": "Baixa Prioridade", "icon": "arrow-down", "target": "background", "pressed": { "priority": "lowest" }, "tip": "Marca a mensagem como de baixa prioridade (X-Priority 5)." },
+
+    "formatHTML": { "label": "HTML", "icon": "code-xml", "target": "background", "enabled": "htmlEditor", "pressed": { "deliveryFormat": ["auto", "html", "both"] }, "tip": "Envia a mensagem em HTML, com uma versão em texto para quem não lê HTML." },
+    "formatPlain": { "label": "Texto sem Formatação", "icon": "type", "target": "background", "enabled": "htmlEditor", "pressed": { "deliveryFormat": "plaintext" }, "tip": "Envia só texto, sem formatação, como no Outlook: a formatação sai do texto (um Ctrl+Z traz de volta) e os comandos de formatação ficam desativados." },
+
+    "attachMessage": { "label": "Anexar Mensagem", "icon": "mails", "tip": "Anexa mensagens do Thunderbird a esta, como arquivos .eml (o Item do Outlook)." },
+    "businessCard": { "label": "Cartão de Visita", "icon": "contact", "menu": "businessCard", "tip": "Anexa o seu cartão de visita (vCard) ou o de um contato dos catálogos de endereços." },
+    "otherBusinessCards": { "label": "Outros Cartões de Visita…", "icon": "contact", "hidden": true },
+    "table": { "label": "Tabela", "icon": "table", "menu": "table", "enabled": "html", "tip": "Insere uma tabela: escolha na grade quantas colunas e linhas. Com o cursor numa tabela, o menu também insere e exclui linhas e colunas." },
+    "insertTable": { "label": "Inserir Tabela", "enabled": "html", "hidden": true },
+    "insertTableDialog": { "label": "Inserir Tabela…", "icon": "table-2", "native": "cmd_InsertTable", "focus": "editor", "enabled": "html", "hidden": true },
+    "tableRowAbove": { "label": "Inserir Linhas Acima", "icon": "between-horizontal-start", "native": "cmd_InsertRowAbove", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableRowBelow": { "label": "Inserir Linhas Abaixo", "icon": "between-horizontal-end", "native": "cmd_InsertRowBelow", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableColBefore": { "label": "Inserir Colunas à Esquerda", "icon": "between-vertical-start", "native": "cmd_InsertColumnBefore", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableColAfter": { "label": "Inserir Colunas à Direita", "icon": "between-vertical-end", "native": "cmd_InsertColumnAfter", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableDeleteRow": { "label": "Excluir Linhas", "icon": "rows-3", "native": "cmd_DeleteRow", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableDeleteCol": { "label": "Excluir Colunas", "icon": "columns-3", "native": "cmd_DeleteColumn", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableDelete": { "label": "Excluir Tabela", "icon": "trash", "native": "cmd_DeleteTable", "focus": "editor", "enabled": "inTable", "hidden": true },
+    "tableMerge": { "label": "Mesclar Células", "icon": "table-cells-merge", "native": "cmd_JoinTableCells", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableSplit": { "label": "Dividir Células", "icon": "table-cells-split", "native": "cmd_SplitTableCell", "focus": "editor", "enabled": "inCell", "hidden": true },
+    "tableProperties": { "label": "Propriedades da Tabela…", "icon": "table-properties", "native": "cmd_editTable", "focus": "editor", "enabled": "inTable", "hidden": true },
+    "pictures": { "label": "Imagens", "icon": "images", "native": "cmd_image", "focus": "editor", "enabled": "html", "tip": "Insere uma imagem do computador ou da web no corpo da mensagem." },
+    "bookmark": { "label": "Indicador", "icon": "bookmark", "native": "cmd_anchor", "focus": "editor", "enabled": "html", "tip": "Marca um ponto da mensagem com um nome (âncora), para um link levar até ele." },
+    "quickParts": { "label": "Partes Rápidas", "icon": "blocks", "menu": "quickParts", "enabled": "text", "tip": "Insere trechos prontos, os seus e os da sua organização. Selecione um texto e salve-o como Parte Rápida para usar de novo." },
+    "insertQuickPart": { "label": "Inserir Parte Rápida", "enabled": "text", "hidden": true },
+    "saveQuickPart": { "label": "Salvar Seleção na Galeria de Partes Rápidas…", "icon": "square-plus", "enabled": "selectionBody", "hidden": true },
+    "quickPartsOptions": { "label": "Partes Rápidas…", "icon": "settings", "hidden": true },
+    "dateTime": { "label": "Data e Hora", "icon": "calendar-clock", "enabled": "text", "tip": "Insere a data ou a hora de agora, no formato que você escolher." },
+    "emoji": { "label": "Emoji", "icon": "smile", "menu": "emoji", "enabled": "text", "tip": "Insere um emoji no texto." },
+    "insertEmoji": { "label": "Inserir Emoji", "enabled": "text", "hidden": true },
+    "symbol": { "label": "Símbolo", "icon": "omega", "menu": "symbol", "enabled": "text", "tip": "Insere símbolos que não estão no teclado, como os de direitos autorais, marca registrada, moedas e letras gregas." },
+    "insertSymbol": { "label": "Inserir Símbolo", "enabled": "text", "hidden": true },
+    "moreSymbols": { "label": "Mais Símbolos…", "icon": "omega", "native": "cmd_insertChars", "focus": "editor", "enabled": "text", "hidden": true },
+    "hline": { "label": "Linha Horizontal", "icon": "separator-horizontal", "native": "cmd_hline", "focus": "editor", "enabled": "html", "tip": "Insere uma linha horizontal no ponto do cursor." },
+
+    "help": { "label": "Ajuda", "icon": "circle-help", "tip": "Abre a ajuda da Faixa de Opções: o que cada aba faz, assinaturas, partes rápidas e teclado. A sua organização pode trocar pela ajuda dela." },
+    "contactSupport": { "label": "Contatar o Suporte", "icon": "headset", "enabled": "support", "tip": "Mostra como falar com o suporte da sua organização: e-mail, telefone e portal." },
+    "keyboardShortcuts": { "label": "Atalhos de Teclado", "icon": "keyboard", "tip": "Mostra o que cada atalho do Office faz aqui, no perfil de atalhos escolhido, e testa as teclas." },
+    "about": { "label": "Sobre", "icon": "info", "tip": "Versão da Faixa de Opções e do Thunderbird." },
+
+    "undo": { "label": "Desfazer", "icon": "undo-2", "enabled": "canUndo", "tbKeys": ["Ctrl+Z"], "tip": "Desfaz a última ação." },
+    "redo": { "label": "Refazer", "icon": "redo-2", "enabled": "canRedo", "tbKeys": ["Ctrl+Y"], "tip": "Refaz a última ação desfeita." },
+    "send": { "label": "Enviar", "icon": "send-horizontal", "tbKeys": ["Ctrl+Enter"], "tip": "Envia a mensagem." },
+    "collapse": { "label": "Recolher a Faixa de Opções", "icon": "chevron-up", "hidden": true },
+    "toggleTbToolbar": { "label": "Mostrar a barra do Thunderbird", "pressed": "tbToolbar", "hidden": true },
+    "toggleMenubar": { "label": "Mostrar a barra de menus", "pressed": "menubar", "hidden": true },
+    "openDiagnostics": { "label": "Diagnóstico da Faixa", "icon": "stethoscope", "tip": "Autoteste da faixa, atalhos, fontes e a configuração em uso. Use “Copiar relatório” para mandar ao suporte." },
+    "saveDraft": { "label": "Salvar Rascunho", "native": "cmd_saveDefault", "tbKeys": ["Ctrl+S"], "hidden": true },
+    "newMessage": { "label": "Nova Mensagem", "hidden": true },
+    "save": { "label": "Salvar", "icon": "save", "native": "cmd_saveDefault", "tbKeys": ["Ctrl+S"], "sameAs": "saveDraft", "tip": "Salva a mensagem em Rascunhos." },
+    "saveAsDraft": { "label": "Salvar Rascunho", "icon": "save", "native": "cmd_saveAsDraft", "tbKeys": ["Ctrl+S"], "sameAs": "saveDraft", "hidden": true },
+    "saveAsTemplate": { "label": "Salvar como Modelo", "icon": "file-text", "native": "cmd_saveAsTemplate", "hidden": true },
+    "saveAsFile": { "label": "Salvar como Arquivo…", "native": "cmd_saveAsFile", "hidden": true },
+    "print": { "label": "Imprimir…", "icon": "printer", "native": "cmd_print", "tbKeys": ["Ctrl+P"], "hidden": true },
+    "properties": { "label": "Propriedades…", "phase": 2, "hidden": true },
+    "ribbonOptions": { "label": "Opções da Faixa…", "icon": "settings", "tip": "Idioma, aba inicial, fonte padrão, Enter como no Outlook e perfil de atalhos." },
+    "close": { "label": "Fechar", "icon": "x", "native": "cmd_close", "tbKeys": ["Ctrl+W"], "hidden": true },
+    "spaceBefore": { "label": "Adicionar Espaço Antes do Parágrafo", "labelOn": "Remover Espaço Antes do Parágrafo", "state": "spaceBefore", "enabled": "html", "hidden": true },
+    "spaceAfter": { "label": "Adicionar Espaço Depois do Parágrafo", "labelOn": "Remover Espaço Depois do Parágrafo", "state": "spaceAfter", "enabled": "html", "hidden": true },
+    "attachPage": { "label": "Página da Web…", "icon": "globe", "native": "cmd_attachPage", "hidden": true },
+    "attachCloud": { "label": "Filelink", "icon": "cloud-upload", "hidden": true },
+    "attachVCard": { "label": "Meu Cartão de Visita (vCard)", "icon": "id-card", "hidden": true },
+    "attachPublicKey": { "label": "Minha Chave Pública OpenPGP", "icon": "key-round", "hidden": true },
+    "mergeFormatting": { "label": "Mesclar Formatação", "phase": 2, "hidden": true }
+  },
+
+  "fileTab": { "label": "Arquivo", "menu": "file", "tip": "Salvar, imprimir, opções da faixa e fechar a mensagem." },
+  "qat": ["save", "undo", "redo"],
+
+  "tabs": [
+    {
+      "id": "mensagem",
+      "label": "Mensagem",
+      "collapseOrder": ["tracking", "tags", "names", "include", "clipboard", "basicText"],
+      "groups": [
+        {
+          "id": "clipboard", "label": "Área de Transferência", "icon": "clipboard-paste",
+          "items": [
+            { "type": "largeSplit", "cmd": "paste", "menu": "paste" },
+            { "type": "stack", "items": [
+              { "type": "small", "cmd": "cut" },
+              { "type": "small", "cmd": "copy" },
+              { "type": "small", "cmd": "painter" }
+            ] }
+          ]
+        },
+        {
+          "id": "basicText", "label": "Texto Básico", "icon": "type",
+          "items": [
+            { "type": "rows", "rows": [
+              [ { "type": "fontCombo", "cmd": "fontName" }, { "type": "sizeCombo", "cmd": "fontSize" }, { "type": "icon", "cmd": "growFont" }, { "type": "icon", "cmd": "shrinkFont" }, { "type": "sep" },
+                { "type": "iconSplit", "cmd": "bullets" }, { "type": "iconSplit", "cmd": "numbering" }, { "type": "icon", "cmd": "outdent" }, { "type": "icon", "cmd": "indent" } ],
+              [ { "type": "icon", "cmd": "bold" }, { "type": "icon", "cmd": "italic" }, { "type": "icon", "cmd": "underline" }, { "type": "sep" },
+                { "type": "color", "cmd": "hilite" }, { "type": "color", "cmd": "foreColor" }, { "type": "sep" },
+                { "type": "icon", "cmd": "alignLeft" }, { "type": "icon", "cmd": "alignCenter" }, { "type": "icon", "cmd": "alignRight" }, { "type": "sep" },
+                { "type": "icon", "cmd": "clearFormatting" } ]
+            ] }
+          ]
+        },
+        {
+          "id": "names", "label": "Nomes", "icon": "book-user",
+          "items": [
+            { "type": "large", "cmd": "addressBook" },
+            { "type": "large", "cmd": "checkNames" }
+          ]
+        },
+        {
+          "id": "include", "label": "Incluir", "icon": "paperclip",
+          "items": [
+            { "type": "largeSplit", "cmd": "attachFile", "menu": "attach" },
+            { "type": "stack", "items": [
+              { "type": "small", "cmd": "insertLink" },
+              { "type": "small", "cmd": "insertImage" },
+              { "type": "smallMenu", "cmd": "signature" }
+            ] }
+          ]
+        },
+        {
+          "id": "tags", "label": "Marcas", "icon": "flag",
+          "items": [
+            { "type": "largeSplit", "cmd": "followUp", "menu": "followUp" },
+            { "type": "stack", "items": [
+              { "type": "small", "cmd": "priorityHigh" },
+              { "type": "small", "cmd": "priorityLow" }
+            ] }
+          ]
+        },
+        {
+          "id": "tracking", "label": "Controle", "icon": "mail-check",
+          "items": [
+            { "type": "stack", "items": [
+              { "type": "small", "cmd": "deliveryReceipt", "keepLabel": true },
+              { "type": "small", "cmd": "returnReceipt", "keepLabel": true }
+            ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inserir",
+      "label": "Inserir",
+      "collapseOrder": ["symbols", "text", "links", "illustrations", "tables", "insertInclude"],
+      "groups": [
+        {
+          "id": "insertInclude", "label": "Incluir", "icon": "paperclip",
+          "items": [
+            { "type": "largeSplit", "cmd": "attachFile", "menu": "attach" },
+            { "type": "large", "cmd": "attachMessage" },
+            { "type": "largeMenu", "cmd": "businessCard" },
+            { "type": "largeMenu", "cmd": "signature" }
+          ]
+        },
+        {
+          "id": "tables", "label": "Tabelas", "icon": "table",
+          "items": [
+            { "type": "largeMenu", "cmd": "table" }
+          ]
+        },
+        {
+          "id": "illustrations", "label": "Ilustrações", "icon": "images",
+          "items": [
+            { "type": "large", "cmd": "pictures" }
+          ]
+        },
+        {
+          "id": "links", "label": "Links", "icon": "link",
+          "items": [
+            { "type": "large", "cmd": "insertLink" },
+            { "type": "large", "cmd": "bookmark" }
+          ]
+        },
+        {
+          "id": "text", "label": "Texto", "icon": "blocks",
+          "items": [
+            { "type": "largeMenu", "cmd": "quickParts" },
+            { "type": "large", "cmd": "dateTime" }
+          ]
+        },
+        {
+          "id": "symbols", "label": "Símbolos", "icon": "omega",
+          "items": [
+            { "type": "largeMenu", "cmd": "emoji" },
+            { "type": "largeMenu", "cmd": "symbol" },
+            { "type": "large", "cmd": "hline" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "formatar",
+      "label": "Formatar Texto",
+      "collapseOrder": ["zoomGroup", "editing", "format", "stylesGroup", "clipboard2", "paragraph"],
+      "groups": [
+        {
+          "id": "clipboard2", "label": "Área de Transferência", "compact": true, "icon": "clipboard-paste",
+          "items": [
+            { "type": "largeSplit", "cmd": "paste", "menu": "paste" },
+            { "type": "stack", "items": [
+              { "type": "small", "cmd": "cut", "iconOnly": true },
+              { "type": "small", "cmd": "copy", "iconOnly": true },
+              { "type": "small", "cmd": "painter", "iconOnly": true }
+            ] }
+          ]
+        },
+        {
+          "id": "format", "label": "Formato", "icon": "code-xml",
+          "items": [
+            { "type": "stack", "items": [
+              { "type": "small", "cmd": "formatHTML" },
+              { "type": "small", "cmd": "formatPlain" },
+              { "type": "note", "id": "plainNote", "icon": "info", "when": { "deliveryFormat": "plaintext" } }
+            ] }
+          ]
+        },
+        {
+          "id": "font", "label": "Fonte", "icon": "type",
+          "items": [
+            { "type": "rows", "rows": [
+              [ { "type": "fontCombo", "cmd": "fontName" }, { "type": "sizeCombo", "cmd": "fontSize" }, { "type": "icon", "cmd": "growFont" }, { "type": "icon", "cmd": "shrinkFont" }, { "type": "sep" }, { "type": "iconMenu", "cmd": "changeCase" }, { "type": "icon", "cmd": "clearFormatting" } ],
+              [ { "type": "icon", "cmd": "bold" }, { "type": "icon", "cmd": "italic" }, { "type": "icon", "cmd": "underline" }, { "type": "icon", "cmd": "strikethrough" }, { "type": "icon", "cmd": "subscript" }, { "type": "icon", "cmd": "superscript" }, { "type": "sep" },
+                { "type": "color", "cmd": "hilite" }, { "type": "color", "cmd": "foreColor" } ]
+            ] }
+          ]
+        },
+        {
+          "id": "paragraph", "label": "Parágrafo", "icon": "pilcrow",
+          "items": [
+            { "type": "rows", "rows": [
+              [ { "type": "iconSplit", "cmd": "bullets" }, { "type": "iconSplit", "cmd": "numbering" }, { "type": "icon", "cmd": "multilevel" }, { "type": "sep" }, { "type": "icon", "cmd": "outdent" }, { "type": "icon", "cmd": "indent" }, { "type": "sep" }, { "type": "icon", "cmd": "sort" }, { "type": "icon", "cmd": "showMarks" } ],
+              [ { "type": "icon", "cmd": "alignLeft" }, { "type": "icon", "cmd": "alignCenter" }, { "type": "icon", "cmd": "alignRight" }, { "type": "icon", "cmd": "alignJustify" }, { "type": "sep" }, { "type": "iconMenu", "cmd": "lineSpacing" }, { "type": "sep" }, { "type": "icon", "cmd": "shading" }, { "type": "icon", "cmd": "borders" } ]
+            ] }
+          ]
+        },
+        {
+          "id": "stylesGroup", "label": "Estilos", "icon": "swatch-book",
+          "items": [
+            { "type": "gallery", "cmd": "styles" },
+            { "type": "large", "cmd": "changeStyles" }
+          ]
+        },
+        {
+          "id": "editing", "label": "Edição", "icon": "search",
+          "items": [
+            { "type": "stack", "items": [
+              { "type": "small", "cmd": "find" },
+              { "type": "small", "cmd": "replace" },
+              { "type": "smallMenu", "cmd": "select" }
+            ] }
+          ]
+        },
+        {
+          "id": "zoomGroup", "label": "Zoom", "icon": "zoom-in",
+          "items": [
+            { "type": "largeMenu", "cmd": "zoom" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ajuda",
+      "label": "Ajuda",
+      "collapseOrder": ["ribbonGroup", "helpGroup"],
+      "groups": [
+        {
+          "id": "helpGroup", "label": "Ajuda", "icon": "circle-help",
+          "items": [
+            { "type": "large", "cmd": "help" },
+            { "type": "large", "cmd": "keyboardShortcuts" }
+          ]
+        },
+        {
+          "id": "ribbonGroup", "label": "Faixa de Opções", "icon": "info",
+          "items": [
+            { "type": "large", "cmd": "ribbonOptions" },
+            { "type": "large", "cmd": "about" }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "menus": {
+    "file": [
+      { "cmd": "saveAsDraft" },
+      { "cmd": "saveAsTemplate" },
+      { "cmd": "saveAsFile" },
+      { "sep": true },
+      { "cmd": "print" },
+      { "sep": true },
+      { "cmd": "properties" },
+      { "cmd": "ribbonOptions" },
+      { "sep": true },
+      { "cmd": "close" }
+    ],
+    "changeCase": [
+      { "cmd": "changeCase", "args": { "mode": "sentence" }, "label": "Primeira letra da frase em maiúscula." },
+      { "cmd": "changeCase", "args": { "mode": "lower" }, "label": "minúsculas" },
+      { "cmd": "changeCase", "args": { "mode": "upper" }, "label": "MAIÚSCULAS" },
+      { "cmd": "changeCase", "args": { "mode": "title" }, "label": "Colocar Cada Palavra em Maiúscula" },
+      { "cmd": "changeCase", "args": { "mode": "toggle" }, "label": "aLTERNAR mAIÚSC./mINÚSC." }
+    ],
+    "attach": [
+      { "cmd": "attachFile", "label": "Procurar neste Computador…" },
+      { "dynamic": "cloud" },
+      { "cmd": "attachPage" },
+      { "sep": true },
+      { "cmd": "attachVCard", "checked": "attachVCard", "enabledWhen": "vcardAvailable" },
+      { "cmd": "attachPublicKey", "checked": "attachPublicKey", "when": "pgp" }
+    ],
+    "signature": [
+      { "dynamic": "signatures" },
+      { "sep": true },
+      { "cmd": "signatureOptions" }
+    ],
+    "businessCard": [
+      { "cmd": "attachVCard", "checked": "attachVCard", "enabledWhen": "vcardAvailable" },
+      { "sep": true },
+      { "cmd": "otherBusinessCards" }
+    ],
+    "table": [
+      { "custom": "tableGrid" },
+      { "sep": true },
+      { "cmd": "insertTableDialog" },
+      { "sep": true },
+      { "cmd": "tableRowAbove" },
+      { "cmd": "tableRowBelow" },
+      { "cmd": "tableColBefore" },
+      { "cmd": "tableColAfter" },
+      { "sep": true },
+      { "cmd": "tableDeleteRow" },
+      { "cmd": "tableDeleteCol" },
+      { "cmd": "tableDelete" },
+      { "sep": true },
+      { "cmd": "tableMerge", "enabledWhen": "canMergeCells" },
+      { "cmd": "tableSplit", "enabledWhen": "canSplitCell" },
+      { "sep": true },
+      { "cmd": "tableProperties" }
+    ],
+    "quickParts": [
+      { "dynamic": "quickParts" },
+      { "sep": true },
+      { "cmd": "saveQuickPart" },
+      { "cmd": "quickPartsOptions" }
+    ],
+    "emoji": [
+      { "custom": "emojiGrid" }
+    ],
+    "symbol": [
+      { "custom": "symbolGrid" },
+      { "sep": true },
+      { "cmd": "moreSymbols" }
+    ],
+    "paste": [
+      { "cmd": "paste", "label": "Manter Formatação Original" },
+      { "cmd": "mergeFormatting" },
+      { "cmd": "pasteNoFormatting", "label": "Manter Somente Texto" },
+      { "cmd": "pasteQuote" }
+    ],
+    "bulletLibrary": [
+      { "head": "Biblioteca de Marcadores" },
+      { "cmd": "bullets", "args": { "listStyle": "disc" }, "label": "● Círculo cheio" },
+      { "cmd": "bullets", "args": { "listStyle": "circle" }, "label": "○ Círculo vazado" },
+      { "cmd": "bullets", "args": { "listStyle": "square" }, "label": "■ Quadrado" }
+    ],
+    "numberLibrary": [
+      { "head": "Biblioteca de Numeração" },
+      { "cmd": "numbering", "args": { "listStyle": "decimal" }, "label": "1. 2. 3." },
+      { "cmd": "numbering", "args": { "listStyle": "lower-alpha" }, "label": "a. b. c." },
+      { "cmd": "numbering", "args": { "listStyle": "upper-alpha" }, "label": "A. B. C." },
+      { "cmd": "numbering", "args": { "listStyle": "lower-roman" }, "label": "i. ii. iii." },
+      { "cmd": "numbering", "args": { "listStyle": "upper-roman" }, "label": "I. II. III." }
+    ],
+    "lineSpacing": [
+      { "cmd": "lineSpacing", "args": { "value": "1.0" }, "label": "1,0", "checked": { "lineSpacing": "1.0" } },
+      { "cmd": "lineSpacing", "args": { "value": "1.15" }, "label": "1,15", "checked": { "lineSpacing": "1.15" } },
+      { "cmd": "lineSpacing", "args": { "value": "1.5" }, "label": "1,5", "checked": { "lineSpacing": "1.5" } },
+      { "cmd": "lineSpacing", "args": { "value": "2.0" }, "label": "2,0", "checked": { "lineSpacing": "2.0" } },
+      { "cmd": "lineSpacing", "args": { "value": "2.5" }, "label": "2,5", "checked": { "lineSpacing": "2.5" } },
+      { "cmd": "lineSpacing", "args": { "value": "3.0" }, "label": "3,0", "checked": { "lineSpacing": "3.0" } },
+      { "sep": true },
+      { "cmd": "spaceBefore" },
+      { "cmd": "spaceAfter" }
+    ],
+    "select": [
+      { "cmd": "selectAll" },
+      { "cmd": "selectSimilar" }
+    ],
+    "zoom": [
+      { "cmd": "zoom", "args": { "value": 50 }, "label": "50%", "checked": { "zoom": 50 } },
+      { "cmd": "zoom", "args": { "value": 75 }, "label": "75%", "checked": { "zoom": 75 } },
+      { "cmd": "zoom", "args": { "value": 100 }, "label": "100%", "checked": { "zoom": 100 } },
+      { "cmd": "zoom", "args": { "value": 125 }, "label": "125%", "checked": { "zoom": 125 } },
+      { "cmd": "zoom", "args": { "value": 150 }, "label": "150%", "checked": { "zoom": 150 } },
+      { "cmd": "zoom", "args": { "value": 200 }, "label": "200%", "checked": { "zoom": 200 } }
+    ],
+    "followUp": [
+      { "cmd": "followUpMe", "checked": "followUpMe" },
+      { "cmd": "followUpRecipients", "checked": "followUpRecipients" },
+      { "sep": true },
+      { "cmd": "followUpClear", "enabledWhen": "followUp" }
+    ],
+    "more": [
+      { "cmd": "toggleTbToolbar", "checked": "tbToolbar", "enabledWhen": "tbToolbarFree" },
+      { "cmd": "toggleMenubar", "checked": "menubar", "when": "menubarAvailable", "enabledWhen": "menubarFree" },
+      { "sep": true },
+      { "cmd": "ribbonOptions" },
+      { "cmd": "openDiagnostics" },
+      { "sep": true },
+      { "cmd": "collapse", "label": "Recolher a Faixa de Opções", "keys": "Ctrl+F1" }
+    ]
+  },
+
+  "fontSizes": [8, 9, 10, 10.5, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72],
+
+  "tableGrid": { "cols": 10, "rows": 8 },
+
+  "symbols": ["€", "£", "¥", "©", "®", "™", "±", "≠", "≤", "≥", "÷", "×", "∞", "µ", "α", "β", "π", "Ω", "∑", "☺"],
+
+  "emoji": [
+    { "id": "faces", "items": ["😀", "😃", "😄", "😁", "😊", "🙂", "😉", "😍", "😘", "😂", "🤣", "😅", "😎", "🤔", "😐", "😕", "😢", "😭", "😡", "😴"] },
+    { "id": "gestures", "items": ["👍", "👎", "👏", "🙏", "👋", "💪", "✌️", "👌", "🤝", "🙌"] },
+    { "id": "objects", "items": ["❤️", "✅", "❌", "⚠️", "⭐", "🎉", "🎂", "🔥", "💡", "📌", "📎", "📅", "⏰", "☕", "🚀", "✔️", "➡️", "💬", "📞", "✉️"] }
+  ],
+
+  "themeFonts": [
+    { "name": "Calibri Light", "note": "Títulos" },
+    { "name": "Calibri", "note": "Corpo" }
+  ],
+
+  "fontFallbacks": {
+    "Calibri": "Carlito, Arial, sans-serif",
+    "Calibri Light": "Carlito, Arial, sans-serif",
+    "Aptos": "Calibri, Carlito, Arial, sans-serif",
+    "Cambria": "Caladea, Georgia, serif",
+    "Arial": "Liberation Sans, Helvetica, sans-serif",
+    "Helvetica": "Arial, Liberation Sans, sans-serif",
+    "Verdana": "DejaVu Sans, sans-serif",
+    "Tahoma": "Verdana, DejaVu Sans, sans-serif",
+    "Segoe UI": "Arial, sans-serif",
+    "Times New Roman": "Liberation Serif, Times, serif",
+    "Georgia": "Times New Roman, serif",
+    "Garamond": "Georgia, serif",
+    "Courier New": "Liberation Mono, monospace",
+    "Consolas": "Courier New, monospace",
+    "Lucida Console": "Consolas, monospace",
+    "Comic Sans MS": "sans-serif",
+    "Trebuchet MS": "Arial, sans-serif",
+    "*": "sans-serif"
+  },
+
+  "palettes": {
+    "font": {
+      "automatic": "Automático",
+      "theme": [
+        ["#FFFFFF", "#000000", "#E7E6E6", "#44546A", "#4472C4", "#ED7D31", "#A5A5A5", "#FFC000", "#5B9BD5", "#70AD47"],
+        ["#F2F2F2", "#7F7F7F", "#D0CECE", "#D6DCE4", "#D9E2F3", "#FBE5D5", "#EDEDED", "#FFF2CC", "#DEEBF6", "#E2EFD9"],
+        ["#D8D8D8", "#595959", "#AEABAB", "#ADB9CA", "#B4C6E7", "#F7CBAC", "#DBDBDB", "#FEE599", "#BDD7EE", "#C5E0B3"],
+        ["#BFBFBF", "#3F3F3F", "#757070", "#8496B0", "#8EAADB", "#F4B183", "#C9C9C9", "#FFD965", "#9CC3E5", "#A8D08D"],
+        ["#A5A5A5", "#262626", "#3A3838", "#323F4F", "#2F5496", "#C55A11", "#7B7B7B", "#BF8F00", "#2E75B5", "#538135"],
+        ["#7F7F7F", "#0C0C0C", "#171616", "#222A35", "#1F3864", "#833C0B", "#525252", "#7F6000", "#1E4E79", "#375623"]
+      ],
+      "standard": ["#C00000", "#FF0000", "#FFC000", "#FFFF00", "#92D050", "#00B050", "#00B0F0", "#0070C0", "#002060", "#7030A0"]
+    },
+    "highlight": {
+      "none": "Sem Cor",
+      "colors": ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#0000FF", "#FF0000", "#000080", "#008080", "#008000", "#800080", "#800000", "#808000", "#808080", "#C0C0C0", "#000000"]
+    }
+  },
+
+  "styles": [
+    { "id": "normal", "label": "Normal", "tag": "p", "css": "", "preview": "" },
+    { "id": "nospace", "label": "Sem Espaçamento", "tag": "p", "css": "margin: 0; line-height: 1", "preview": "", "match": { "lineHeight": "1" } },
+    { "id": "h1", "label": "Título 1", "tag": "h1", "css": "margin: 12pt 0 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 16pt; font-weight: normal; color: #2F5496", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 16px; color: #2F5496" },
+    { "id": "h2", "label": "Título 2", "tag": "h2", "css": "margin: 2pt 0 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 13pt; font-weight: normal; color: #2F5496", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 14px; color: #2F5496" },
+    { "id": "h3", "label": "Título 3", "tag": "h3", "css": "margin: 2pt 0 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 12pt; font-weight: normal; color: #1F3763", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 13px; color: #1F3763" },
+    { "id": "title", "label": "Título", "tag": "h1", "css": "margin: 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 28pt; font-weight: normal; letter-spacing: -0.5pt; line-height: 1", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 20px; letter-spacing: -0.3px", "match": { "fontSize": "28pt" } },
+    { "id": "subtitle", "label": "Subtítulo", "tag": "p", "css": "margin: 0 0 8pt; color: #5A5A5A; letter-spacing: 0.75pt", "preview": "color: #5A5A5A; letter-spacing: 0.6px", "match": { "letterSpacing": "0.75pt" } },
+    { "id": "subtleEmphasis", "label": "Ênfase Sutil", "kind": "char", "tag": "em", "color": "#404040", "preview": "font-style: italic; color: #404040" },
+    { "id": "emphasis", "label": "Ênfase", "kind": "char", "tag": "em", "preview": "font-style: italic" },
+    { "id": "intenseEmphasis", "label": "Ênfase Intensa", "kind": "char", "tag": "em", "color": "#4472C4", "preview": "font-style: italic; color: #4472C4" },
+    { "id": "strong", "label": "Forte", "kind": "char", "tag": "strong", "preview": "font-weight: bold" },
+    { "id": "quote", "label": "Citação", "tag": "p", "css": "margin: 10pt 43pt; font-style: italic; color: #404040; text-align: center", "preview": "font-style: italic; color: #404040", "match": { "fontStyle": "italic", "textAlign": "center" } }
+  ],
+
+  "shortcutProfiles": {
+    "thunderbird-office": {
+      "label": "Thunderbird + Office sem conflito",
+      "keys": [
+        { "keys": "Ctrl+B", "cmd": "bold", "scope": "body", "note": "mesmo comando do Thunderbird, com palavra inteira" },
+        { "keys": "Ctrl+I", "cmd": "italic", "scope": "body", "note": "mesmo comando do Thunderbird, com palavra inteira" },
+        { "keys": "Ctrl+U", "cmd": "underline", "scope": "body", "note": "mesmo comando do Thunderbird, com palavra inteira" },
+        { "keys": "Ctrl+E", "cmd": "alignCenter", "scope": "body" },
+        { "keys": "Ctrl+L", "cmd": "alignLeft", "scope": "body" },
+        { "keys": "Ctrl+J", "cmd": "alignJustify", "scope": "body" },
+        { "keys": "Ctrl+>", "label": "Ctrl+Shift+>", "cmd": "growFont", "scope": "body", "note": "o Thunderbird usa as mesmas teclas; agora em passos de pt" },
+        { "keys": "Ctrl+<", "label": "Ctrl+Shift+<", "cmd": "shrinkFont", "scope": "body", "note": "o Thunderbird usa as mesmas teclas; agora em passos de pt" },
+        { "keys": "Ctrl+.", "cmd": "growFont", "scope": "body", "hidden": true },
+        { "keys": "Ctrl+,", "cmd": "shrinkFont", "scope": "body", "hidden": true },
+        { "keys": "Ctrl+M", "cmd": "indent", "scope": "body" },
+        { "keys": "Ctrl+Shift+L", "cmd": "bullets", "scope": "body" },
+        { "keys": "Ctrl+Alt+C", "cmd": "painterCopy", "scope": "body", "note": "Ctrl+Shift+C mostra o campo Cc no Thunderbird; Ctrl+Alt+C/V são os atalhos do Google Docs" },
+        { "keys": "Ctrl+Alt+V", "cmd": "painterApply", "scope": "body", "note": "Ctrl+Shift+V é Colar sem Formatação no Thunderbird" },
+        { "keys": "Ctrl+Shift+N", "cmd": "style", "args": { "value": "normal" }, "scope": "body" },
+        { "keys": "Ctrl+Alt+1", "cmd": "style", "args": { "value": "h1" }, "scope": "body", "typingWins": true, "note": "Onde Ctrl+Alt+1/2/3 digita um caractere (¹ ² ³ no ABNT2, ¡ ² ³ no US-Internacional), o caractere vence" },
+        { "keys": "Ctrl+Alt+2", "cmd": "style", "args": { "value": "h2" }, "scope": "body", "typingWins": true },
+        { "keys": "Ctrl+Alt+3", "cmd": "style", "args": { "value": "h3" }, "scope": "body", "typingWins": true },
+        { "keys": "Ctrl+2", "cmd": "lineSpacing", "args": { "value": "2.0" }, "scope": "body" },
+        { "keys": "Ctrl+5", "cmd": "lineSpacing", "args": { "value": "1.5" }, "scope": "body" },
+        { "keys": "Ctrl+*", "label": "Ctrl+Shift+8", "cmd": "showMarks", "scope": "body" },
+        { "keys": "Ctrl+F1", "cmd": "collapse", "scope": "window" },
+        { "keys": "Ctrl+K", "cmd": "checkNames", "scope": "recipients", "note": "no Para, Cc e Cco, como no Outlook; no corpo, Ctrl+K continua inserindo link" }
+      ]
+    },
+    "office-ptbr": {
+      "label": "Office em português (Ctrl+N negrito, Ctrl+S sublinhado)",
+      "extends": "thunderbird-office",
+      "keys": [
+        { "keys": "Ctrl+N", "cmd": "bold", "scope": "body", "note": "substitui Nova Mensagem do Thunderbird dentro do corpo" },
+        { "keys": "Ctrl+S", "cmd": "underline", "scope": "body", "note": "substitui Salvar do Thunderbird dentro do corpo" },
+        { "keys": "Ctrl+B", "cmd": "saveDraft", "scope": "body", "note": "Salvar, como no Office em português" },
+        { "keys": "Ctrl+U", "cmd": "replace", "scope": "body", "note": "Substituir, como no Office em português" },
+        { "keys": "Ctrl+Q", "cmd": "alignLeft", "scope": "body" },
+        { "keys": "Ctrl+G", "cmd": "alignRight", "scope": "body", "note": "substitui Localizar Próxima do Thunderbird dentro do corpo" },
+        { "keys": "Ctrl+L", "cmd": "find", "scope": "body", "note": "Localizar, como no Office em português" },
+        { "keys": "Ctrl+T", "cmd": "selectAll", "scope": "body", "note": "substitui Largura Fixa do Thunderbird" },
+        { "keys": "Ctrl+R", "cmd": "redo", "scope": "body", "note": "substitui Refazer Quebra de Linhas do Thunderbird" },
+        { "keys": "Ctrl+O", "cmd": "newMessage", "scope": "window" }
+      ]
+    }
+  },
+
+  "officeReference": [
+    { "action": "Negrito", "office": "Ctrl+B", "officePtBr": "Ctrl+N", "cmd": "bold" },
+    { "action": "Itálico", "office": "Ctrl+I", "officePtBr": "Ctrl+I", "cmd": "italic" },
+    { "action": "Sublinhado", "office": "Ctrl+U", "officePtBr": "Ctrl+S", "cmd": "underline" },
+    { "action": "Centralizar", "office": "Ctrl+E", "officePtBr": "Ctrl+E", "cmd": "alignCenter" },
+    { "action": "Alinhar à esquerda", "office": "Ctrl+L", "officePtBr": "Ctrl+Q", "cmd": "alignLeft" },
+    { "action": "Alinhar à direita", "office": "Ctrl+R", "officePtBr": "Ctrl+G", "cmd": "alignRight" },
+    { "action": "Justificar", "office": "Ctrl+J", "officePtBr": "Ctrl+J", "cmd": "alignJustify" },
+    { "action": "Aumentar fonte", "office": "Ctrl+>", "officeLabel": "Ctrl+Shift+>", "officePtBr": "Ctrl+>", "cmd": "growFont" },
+    { "action": "Diminuir fonte", "office": "Ctrl+<", "officeLabel": "Ctrl+Shift+<", "officePtBr": "Ctrl+<", "cmd": "shrinkFont" },
+    { "action": "Aumentar fonte 1 pt", "office": "Ctrl+]", "officePtBr": "Ctrl+]", "cmd": null },
+    { "action": "Diminuir fonte 1 pt", "office": "Ctrl+[", "officePtBr": "Ctrl+[", "cmd": null },
+    { "action": "Aumentar recuo", "office": "Ctrl+M", "officePtBr": "Ctrl+M", "cmd": "indent" },
+    { "action": "Diminuir recuo", "office": "Ctrl+Shift+M", "officePtBr": "Ctrl+Shift+M", "cmd": "outdent" },
+    { "action": "Marcadores", "office": "Ctrl+Shift+L", "officePtBr": "Ctrl+Shift+L", "cmd": "bullets" },
+    { "action": "Limpar formatação de caractere", "office": "Ctrl+Space", "officePtBr": "Ctrl+Space", "cmd": "clearChar" },
+    { "action": "Copiar formatação", "office": "Ctrl+Shift+C", "officePtBr": "Ctrl+Shift+C", "cmd": "painterCopy" },
+    { "action": "Colar formatação", "office": "Ctrl+Shift+V", "officePtBr": "Ctrl+Shift+V", "cmd": "painterApply" },
+    { "action": "Copiar formatação (atalho da faixa)", "office": "Ctrl+Alt+C", "officePtBr": "Ctrl+Alt+C", "cmd": "painterCopy" },
+    { "action": "Colar formatação (atalho da faixa)", "office": "Ctrl+Alt+V", "officePtBr": "Ctrl+Alt+V", "cmd": "painterApply" },
+    { "action": "Inserir link", "office": "Ctrl+K", "officePtBr": "Ctrl+K", "cmd": "insertLink" },
+    { "action": "Subscrito", "office": "Ctrl+=", "officePtBr": "Ctrl+=", "cmd": "subscript" },
+    { "action": "Sobrescrito", "office": "Ctrl++", "officeLabel": "Ctrl+Shift++", "officePtBr": "Ctrl++", "cmd": "superscript" },
+    { "action": "Todas em maiúsculas", "office": "Ctrl+Shift+A", "officePtBr": "Ctrl+Shift+A", "cmd": null },
+    { "action": "Maiúsculas e minúsculas", "office": "Shift+F3", "officePtBr": "Shift+F3", "cmd": "changeCase" },
+    { "action": "Estilo Normal", "office": "Ctrl+Shift+N", "officePtBr": "Ctrl+Shift+N", "cmd": "style" },
+    { "action": "Título 1", "office": "Ctrl+Alt+1", "officePtBr": "Ctrl+Alt+1", "cmd": "style" },
+    { "action": "Espaçamento simples", "office": "Ctrl+1", "officePtBr": "Ctrl+1", "cmd": "lineSpacing" },
+    { "action": "Espaçamento duplo", "office": "Ctrl+2", "officePtBr": "Ctrl+2", "cmd": "lineSpacing" },
+    { "action": "Espaçamento 1,5", "office": "Ctrl+5", "officePtBr": "Ctrl+5", "cmd": "lineSpacing" },
+    { "action": "Mostrar marcas de formatação", "office": "Ctrl+*", "officeLabel": "Ctrl+Shift+8", "officePtBr": "Ctrl+*", "cmd": "showMarks" },
+    { "action": "Selecionar tudo", "office": "Ctrl+A", "officePtBr": "Ctrl+T", "cmd": "selectAll" },
+    { "action": "Localizar", "office": "Ctrl+F", "officePtBr": "Ctrl+L", "cmd": "find" },
+    { "action": "Substituir", "office": "Ctrl+H", "officePtBr": "Ctrl+U", "cmd": "replace" },
+    { "action": "Desfazer", "office": "Ctrl+Z", "officePtBr": "Ctrl+Z", "cmd": "undo" },
+    { "action": "Refazer", "office": "Ctrl+Y", "officePtBr": "Ctrl+R", "cmd": "redo" },
+    { "action": "Salvar", "office": "Ctrl+S", "officePtBr": "Ctrl+B", "cmd": "saveDraft" },
+    { "action": "Nova mensagem", "office": "Ctrl+N", "officePtBr": "Ctrl+O", "cmd": "newMessage" },
+    { "action": "Enviar", "office": "Ctrl+Enter", "officePtBr": "Ctrl+Enter", "cmd": "send" },
+    { "action": "Enviar (alternativo)", "office": "Alt+S", "officePtBr": "Alt+E", "cmd": null },
+    { "action": "Catálogo de endereços", "office": "Ctrl+Shift+B", "officePtBr": "Ctrl+Shift+B", "cmd": "addressBook" },
+    { "action": "Recolher a faixa", "office": "Ctrl+F1", "officePtBr": "Ctrl+F1", "cmd": "collapse" },
+    { "action": "Verificar nomes (no Para)", "office": "Ctrl+K", "officePtBr": "Ctrl+K", "cmd": "checkNames", "where": "recipients" }
+  ]
+}

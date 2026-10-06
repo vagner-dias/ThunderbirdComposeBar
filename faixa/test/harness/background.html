@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Background simulado</title>
+</head>
+<body>
+<p>background.js com uma API browser.* simulada (ver diag_test.py).</p>
+<script>
+/* O que o background pede ao Thunderbird fica em window.calls; window.managed é a
+ * política (null: sem política); window.failBrowser faz o navegador do sistema falhar. */
+"use strict";
+window.calls = [];
+window.managed = null;
+window.failBrowser = false;
+const event = () => {
+  const fns = [];
+  return { addListener: fn => fns.push(fn), fire: (...a) => Promise.all(fns.map(fn => fn(...a))) };
+};
+const store = {};
+const onChanged = event();
+const details = { priority: "normal", deliveryFormat: "auto" };
+const log = (...c) => window.calls.push(JSON.parse(JSON.stringify(c)));
+window.store = store;
+window.browser = {
+  runtime: {
+    getManifest: () => ({ name: "Faixa de Opções", version: window.manifestVersion, manifest_version: 3 }),
+    getURL: p => "moz-extension://faixa/" + p,
+    onStartup: event(),
+    onInstalled: event(),
+    openOptionsPage: async () => log("openOptionsPage"),
+  },
+  storage: {
+    managed: {
+      get: async () => {
+        if (!window.managed) throw new Error("Managed storage manifest not found");
+        return JSON.parse(JSON.stringify(window.managed));
+      },
+    },
+    local: {
+      get: async k => {
+        const keys = k == null ? Object.keys(store) : Array.isArray(k) ? k : [k];
+        return JSON.parse(JSON.stringify(Object.fromEntries(keys.filter(x => x in store).map(x => [x, store[x]]))));
+      },
+      set: async o => {
+        const changes = {};
+        for (const [k, v] of Object.entries(JSON.parse(JSON.stringify(o)))) {
+          changes[k] = { oldValue: store[k], newValue: v };
+          store[k] = v;
+        }
+        setTimeout(() => onChanged.fire(changes, "local"), 0);
+      },
+      remove: async k => {
+        delete store[k];
+        setTimeout(() => onChanged.fire({ [k]: {} }, "local"), 0);
+      },
+    },
+    onChanged,
+  },
+  faixa: {
+    onCommand: event(),
+    onComposeReady: event(),
+    configure: async config => log("configure", config),
+    setMessageState: async (tabId, state) => log("setMessageState", tabId, state),
+  },
+  compose: {
+    getComposeDetails: async () => Object.assign({}, details),
+    setComposeDetails: async (tabId, d) => {
+      Object.assign(details, d);
+      log("setComposeDetails", tabId, d);
+    },
+    beginNew: async d => {
+      log("beginNew", d);
+      return { id: 12 };
+    },
+  },
+  windows: {
+    openDefaultBrowser: async url => {
+      log("openDefaultBrowser", url);
+      if (window.failBrowser) throw new Error("sem navegador");
+    },
+    update: async (id, o) => log("windows.update", id, o),
+    getLastFocused: async () => ({ id: 3 }),
+    create: async o => log("windows.create", o.url),
+  },
+  tabs: {
+    create: async o => {
+      log("tabs.create", o.url);
+      return { id: 20, windowId: 3 };
+    },
+  },
+};
+/** Espera a fila do background (comando, gravação, aviso de mudança, nova configuração). */
+window.settle = () => new Promise(r => setTimeout(r, 60));
+window.command = async (name, args) => {
+  window.calls = [];
+  await browser.faixa.onCommand.fire(7, name, args || {});
+  await window.settle();
+  return window.calls;
+};
+fetch("../../manifest.json").then(r => r.json()).then(m => {
+  window.manifestVersion = m.version;
+  return import("../../background.js");
+}).then(() => window.settle()).then(() => { window.bgReady = true; }, e => { window.bgError = String(e); });
+</script>
+</body>
+</html>
