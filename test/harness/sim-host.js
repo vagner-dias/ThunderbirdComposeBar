@@ -11,11 +11,26 @@ var SimEditor = class {
     this.css = false;
     this.log = [];
   }
+  /** O desfazer do Gecko também guarda os atributos do <body> (tema do Alterar Estilos,
+   * fonte do corpo): o instantâneo leva os atributos e o conteúdo. */
   snap() {
-    return this.doc.body.innerHTML;
+    const body = this.doc.body;
+    return JSON.stringify([[...body.attributes].map(a => [a.name, a.value]), body.innerHTML]);
   }
-  restore(html) {
-    this.doc.body.innerHTML = html;
+  restore(s) {
+    const body = this.doc.body;
+    const [attrs, html] = JSON.parse(s);
+    for (const a of [...body.attributes]) {
+      if (!attrs.some(([n]) => n == a.name)) {
+        body.removeAttribute(a.name);
+      }
+    }
+    for (const [n, v] of attrs) {
+      if (body.getAttribute(n) !== v) {
+        body.setAttribute(n, v);
+      }
+    }
+    body.innerHTML = html;
   }
   beginTransaction() {
     if (this.depth++ == 0) this.pending = this.snap();
@@ -314,12 +329,26 @@ var FaixaSimHost = class {
       w.simComposeProcessDone(ok);
     }
   }
+  /** Área de Transferência simulada (window.simClipboard = { html, text }). */
+  readClipboard() {
+    const c = this.chromeWin.simClipboard || {};
+    return { html: c.html || "", text: c.text || "" };
+  }
   nativeCommand(cmd, focus) {
     this.nativeLog.push(cmd + (focus ? "@" + focus : ""));
     const map = { cmd_paste: "paste", cmd_cut: "cut", cmd_copy: "copy", cmd_selectAll: "selectAll" };
     if (map[cmd]) {
       this.focusEditor();
       this.editorDoc.execCommand(map[cmd]);
+    }
+    if (cmd == "cmd_pasteNoFormatting" && this.chromeWin.simClipboard) {
+      // Como o Colar sem Formatação do Thunderbird: o texto, com a formatação do cursor.
+      this.editor.beginTransaction();
+      try {
+        this.editorDoc.execCommand("insertText", false, this.chromeWin.simClipboard.text || "");
+      } finally {
+        this.editor.endTransaction();
+      }
     }
     if (/^cmd_(InsertRow|InsertColumn|DeleteRow|DeleteColumn|DeleteTable)/.test(cmd)) {
       this.simTableCommand(cmd);

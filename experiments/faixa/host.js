@@ -454,6 +454,69 @@ var FaixaTBHost = class {
     return true;
   }
 
+  /** Área de Transferência para Mesclar Formatação: { html, text }. O HTML vem como o editor
+   * do Gecko o lê ao colar (HTMLEditor::InsertFromTransferableAtSelection): o CF_HTML do
+   * Windows (só o trecho entre StartFragment e EndFragment) ou o text/html dos outros
+   * sistemas. Sem HTML, o texto. */
+  readClipboard() {
+    const out = { html: "", text: "" };
+    const win = this.chromeWin;
+    // Como o Firefox lê a Área de Transferência: com o contexto da janela que pede.
+    let loadContext = null;
+    let windowContext = null;
+    try {
+      loadContext = win.docShell.QueryInterface(Ci.nsILoadContext);
+      windowContext = win.browsingContext.currentWindowContext;
+    } catch (e) {}
+    const read = flavors => {
+      const trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
+      trans.init(loadContext);
+      for (const f of flavors) {
+        trans.addDataFlavor(f);
+      }
+      Services.clipboard.getData(trans, Ci.nsIClipboard.kGlobalClipboard, windowContext);
+      const flavor = {};
+      const data = {};
+      trans.getAnyTransferData(flavor, data);
+      return { flavor: flavor.value, data: data.value };
+    };
+    const asString = d => {
+      for (const iface of [Ci.nsISupportsString, Ci.nsISupportsCString]) {
+        try {
+          return { text: d.QueryInterface(iface).data, bytes: iface == Ci.nsISupportsCString };
+        } catch (e) {}
+      }
+      return { text: "", bytes: false };
+    };
+    const utf8 = s => new win.TextDecoder("utf-8").decode(Uint8Array.from(s, c => c.charCodeAt(0) & 0xff));
+    try {
+      const { flavor, data } = read(["application/x-moz-nativehtml", "text/html"]);
+      const got = asString(data);
+      let html = got.text;
+      if (flavor == "application/x-moz-nativehtml") {
+        // CF_HTML: UTF-8, com os deslocamentos (em bytes) do trecho copiado no cabeçalho.
+        const num = name => {
+          const m = html.match(new RegExp(name + ":(-?\\d+)"));
+          return m ? parseInt(m[1], 10) : -1;
+        };
+        const start = num("StartFragment");
+        const end = num("EndFragment");
+        html = utf8(start >= 0 && end > start ? html.slice(start, end) : html);
+      } else if (got.bytes) {
+        html = utf8(html);
+      }
+      out.html = html;
+    } catch (e) {
+      // Nada em HTML na Área de Transferência.
+    }
+    if (!out.html) {
+      try {
+        out.text = asString(read(["text/plain"]).data).text;
+      } catch (e) {}
+    }
+    return out;
+  }
+
   /** O comando do corpo da mensagem está disponível agora? Pergunta ao controlador do
    * editor, como o menu Tabela do Thunderbird (Mesclar Células precisa de uma célula à
    * direita ou de várias selecionadas; Dividir, de uma célula mesclada). */

@@ -12,6 +12,15 @@ var FAIXA_NS_SVG = "http://www.w3.org/2000/svg";
 /* Visualização Dinâmica: espera (ms) com o mouse ou o foco num item antes de mostrar. */
 var FAIXA_PREVIEW_DELAY = 150;
 
+/* Bordas, como os ícones do Word: o quadrado pontilhado com as bordas escolhidas cheias. */
+var FAIXA_BORDER_DOTS = { "stroke-dasharray": "0 3" };
+var FAIXA_BORDER_BOX = "M3 3h18v18H3z";
+var FAIXA_BORDER_CROSS = "M12 3v18M3 12h18";
+var faixaBorderIcon = (dotted, solid) => [
+  ...dotted.map(d => ["path", Object.assign({ d }, FAIXA_BORDER_DOTS)]),
+  ...solid.map(d => ["path", { d }]),
+];
+
 /* Ícones que não vieram do sprite do mockup. */
 var FAIXA_EXTRA_ICONS = {
   ellipsis: [
@@ -19,6 +28,14 @@ var FAIXA_EXTRA_ICONS = {
     ["circle", { cx: "12", cy: "12", r: "1" }],
     ["circle", { cx: "19", cy: "12", r: "1" }],
   ],
+  "border-bottom": faixaBorderIcon([FAIXA_BORDER_BOX], ["M3 21h18"]),
+  "border-top": faixaBorderIcon([FAIXA_BORDER_BOX], ["M3 3h18"]),
+  "border-left": faixaBorderIcon([FAIXA_BORDER_BOX], ["M3 3v18"]),
+  "border-right": faixaBorderIcon([FAIXA_BORDER_BOX], ["M21 3v18"]),
+  "border-none": faixaBorderIcon([FAIXA_BORDER_BOX, FAIXA_BORDER_CROSS], []),
+  "border-all": faixaBorderIcon([], [FAIXA_BORDER_BOX, FAIXA_BORDER_CROSS]),
+  "border-outside": faixaBorderIcon([FAIXA_BORDER_CROSS], [FAIXA_BORDER_BOX]),
+  "border-inside-h": faixaBorderIcon([FAIXA_BORDER_BOX, "M12 3v18"], ["M3 12h18"]),
 };
 
 /* ---------------------------------------------------------------------------
@@ -153,6 +170,14 @@ var FaixaI18n = {
         d.officeReference[i].action = action;
       }
     });
+    // Alterar Estilos: "colors.blue" → o nome do tema de cores Azul, e assim por diante.
+    for (const [key, text] of Object.entries(overlay.changeStyles || {})) {
+      const [section, id] = key.split(".");
+      const item = d.changeStyles && (d.changeStyles[section] || []).find(o => o.id == id);
+      if (item) {
+        item.label = text;
+      }
+    }
     return d;
   },
 };
@@ -526,6 +551,16 @@ var FaixaUI = class {
       svg.append(node);
     }
     return svg;
+  }
+
+  /** Definição efetiva: a da faixa com o tema da mensagem (Alterar Estilos), que o motor
+   * manda no estado (theme). Sem motor ainda, o tema padrão. */
+  get def() {
+    return FaixaThemes.apply(this.baseDef, this.state && this.state.theme);
+  }
+
+  set def(definition) {
+    this.baseDef = definition;
   }
 
   meta(cmd) {
@@ -983,7 +1018,10 @@ var FaixaUI = class {
     const b = this.h("button", { class: "fx-icon", type: "button", "aria-label": meta.label });
     b.append(this.icon(meta.icon));
     this.bindButton(b, item.cmd);
-    const arrow = this.h("button", { class: "fx-arrow", type: "button", "aria-label": this.menuTitle(meta.menu) || meta.label, "aria-haspopup": "menu" });
+    // A seta tem nome próprio: o título do menu ("Biblioteca de Marcadores") ou, sem
+    // título, "Mais opções de Bordas"; o nome do botão sozinho repetiria o do lado.
+    const arrowLabel = this.menuTitle(meta.menu) || FaixaI18n.t("ribbon.moreOf", "Mais opções de {name}", { name: meta.label });
+    const arrow = this.h("button", { class: "fx-arrow", type: "button", "aria-label": arrowLabel, "aria-haspopup": "menu" });
     arrow.append(this.icon("chevron-down", "fx-chev"));
     this.bindMenu(arrow, () => this.def.menus[meta.menu], { icons: true });
     wrap.append(b, arrow);
@@ -1123,14 +1161,7 @@ var FaixaUI = class {
   makeStyleTile(style) {
     const t = this.h("button", { class: "fx-tile", type: "button", role: "option", "aria-label": style.label, "data-style": style.id });
     const prev = this.h("span", { class: "fx-tprev", text: "AaBbCc" });
-    if (style.preview) {
-      for (const decl of style.preview.split(";")) {
-        const i = decl.indexOf(":");
-        if (i > 0) {
-          prev.style.setProperty(decl.slice(0, i).trim(), decl.slice(i + 1).trim());
-        }
-      }
-    }
+    this.applyPreviewCss(prev, style.preview);
     t.append(prev, this.h("span", { class: "fx-tname", text: style.label }));
     t.addEventListener("click", e => {
       if (!t.disabled) {
@@ -1520,8 +1551,33 @@ var FaixaUI = class {
   /* ---------- estado ---------- */
 
   setState(state) {
+    const theme = this.state.theme || "";
     this.state = Object.assign({}, this.state, state);
+    if ((this.state.theme || "") != theme) {
+      this.refreshStyleTiles();
+    }
     this.updateControls();
+  }
+
+  /** As amostras da galeria de estilos com o tema atual (Alterar Estilos, Ctrl+Z, rascunho). */
+  refreshStyleTiles() {
+    for (const t of this.galleryTiles || []) {
+      const style = this.def.styles.find(st => st.id == t.getAttribute("data-style"));
+      const prev = t.querySelector(".fx-tprev");
+      if (style && prev) {
+        prev.removeAttribute("style");
+        this.applyPreviewCss(prev, style.preview);
+      }
+    }
+  }
+
+  applyPreviewCss(el, css) {
+    for (const decl of String(css || "").split(";")) {
+      const i = decl.indexOf(":");
+      if (i > 0) {
+        el.style.setProperty(decl.slice(0, i).trim(), decl.slice(i + 1).trim());
+      }
+    }
   }
 
   isEnabled(cmd) {
@@ -1600,6 +1656,14 @@ var FaixaUI = class {
           }
           if (meta.pressed) {
             c.el.setAttribute("aria-pressed", this.matches(meta.pressed) ? "true" : "false");
+          }
+          // Ícone que segue o estado (Bordas mostra a borda que o botão repete).
+          if (meta.iconBy && c.el.classList.contains("fx-icon")) {
+            const name = meta.iconBy.icons[s[meta.iconBy.state]] || meta.icon;
+            if (c.iconName != name) {
+              c.iconName = name;
+              c.el.replaceChildren(this.icon(name));
+            }
           }
           break;
         }
@@ -2106,6 +2170,8 @@ var FaixaUI = class {
 
   customPart(kind, anchor) {
     switch (kind) {
+      case "changeStyles":
+        return this.changeStylesPart(anchor);
       case "tableGrid":
         return this.tableGrid(anchor);
       case "emojiGrid":
@@ -2114,6 +2180,63 @@ var FaixaUI = class {
         return this.glyphGrid(anchor, "insertSymbol", [{ items: this.symbolList() }], false);
     }
     return null;
+  }
+
+  /** Alterar Estilos: as quatro partes do tema lado a lado, como os submenus do Outlook:
+   * Conjunto de Estilos, Cores (com as cores de cada tema), Fontes (o nome na fonte dos
+   * títulos, e as duas fontes embaixo) e Espaçamento entre Parágrafos (com os valores). A
+   * escolha da mensagem vem marcada. As setas andam pela grade. */
+  changeStylesPart(anchor) {
+    const t = FaixaI18n.t.bind(FaixaI18n);
+    const cs = this.def.changeStyles || {};
+    const theme = this.def.theme || {};
+    const state = theme.state || {};
+    const enabled = this.isEnabled("changeStyles");
+    const box = this.h("div", { class: "fx-csgrid" });
+    const column = (part, head, items, extra) => {
+      const col = this.h("div", { class: "fx-cscol", role: "group", "aria-label": head });
+      col.append(this.h("div", { class: "fx-mhead", text: head }));
+      for (const [i, o] of (items || []).entries()) {
+        const more = extra ? extra(o, i) : {};
+        const b = this.menuItem(Object.assign({
+          label: o.label,
+          checked: state[part] == o.id,
+          disabled: !enabled,
+          onPick: () => this.onCommand("changeStyles", { part, id: o.id }, { source: anchor }),
+        }, more));
+        if (more.strip) {
+          b.querySelector(".fx-mlab").before(more.strip);
+        }
+        col.append(b);
+      }
+      box.append(col);
+    };
+    column("set", t("changeStyles.set", "Conjunto de Estilos"), cs.styleSets);
+    column("colors", t("changeStyles.colors", "Cores"), cs.colors, o => {
+      const strip = this.h("span", { class: "fx-csstrip", "aria-hidden": "true" });
+      for (const c of (o.colors || []).slice(2)) {
+        strip.append(this.h("i", { style: { background: c } }));
+      }
+      return { strip };
+    });
+    // As do Office (o padrão) deixam o corpo na fonte padrão das Opções da Faixa.
+    const defaultBody = (this.config.fontePadrao && this.config.fontePadrao.familia) || "";
+    column("fonts", t("changeStyles.fonts", "Fontes"), cs.fonts, (o, i) => ({
+      labelStyle: FaixaThemes.fontStack(o.major, this.def.fontFallbacks),
+      sub: t("changeStyles.fontPair", "Títulos: {major} · Corpo: {minor}", { major: o.major, minor: (i == 0 && defaultBody) || o.minor }),
+    }));
+    column("spacing", t("changeStyles.spacing", "Espaçamento entre Parágrafos"), cs.spacing, o => {
+      if (o.after == null) {
+        return { sub: t("changeStyles.spacingDefault", "Como nas Opções da Faixa") };
+      }
+      return {
+        sub: t("changeStyles.spacingValues", "Depois: {after} pt · Entre linhas: {line}", {
+          after: FaixaI18n.num(o.after),
+          line: FaixaI18n.num(o.line ? (o.line == 1.15 ? "1.15" : Number(o.line).toFixed(1)) : "1.0"),
+        }),
+      };
+    });
+    return box;
   }
 
   /** Escolha feita numa grade (clique ou Enter): fecha o menu e, pelo teclado, devolve
@@ -2265,7 +2388,9 @@ var FaixaUI = class {
       return;
     }
     const p = palettes.font;
-    frag.append(this.menuItem({ label: p.automatic, onPick: () => pick(null), preview: { cmd, args: { value: null } } }));
+    // Cor da Fonte começa por Automático; Sombreamento, por Sem Cor (como no Word).
+    const none = meta.palette == "shading" ? (palettes.shading || {}).none || p.automatic : p.automatic;
+    frag.append(this.menuItem({ label: none, onPick: () => pick(null), preview: { cmd, args: { value: null } } }));
     frag.append(this.h("div", { class: "fx-mhead", text: FaixaI18n.t("color.theme", "Cores do Tema") }));
     const tgrid = this.h("div", { class: "fx-tgrid" });
     p.theme.forEach((row, i) => {

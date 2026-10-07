@@ -62,6 +62,30 @@ var FAIXA_SHEETS = {
   preview: "::highlight(faixa-preview) { background-color: rgba(120, 120, 120, 0.3); }",
 };
 
+/* Parágrafos do autor (fora de citação, encaminhada e assinatura), para as folhas abaixo. */
+var FAIXA_OWN_P = 'p:not(:is(blockquote[type="cite"], .moz-forward-container, .moz-signature) p)';
+
+/** Lista de Vários Níveis: a numeração de cada nível de dentro (o primeiro fica no style da
+ * lista). Só na tela: no envio, normalizeForSend escreve a de cada nível no style dela. */
+function faixaMultilevelSheet(schemes) {
+  const rules = [];
+  for (const s of schemes || []) {
+    for (let depth = 1; depth < 9; depth++) {
+      const sel = ':is(ol, ul)[data-faixa-ml="' + s.id + '"]' + " :is(ol, ul)".repeat(depth);
+      rules.push(sel + " { list-style-type: " + s.levels[depth % s.levels.length] + "; }");
+    }
+  }
+  return rules.join("\n");
+}
+
+/** Espaçamento entre Parágrafos (Alterar Estilos): o espaço depois e as linhas dos
+ * parágrafos do autor que não têm o seu próprio. Só na tela, como a folha paragraph; no
+ * envio, normalizeForSend escreve os valores em cada parágrafo. */
+function faixaSpacingSheet(sp) {
+  const line = sp.line ? " line-height: " + sp.line + ";" : "";
+  return "html > body " + FAIXA_OWN_P + " { margin-block: 0 " + (sp.after || 0) + "pt;" + line + " }";
+}
+
 var FaixaEngine = class {
   /** Formato copiado pelo pincel: vale entre janelas de composição. */
   static painterClipboard = null;
@@ -91,6 +115,37 @@ var FaixaEngine = class {
 
   get editor() {
     return this.host.editor;
+  }
+
+  /** Definição efetiva: a da faixa com o tema que a mensagem guarda (Alterar Estilos). */
+  get def() {
+    return FaixaThemes.apply(this.baseDef, this.themeValue());
+  }
+
+  set def(definition) {
+    this.baseDef = definition;
+  }
+
+  /** Tema guardado na mensagem (data-faixa-estilos do <body>); "" sem escolha. */
+  themeValue() {
+    const doc = this.host.editorDoc;
+    const body = doc && doc.body;
+    return (body && body.getAttribute(FAIXA_THEME_ATTR)) || "";
+  }
+
+  /** A folha do Espaçamento entre Parágrafos segue o tema guardado na mensagem (também
+   * depois de um Ctrl+Z ou num rascunho aberto de novo). */
+  syncThemeSheet() {
+    const value = this.themeValue();
+    if (value == this.sheetTheme || !this.host.isHTML()) {
+      return;
+    }
+    this.sheetTheme = value;
+    const sp = this.def.theme ? this.def.theme.spacing : null;
+    this.host.removeAgentSheet("spacing");
+    if (sp && sp.after != null) {
+      this.host.loadAgentSheet("spacing", faixaSpacingSheet(sp));
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -126,8 +181,10 @@ var FaixaEngine = class {
       if (this.config.paragrafoSemEspaco !== false) {
         this.host.loadAgentSheet("paragraph", FAIXA_SHEETS.paragraph);
       }
+      this.host.loadAgentSheet("lists", faixaMultilevelSheet(this.def.multilevelLists));
       this.applyDefaultFont();
       this.applyParagraphMode(true);
+      this.syncThemeSheet();
     }
     // A API compose (ou outro complemento) pode trocar o <body> inteiro depois
     // que o editor fica pronto: reaplica a fonte padrão no corpo novo.
@@ -160,7 +217,7 @@ var FaixaEngine = class {
         d();
       } catch (e) {}
     }
-    for (const id of ["paragraph", "painter", "marks", "preview"]) {
+    for (const id of ["paragraph", "painter", "marks", "preview", "lists", "spacing"]) {
       try {
         this.host.removeAgentSheet(id);
       } catch (e) {}
@@ -330,6 +387,7 @@ var FaixaEngine = class {
     }
     let s;
     try {
+      this.syncThemeSheet();
       s = this.computeState();
     } catch (e) {
       this.lastError = e;
@@ -358,6 +416,8 @@ var FaixaEngine = class {
       canUndo: !!(ed && ed.canUndo),
       canRedo: !!(ed && ed.canRedo),
       hasSelection: false,
+      // A borda que o botão Bordas repete (a última escolhida no menu).
+      lastBorder: this.lastBorder || "bottom",
     };
     const sel = doc && doc.getSelection();
     const range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
@@ -400,6 +460,7 @@ var FaixaEngine = class {
     s.inTable = !!table && doc.body.contains(table);
     s.inCell = s.inTable && !!el.closest("td, th");
     s.lineSpacing = this.lineSpacingOf(block);
+    s.theme = this.themeValue();
     const isBody = block == doc.body;
     s.spaceBefore = !isBody && parseFloat(bcs.marginTop) > 0.1;
     s.spaceAfter = !isBody && parseFloat(bcs.marginBottom) > 0.1;
@@ -440,8 +501,10 @@ var FaixaEngine = class {
     }
   }
 
-  matchStyle(block) {
-    const styles = (this.def.styles || []).filter(st => st.kind != "char");
+  /** Estilo de parágrafo do bloco (pela marca e pelo que o estilo põe no style). styles:
+   * os estilos de um tema (o Alterar Estilos reconhece os do tema anterior). */
+  matchStyle(block, styleList = this.def.styles) {
+    const styles = (styleList || []).filter(st => st.kind != "char");
     const tag = block.localName == "div" || block.localName == "body" ? "p" : block.localName;
     const cs = this.win.getComputedStyle(block);
     const props = {
@@ -623,13 +686,26 @@ var FaixaEngine = class {
     };
   }
 
-  /** Blocos (os mais internos) tocados pela seleção. */
+  /** Blocos (os mais internos) tocados pela seleção, em todos os trechos dela (Selecionar
+   * Texto com Formatação Semelhante deixa vários). */
   blocksInSelection() {
     const sel = this.doc.getSelection();
     if (!sel.rangeCount) {
       return [];
     }
-    const range = sel.getRangeAt(0);
+    if (sel.rangeCount == 1) {
+      return this.blocksInRange(sel.getRangeAt(0));
+    }
+    const seen = new Set();
+    for (let i = 0; i < sel.rangeCount; i++) {
+      for (const b of this.blocksInRange(sel.getRangeAt(i))) {
+        seen.add(b);
+      }
+    }
+    return [...seen];
+  }
+
+  blocksInRange(range) {
     const first = this.blockOf(range.startContainer);
     if (range.collapsed) {
       return first ? [first] : [];
@@ -757,22 +833,7 @@ var FaixaEngine = class {
   }
 
   fontStack(name) {
-    const clean = String(name || "").trim();
-    if (!clean) {
-      return clean;
-    }
-    if (clean.includes(",")) {
-      return clean;
-    }
-    const map = this.def.fontFallbacks || {};
-    const fallback = map[clean] || map["*"] || "sans-serif";
-    const quoted = /[^\w-]/.test(clean) ? '"' + clean.replace(/"/g, "") + '"' : clean;
-    const rest = fallback
-      .split(",")
-      .map(f => f.trim())
-      .filter(f => f && f.toLowerCase() != clean.toLowerCase())
-      .map(f => (/[^\w-]/.test(f) && !/^["']/.test(f) ? '"' + f + '"' : f));
-    return [quoted, ...rest].join(", ");
+    return FaixaThemes.fontStack(name, this.def.fontFallbacks);
   }
 
   /* ------------------------------------------------------------------ */
@@ -832,6 +893,20 @@ var FaixaEngine = class {
         return this.setAlign("justify");
       case "lineSpacing":
         return this.setLineSpacing(args.value);
+      case "shading":
+        return this.setShading(args.value);
+      case "borders":
+        return this.setBorders(args.side);
+      case "multilevel":
+        return this.setMultilevel(args.scheme);
+      case "sort":
+        return this.sortParagraphs(args);
+      case "selectSimilar":
+        return this.selectSimilar();
+      case "mergeFormatting":
+        return this.pasteMerged(args);
+      case "changeStyles":
+        return this.changeStyles(args.part, args.id);
       case "style":
         return this.applyStyle(args.value);
       case "insertTable":
@@ -945,6 +1020,778 @@ var FaixaEngine = class {
         }
       }
     });
+  }
+
+  /* ---------- sombreamento e bordas ---------- */
+
+  /** Blocos da seleção que recebem sombreamento e bordas: parágrafos do autor e, se pedido,
+   * células e itens de lista. Nunca citação, encaminhada, assinatura ou o corpo. */
+  ownParagraphBlocks({ cells = false, items = false } = {}) {
+    const body = this.doc.body;
+    return this.blocksInSelection().filter(b => b != body && !b.closest(FAIXA_FOREIGN) && !b.classList.contains("moz-cite-prefix") &&
+      (this.isParagraph(b) || (cells && (b.localName == "td" || b.localName == "th")) || (items && b.localName == "li")));
+  }
+
+  flashForeign() {
+    if (this.host.flash) {
+      this.host.flash(FaixaI18n.t("styles.foreign", "Citação, mensagem encaminhada e assinatura mantêm a formatação original."));
+    }
+  }
+
+  /** O sombreamento vale para o parágrafo (cursor parado, parágrafos inteiros) ou só para
+   * o texto selecionado? */
+  shadingTarget() {
+    const sel = this.doc.getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) {
+      return "paragraph";
+    }
+    for (let i = 0; i < sel.rangeCount; i++) {
+      if (!this.coversWholeBlocks(sel.getRangeAt(i))) {
+        return "text";
+      }
+    }
+    return "paragraph";
+  }
+
+  /** Sombreamento, como no Word: com o cursor parado ou parágrafos inteiros selecionados,
+   * o fundo do parágrafo (também de itens de lista e células); com só uma parte do texto,
+   * o fundo desse texto, como o realce, em qualquer cor. Sem Cor tira. Um Ctrl+Z desfaz. */
+  setShading(value) {
+    if (!this.doc.getSelection().rangeCount) {
+      return;
+    }
+    if (this.shadingTarget() == "text") {
+      this.setColor("hiliteColor", value);
+      return;
+    }
+    const blocks = this.ownParagraphBlocks({ cells: true, items: true });
+    if (!blocks.length) {
+      this.flashForeign();
+      return;
+    }
+    this.tx(() => {
+      for (const b of blocks) {
+        this.setStyleProps(b, { "background-color": value || null });
+        if (!value && b.hasAttribute("bgcolor")) {
+          this.editor.removeAttribute(b, "bgcolor");
+        }
+      }
+    });
+  }
+
+  /** Parágrafos que recebem bordas (fora de listas, tabelas, citação e assinatura). */
+  borderBlocks() {
+    return this.ownParagraphBlocks();
+  }
+
+  /** Bordas que o grupo de parágrafos tem, como o menu Bordas do Word mostra: em cima do
+   * primeiro, embaixo do último, dos lados de todos e entre eles. */
+  bordersOf(blocks) {
+    const has = (b, edge) => {
+      const cs = this.win.getComputedStyle(b);
+      return cs.getPropertyValue("border-" + edge + "-style") != "none" && parseFloat(cs.getPropertyValue("border-" + edge + "-width")) > 0;
+    };
+    const first = blocks[0];
+    const last = blocks[blocks.length - 1];
+    const s = {
+      borderTop: !!first && has(first, "top"),
+      borderBottom: !!last && has(last, "bottom"),
+      borderLeft: blocks.length > 0 && blocks.every(b => has(b, "left")),
+      borderRight: blocks.length > 0 && blocks.every(b => has(b, "right")),
+      borderInsideH: blocks.length > 1 && blocks.slice(1).every(b => has(b, "top")),
+    };
+    s.borderOutside = s.borderTop && s.borderBottom && s.borderLeft && s.borderRight;
+    s.borderAll = s.borderOutside && (blocks.length == 1 || s.borderInsideH);
+    return s;
+  }
+
+  /** Bordas, como no Word: Inferior e Superior valem para o grupo de parágrafos (embaixo do
+   * último, em cima do primeiro), Esquerda e Direita para todos, Externas em volta do grupo,
+   * Horizontal Interna entre os parágrafos e Todas as Bordas para tudo isso. Cada uma liga
+   * e desliga; o botão repete a última escolha. Linha fina preta, com um pouco de espaço
+   * entre o texto e a borda. Um Ctrl+Z desfaz. */
+  setBorders(side) {
+    const which = ["bottom", "top", "left", "right", "none", "all", "outside", "insideH"].includes(side) ? side : this.lastBorder || "bottom";
+    this.lastBorder = which;
+    const blocks = this.borderBlocks();
+    if (!blocks.length) {
+      if (this.host.flash) {
+        this.host.flash(FaixaI18n.t("borders.none", "As bordas valem para os parágrafos do texto, fora de listas, tabelas, citação e assinatura."));
+      }
+      return;
+    }
+    const st = this.bordersOf(blocks);
+    const first = blocks[0];
+    const last = blocks[blocks.length - 1];
+    const ops = [];
+    const set = (b, edge, on) => ops.push([b, edge, on]);
+    const clear = () => blocks.forEach(b => ["top", "bottom", "left", "right"].forEach(e => set(b, e, false)));
+    switch (which) {
+      case "bottom":
+        set(last, "bottom", !st.borderBottom);
+        break;
+      case "top":
+        set(first, "top", !st.borderTop);
+        break;
+      case "left":
+      case "right": {
+        const on = !st[which == "left" ? "borderLeft" : "borderRight"];
+        blocks.forEach(b => set(b, which, on));
+        break;
+      }
+      case "insideH":
+        blocks.slice(1).forEach(b => set(b, "top", !st.borderInsideH));
+        break;
+      case "outside": {
+        const on = !st.borderOutside;
+        set(first, "top", on);
+        set(last, "bottom", on);
+        blocks.forEach(b => {
+          set(b, "left", on);
+          set(b, "right", on);
+        });
+        break;
+      }
+      case "all":
+        if (st.borderAll) {
+          clear();
+        } else {
+          blocks.forEach(b => {
+            set(b, "top", true);
+            set(b, "left", true);
+            set(b, "right", true);
+            set(b, "bottom", b == last);
+          });
+        }
+        break;
+      case "none":
+        clear();
+        break;
+    }
+    this.tx(() => {
+      for (const [b, edge, on] of ops) {
+        this.setBorder(b, edge, on);
+      }
+    });
+  }
+
+  /** Uma borda de um parágrafo, com o espaço até o texto (1 pt em cima e embaixo, 4 pt dos
+   * lados, como no Word). Tirando a borda, sai também esse espaço. */
+  setBorder(block, edge, on) {
+    const pad = edge == "top" || edge == "bottom" ? "1pt" : "4pt";
+    if (on) {
+      this.setStyleProps(block, { ["border-" + edge]: "1px solid #000000", ["padding-" + edge]: pad });
+      return;
+    }
+    const props = { ["border-" + edge]: null };
+    if (block.style.getPropertyValue("padding-" + edge) == pad) {
+      props["padding-" + edge] = null;
+    }
+    this.setStyleProps(block, props);
+  }
+
+  /** O que os menus mostram marcado (Bordas, Lista de Vários Níveis). Lido só quando um menu
+   * abre: com uma seleção grande, ler as bordas de cada parágrafo a cada tecla custaria. */
+  menuState() {
+    const out = { multilevel: null };
+    try {
+      Object.assign(out, this.bordersOf(this.borderBlocks()));
+      const sel = this.doc.getSelection();
+      const el = sel && sel.rangeCount ? this.elementOf(sel.getRangeAt(0).startContainer) : null;
+      const list = el && el.closest("ol, ul");
+      const root = list ? this.multilevelRoot(list) : null;
+      out.multilevel = root ? root.getAttribute("data-faixa-ml") : null;
+    } catch (e) {
+      this.lastError = e;
+    }
+    return out;
+  }
+
+  /* ---------- lista de vários níveis ---------- */
+
+  /** A lista de vários níveis (com data-faixa-ml) que contém a lista dada, ou null. */
+  multilevelRoot(list) {
+    const root = list.closest("ol[data-faixa-ml], ul[data-faixa-ml]");
+    return root && this.doc.body.contains(root) ? root : null;
+  }
+
+  /** A lista mais de fora que contém a lista dada. */
+  outerList(list) {
+    let root = list;
+    for (let p = list.parentElement; p && p != this.doc.body; p = p.parentElement) {
+      if (p.localName == "ol" || p.localName == "ul") {
+        root = p;
+      }
+    }
+    return root;
+  }
+
+  /** Lista de Vários Níveis, como no Word: os parágrafos viram lista (ou a lista do cursor,
+   * inteira, muda) e cada nível tem a sua numeração (1. → a. → i.). Aumentar e Diminuir
+   * Recuo mudam o nível do item. A lista guarda o esquema em data-faixa-ml: o primeiro nível
+   * vai no style dela; os de dentro aparecem pela folha lists e vão no style de cada lista
+   * no envio. Marcadores ↔ numeração trocam a marca das listas (ul ↔ ol). Um Ctrl+Z desfaz. */
+  setMultilevel(id) {
+    const scheme = (this.def.multilevelLists || []).find(s => s.id == id);
+    const sel = this.doc.getSelection();
+    if (!scheme || !sel.rangeCount) {
+      return;
+    }
+    const listAt = () => {
+      const el = sel.rangeCount ? this.elementOf(sel.getRangeAt(0).startContainer) : null;
+      const list = el && el.closest("ol, ul");
+      return list && this.doc.body.contains(list) ? list : null;
+    };
+    this.tx(() => {
+      let list = listAt();
+      if (!list) {
+        this.exec(scheme.tag == "ul" ? "insertUnorderedList" : "insertOrderedList");
+        list = listAt();
+        if (!list) {
+          return;
+        }
+      }
+      let root = this.multilevelRoot(list) || this.outerList(list);
+      const other = [root, ...root.querySelectorAll("ol, ul")].filter(l => l.localName != scheme.tag);
+      if (other.length) {
+        const mark = this.bookmark();
+        for (const l of other) {
+          const fresh = this.retagList(l, scheme.tag);
+          if (l == root) {
+            root = fresh;
+          }
+        }
+        this.restoreBookmark(mark, new Map(), true);
+      }
+      const plain = scheme.tag == "ul" ? "disc" : "decimal";
+      this.setStyleProps(root, { "list-style-type": scheme.levels[0] == plain ? null : scheme.levels[0] });
+      for (const inner of root.querySelectorAll("ol, ul")) {
+        this.setStyleProps(inner, { "list-style-type": null });
+        if (inner.hasAttribute("data-faixa-ml")) {
+          this.editor.removeAttribute(inner, "data-faixa-ml");
+        }
+      }
+      if (root.getAttribute("data-faixa-ml") != scheme.id) {
+        this.editor.setAttribute(root, "data-faixa-ml", scheme.id);
+      }
+    });
+  }
+
+  /** Troca a marca de uma lista (ul ↔ ol) pelo editor: os itens passam para a lista nova,
+   * com os mesmos atributos (menos start e type, que são da marca antiga). */
+  retagList(list, tag) {
+    const ed = this.editor;
+    const fresh = this.doc.createElement(tag);
+    for (const { name, value } of [...list.attributes]) {
+      if (name != "start" && name != "type") {
+        fresh.setAttribute(name, value);
+      }
+    }
+    const parent = list.parentNode;
+    ed.insertNode(fresh, parent, Array.prototype.indexOf.call(parent.childNodes, list), true);
+    let i = 0;
+    for (const child of [...list.childNodes]) {
+      ed.deleteNode(child, true);
+      ed.insertNode(child, fresh, i++, true);
+    }
+    ed.deleteNode(list, true);
+    return fresh;
+  }
+
+  /* ---------- classificar ---------- */
+
+  /** O que Classificar ordena: com o cursor numa lista, os itens dela; com seleção, os itens
+   * da lista selecionados (cada um com as listas de dentro) ou os parágrafos selecionados,
+   * que precisam estar lado a lado, no mesmo bloco. Citação, encaminhada e assinatura ficam
+   * de fora. Devolve { units, parent } ou { error } (texto para o usuário). */
+  sortTargets() {
+    const t = FaixaI18n.t.bind(FaixaI18n);
+    const doc = this.doc;
+    const body = doc && doc.body;
+    const sel = doc && doc.getSelection();
+    const none = { error: t("sort.select", "Selecione os parágrafos ou os itens de lista que você quer classificar.") };
+    if (!body || !sel || !sel.rangeCount) {
+      return none;
+    }
+    const range = sel.getRangeAt(0);
+    const startEl = this.elementOf(range.startContainer, range);
+    const endEl = this.elementOf(range.endContainer, range);
+    const startLi = startEl && startEl.closest("li");
+    let units = null;
+    if (sel.isCollapsed) {
+      if (startLi && body.contains(startLi)) {
+        units = [...startLi.parentElement.children].filter(c => c.localName == "li");
+      }
+    } else if (startLi || (endEl && endEl.closest("li"))) {
+      // A lista mais de dentro que tem o começo e o fim da seleção: os itens dela que a
+      // seleção toca (fim no começo de um item, como no clique triplo, não conta).
+      let list = (startLi || endEl.closest("li")).parentElement;
+      while (list && !(list.contains(range.startContainer) && list.contains(range.endContainer))) {
+        list = list.parentElement && list.parentElement.closest("ol, ul");
+      }
+      if (list && body.contains(list)) {
+        units = [...list.children].filter(li => li.localName == "li" && range.intersectsNode(li) &&
+          !(li.contains(range.endContainer) && !li.contains(range.startContainer) && this.textOffset(li, range.endContainer, range.endOffset) == 0));
+      }
+    }
+    if (!units) {
+      units = this.blocksInSelection();
+    }
+    units = units.filter(u => u != body && !u.closest(FAIXA_FOREIGN) && !u.classList.contains("moz-cite-prefix") && (u.localName == "li" || this.isParagraph(u)));
+    if (units.length < 2) {
+      return none;
+    }
+    const parent = units[0].parentNode;
+    if (units.some(u => u.parentNode != parent)) {
+      return { error: t("sort.mixed", "Classificar ordena parágrafos seguidos ou itens da mesma lista. Selecione só um desses grupos.") };
+    }
+    return { units, parent };
+  }
+
+  /** Classificar Texto, como no Word: os parágrafos ou itens em ordem crescente ou
+   * decrescente, pelo texto (sem diferenciar maiúsculas e acentos), pelo primeiro número
+   * ou pela primeira data de cada um. O que não tem número ou data vai para o fim; os vazios
+   * ficam onde estão. Cada item leva junto a formatação e as listas de dentro. A seleção
+   * fica nos itens classificados. Um Ctrl+Z desfaz. Devolve { count } ou { error }. */
+  sortParagraphs({ type = "text", order = "asc" } = {}) {
+    const target = this.sortTargets();
+    if (target.error) {
+      return target;
+    }
+    const { units, parent } = target;
+    const locale = FaixaI18n.locale;
+    const collator = new Intl.Collator(locale, { sensitivity: "base" });
+    const items = units.map(u => {
+      const text = this.sortText(u);
+      const value = type == "number" ? this.sortNumber(text) : type == "date" ? this.sortDate(text) : text;
+      return { u, empty: !text, value };
+    });
+    const dir = order == "desc" ? -1 : 1;
+    const full = items.filter(x => !x.empty);
+    const sorted = full.slice().sort((a, b) => {
+      if (type == "text") {
+        return dir * collator.compare(a.value, b.value);
+      }
+      if (a.value == null || b.value == null) {
+        return (a.value == null) - (b.value == null);
+      }
+      return dir * (a.value - b.value);
+    });
+    let k = 0;
+    const final = items.map(x => (x.empty ? x.u : sorted[k++].u));
+    const skip = n => {
+      while (n && ((n.nodeType == 3 && !/[^ \t\n\r\f]/.test(n.data)) || n.nodeType == 8)) {
+        n = n.nextSibling;
+      }
+      return n;
+    };
+    // Cada item leva junto as listas de dentro que o editor põe logo depois dele, como irmãs
+    // (<ol><li>a</li><ol>...</ol><li>b</li></ol>, como o Recuo do Gecko faz).
+    const group = u => {
+      const out = [u];
+      for (let n = skip(u.nextSibling); u.localName == "li" && n && n.nodeType == 1 && (n.localName == "ol" || n.localName == "ul"); n = skip(n.nextSibling)) {
+        out.push(n);
+      }
+      return out;
+    };
+    const groups = new Map(units.map(u => [u, group(u)]));
+    const tail = u => groups.get(u)[groups.get(u).length - 1];
+    const sel = this.doc.getSelection();
+    this.tx(() => {
+      if (!final.every((u, i) => u == units[i])) {
+        const ed = this.editor;
+        let ref = tail(units[units.length - 1]).nextSibling;
+        for (let i = final.length - 1; i >= 0; i--) {
+          const u = final[i];
+          if (skip(tail(u).nextSibling) !== skip(ref)) {
+            for (const n of groups.get(u)) {
+              ed.deleteNode(n, true);
+              ed.insertNode(n, parent, ref ? Array.prototype.indexOf.call(parent.childNodes, ref) : parent.childNodes.length, true);
+            }
+          }
+          ref = u;
+        }
+      }
+      const last = tail(final[final.length - 1]);
+      const r = this.doc.createRange();
+      r.setStart(final[0], 0);
+      r.setEnd(last, last.childNodes.length);
+      sel.removeAllRanges();
+      sel.addRange(r);
+    });
+    return { count: units.length };
+  }
+
+  /** Texto de um parágrafo ou item para classificar (sem as listas de dentro). */
+  sortText(unit) {
+    const clone = unit.cloneNode(true);
+    for (const l of clone.querySelectorAll("ol, ul")) {
+      l.remove();
+    }
+    return clone.textContent.replace(/[\s​]+/g, " ").trim();
+  }
+
+  /** Primeiro número do texto, com a vírgula ou o ponto decimal do idioma (1.234,5 em
+   * português; 1,234.5 em inglês). null sem número. */
+  sortNumber(text) {
+    const comma = FaixaI18n.locale != "en-US";
+    const m = String(text).match(comma
+      ? /[-−]?\d{1,3}(?:[. \u00a0]\d{3})+(?:,\d+)?|[-−]?\d+(?:,\d+)?/
+      : /[-−]?\d{1,3}(?:[, \u00a0]\d{3})+(?:\.\d+)?|[-−]?\d+(?:\.\d+)?/);
+    if (!m) {
+      return null;
+    }
+    let s = m[0].replace("−", "-");
+    s = comma ? s.replace(/[. \u00a0]/g, "").replace(",", ".") : s.replace(/[, \u00a0]/g, "");
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  /** Primeira data do texto: 2026-10-07, 07/10/2026 (dia primeiro; mês primeiro em inglês),
+   * 7.10.26 ou com o mês por extenso no idioma da faixa ("7 de outubro de 2026", "October
+   * 7, 2026"). null sem data. */
+  sortDate(text) {
+    const s = String(text);
+    let m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) {
+      return Date.UTC(+m[1], +m[2] - 1, +m[3]);
+    }
+    m = s.match(/(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})/);
+    if (m) {
+      let y = +m[3];
+      if (y < 100) {
+        y += y < 70 ? 2000 : 1900;
+      }
+      const [d, mo] = FaixaI18n.locale == "en-US" ? [+m[2], +m[1]] : [+m[1], +m[2]];
+      if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+        return Date.UTC(y, mo - 1, d);
+      }
+    }
+    // Mês por extenso (ou abreviado) no idioma da faixa, com o dia e o ano em volta.
+    const fold = v => v.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\./g, "");
+    const plain = fold(s);
+    let month = -1;
+    let best = 0;
+    for (let i = 0; i < 12; i++) {
+      for (const style of ["long", "short"]) {
+        let name = "";
+        try {
+          name = fold(new Intl.DateTimeFormat(FaixaI18n.locale, { month: style, timeZone: "UTC" }).format(new Date(Date.UTC(2000, i, 1))));
+        } catch (e) {}
+        const pattern = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        if (name.length >= 3 && name.length > best && new RegExp("(^|[^\\p{L}])" + pattern + "($|[^\\p{L}])", "u").test(plain)) {
+          month = i;
+          best = name.length;
+        }
+      }
+    }
+    const year = plain.match(/\b(\d{4})\b/);
+    const day = plain.replace(year ? year[1] : "", " ").match(/\b(\d{1,2})\b/);
+    if (month >= 0 && year && day && +day[1] >= 1 && +day[1] <= 31) {
+      return Date.UTC(+year[1], month, +day[1]);
+    }
+    return null;
+  }
+
+  /* ---------- selecionar texto com formatação semelhante ---------- */
+
+  /** Chave da formatação de caractere: dois trechos com a mesma chave têm a mesma fonte,
+   * tamanho, cor, realce, negrito, itálico, sublinhado, tachado e sub/sobrescrito. */
+  formatKey(f) {
+    const family = String(f.fontFamily || "").replace(/["']/g, "").replace(/\s*,\s*/g, ",").trim().toLowerCase();
+    return [family, f.fontSizePt, f.bold, f.italic, f.underline, f.strike, this.rgbToHex(f.color),
+      f.background ? this.rgbToHex(f.background) : "", f.vertical || ""].join("|");
+  }
+
+  /** Selecionar Texto com Formatação Semelhante, como no Word: todo o texto da mensagem com
+   * a formatação de caractere do começo da seleção (ou do cursor) fica selecionado, um
+   * trecho por parágrafo. Citação, encaminhada e assinatura só entram com o ponto de partida
+   * nelas. O Thunderbird mostra todos os trechos, e a formatação escolhida depois vale para
+   * todos. Devolve os trechos. */
+  selectSimilar() {
+    const doc = this.doc;
+    const body = doc && doc.body;
+    const sel = doc && doc.getSelection();
+    if (!body || !sel || !sel.rangeCount) {
+      return [];
+    }
+    const range = sel.getRangeAt(0);
+    const start = this.elementOf(this.firstTextNode(range) || range.startContainer, range);
+    if (!start || !body.contains(start)) {
+      return [];
+    }
+    const keys = new Map();
+    const keyOf = el => {
+      if (!keys.has(el)) {
+        keys.set(el, this.formatKey(this.charFormatOf(el, this.blockOf(el))));
+      }
+      return keys.get(el);
+    };
+    const want = keyOf(start);
+    const foreignOk = !!start.closest(FAIXA_FOREIGN);
+    const ranges = [];
+    let cur = null;
+    const close = () => {
+      if (cur) {
+        const r = doc.createRange();
+        r.setStart(cur.first, 0);
+        r.setEnd(cur.last, cur.last.length);
+        ranges.push(r);
+        cur = null;
+      }
+    };
+    const walker = doc.createTreeWalker(body, 4 /* SHOW_TEXT */);
+    let n;
+    while ((n = walker.nextNode())) {
+      const parent = n.parentElement;
+      if (!parent || parent.namespaceURI != FAIXA_HTML_NS || /^(script|style|title|textarea|option|select)$/.test(parent.localName) ||
+        parent.closest('[contenteditable="false"]')) {
+        continue;
+      }
+      const visible = /[^ \t\n\r\f​]/.test(n.data);
+      // Espaço de formatação do código entre blocos: não entra nem separa trechos.
+      if (!visible && [n.previousSibling, n.nextSibling].some(x => !x || (x.nodeType == 1 && FAIXA_TOP_BLOCKS.has(x.localName)))) {
+        continue;
+      }
+      if (!foreignOk && parent.closest(FAIXA_FOREIGN)) {
+        close();
+        continue;
+      }
+      if (keyOf(parent) != want) {
+        if (visible) {
+          close();
+        }
+        continue;
+      }
+      const block = this.blockOf(n);
+      if (cur && cur.block == block) {
+        cur.last = n;
+      } else {
+        close();
+        cur = { block, first: n, last: n };
+      }
+    }
+    close();
+    if (!ranges.length) {
+      return [];
+    }
+    sel.removeAllRanges();
+    for (const r of ranges) {
+      sel.addRange(r);
+    }
+    this.scheduleState(0);
+    return ranges;
+  }
+
+  /* ---------- mesclar formatação ---------- */
+
+  /** Mesclar Formatação, como no Word: o que foi copiado entra com a formatação do destino.
+   * content: { html } da Área de Transferência (texto puro vai pelo Colar sem Formatação do
+   * Thunderbird, que já usa a formatação do cursor). O HTML passa pela limpeza
+   * (FaixaSanitizer.merge) e, como o editor não deixa o que se cola herdar a formatação do
+   * ponto de inserção, a do texto em volta do cursor (fonte, tamanho, cor, realce,
+   * negrito...) vai junto em cada trecho. Um Ctrl+Z desfaz. Devolve se colou. */
+  pasteMerged(content) {
+    const merged = content && content.html ? FaixaSanitizer.merge(content.html, this.win) : null;
+    if (!merged || (!merged.html.replace(/<br>/g, "").trim() && !/<(img|hr|table)\b/.test(merged.html))) {
+      return false;
+    }
+    const html = this.withCaretFormat(merged);
+    if (merged.remote && this.host.allowRemoteContent) {
+      this.host.allowRemoteContent();
+    }
+    this.insertHTML(html);
+    return true;
+  }
+
+  /** O HTML limpo com a formatação que o texto digitado no cursor teria: um <span> com a
+   * fonte, o tamanho, a cor e o fundo, e <b>, <i>, <u>, <s>, <sub> ou <sup>, em volta do
+   * conteúdo de cada parágrafo, item e célula. Só o que difere do parágrafo do destino (o
+   * resto ele já dá). Um link no cursor não passa adiante (o colado não vira link). */
+  withCaretFormat(merged) {
+    const sel = this.doc.getSelection();
+    const r = sel.rangeCount ? sel.getRangeAt(0) : null;
+    let el = r ? this.elementOf(r.startContainer, r.collapsed ? r : null) : null;
+    const block = el ? this.blockOf(el) : null;
+    if (!el || !block || el == block) {
+      return merged.html;
+    }
+    const link = el.closest("a[href]");
+    if (link && block.contains(link) && link != block) {
+      el = link.parentElement;
+    }
+    if (el == block || !block.contains(el)) {
+      return merged.html;
+    }
+    const f = this.charFormatOf(el, block);
+    const base = this.charFormatOf(block, block);
+    const style = [];
+    if (!this.sameFamily(f.fontFamily, base.fontFamily)) {
+      style.push(["font-family", f.fontFamily]);
+    }
+    if (f.fontSizePt && f.fontSizePt != base.fontSizePt) {
+      style.push(["font-size", f.fontSizePt + "pt"]);
+    }
+    if (f.color != base.color) {
+      style.push(["color", this.rgbToHex(f.color)]);
+    }
+    if (f.background) {
+      style.push(["background-color", this.rgbToHex(f.background)]);
+    }
+    const tags = [];
+    for (const [on, tag] of [[f.bold && !base.bold, "b"], [f.italic && !base.italic, "i"], [f.underline && !base.underline, "u"], [f.strike && !base.strike, "s"],
+      [f.vertical == "sub", "sub"], [f.vertical == "super", "sup"]]) {
+      if (on) {
+        tags.push(tag);
+      }
+    }
+    if (!style.length && !tags.length) {
+      return merged.html;
+    }
+    const inert = FaixaSanitizer.inertDocument(this.win);
+    const box = inert.createElement("div");
+    box.innerHTML = merged.html;
+    const wrap = nodes => {
+      let outer = null;
+      let inner = null;
+      if (style.length) {
+        outer = inner = inert.createElement("span");
+        for (const [k, v] of style) {
+          outer.style.setProperty(k, v);
+        }
+      }
+      for (const tag of tags) {
+        const e = inert.createElement(tag);
+        if (inner) {
+          inner.append(e);
+        } else {
+          outer = e;
+        }
+        inner = e;
+      }
+      nodes[0].before(outer);
+      inner.append(...nodes);
+    };
+    // Trechos de linha seguidos (uma lista de dentro de um item fica fora do embrulho).
+    const runs = holder => {
+      let run = [];
+      for (const n of [...holder.childNodes]) {
+        if (n.nodeType == 1 && /^(ul|ol|table|hr)$/.test(n.localName)) {
+          if (run.length) {
+            wrap(run);
+          }
+          run = [];
+        } else {
+          run.push(n);
+        }
+      }
+      if (run.length) {
+        wrap(run);
+      }
+    };
+    if (merged.inline) {
+      runs(box);
+    } else {
+      for (const leaf of box.querySelectorAll("p, li, td, th")) {
+        runs(leaf);
+      }
+    }
+    return box.innerHTML;
+  }
+
+  /* ---------- alterar estilos ---------- */
+
+  /** Alterar Estilos, como no Outlook: troca uma parte do tema da mensagem (conjunto de
+   * estilos, cores, fontes ou espaçamento entre parágrafos). Os parágrafos com um estilo da
+   * galeria (títulos, Título, Subtítulo, Citação) passam a ter o do tema novo, menos o que o
+   * usuário mudou por conta própria neles; as ênfases com a cor do tema mudam de cor; com
+   * outras fontes, a fonte do corpo muda junto. A escolha fica no <body> (data-faixa-estilos)
+   * e vale para os estilos aplicados depois. Tudo num Ctrl+Z. Devolve se mudou. */
+  changeStyles(part, id) {
+    const base = this.baseDef;
+    const body = this.doc && this.doc.body;
+    if (!body || !this.host.isHTML() || !FaixaThemes.PARTS.includes(part) || !FaixaThemes.options(base, part).some(o => o.id == id)) {
+      return false;
+    }
+    const oldValue = this.themeValue();
+    const state = FaixaThemes.parse(oldValue, base);
+    if (state[part] == id) {
+      return false;
+    }
+    state[part] = id;
+    const newValue = FaixaThemes.serialize(state, base);
+    const before = FaixaThemes.apply(base, oldValue);
+    const after = FaixaThemes.apply(base, newValue);
+    this.tx(() => {
+      // 1. Parágrafos com estilo: o style do estilo antigo vira o do novo, propriedade a
+      // propriedade (o que o usuário mudou depois, como o alinhamento, fica).
+      for (const block of [...body.querySelectorAll("p, div, h1, h2, h3, h4, h5, h6")]) {
+        if (!this.isParagraph(block)) {
+          continue;
+        }
+        const sid = this.matchStyle(block, before.styles);
+        const was = before.styles.find(s => s.id == sid);
+        const now = after.styles.find(s => s.id == sid);
+        if (!was || !now || was.kind == "char" || was.css == now.css) {
+          continue;
+        }
+        const oldProps = this.cssToProps(was.css);
+        const newProps = this.cssToProps(now.css);
+        const change = {};
+        for (const k of new Set([...Object.keys(oldProps), ...Object.keys(newProps)])) {
+          const cur = block.style.getPropertyValue(k);
+          if (cur == (oldProps[k] || "") && cur != (newProps[k] || "")) {
+            change[k] = newProps[k] || null;
+          }
+        }
+        if (Object.keys(change).length) {
+          this.setStyleProps(block, change);
+        }
+      }
+      // 2. Ênfases com a cor do tema (Ênfase Intensa): a cor do tema novo.
+      const recolor = new Map();
+      for (const st of before.styles) {
+        const next = after.styles.find(s => s.id == st.id);
+        if (st.kind == "char" && st.color && next && next.color && st.color.toUpperCase() != next.color.toUpperCase()) {
+          recolor.set(st.color.toUpperCase(), next.color);
+        }
+      }
+      if (recolor.size) {
+        for (const el of [...body.querySelectorAll("[style*='color'], font[color]")]) {
+          if (el.closest(FAIXA_FOREIGN) || !(el.closest("em") || el.querySelector("em"))) {
+            continue;
+          }
+          const inline = el.style && el.style.color;
+          const target = recolor.get(String(this.rgbToHex(inline || el.getAttribute("color") || "")).toUpperCase());
+          if (!target) {
+            continue;
+          }
+          if (inline) {
+            this.setStyleProps(el, { color: target });
+          } else {
+            this.editor.setAttribute(el, "color", target);
+          }
+        }
+      }
+      // 3. Fontes do tema: a fonte do corpo da mensagem. As do Office (o padrão) voltam à
+      // fonte padrão das Opções da Faixa, a mesma de uma mensagem nova.
+      if (part == "fonts") {
+        const cfg = this.config.fontePadrao;
+        const isDefault = id == FaixaThemes.options(base, "fonts")[0].id;
+        const family = isDefault && cfg && cfg.familia ? this.fontStack(cfg.familia) : after.theme.bodyFont;
+        if (family) {
+          this.setStyleProps(body, { "font-family": family });
+        }
+      }
+      // 4. A escolha, guardada na mensagem (rascunho, modelo); sai no envio.
+      if (newValue) {
+        this.editor.setAttribute(body, FAIXA_THEME_ATTR, newValue);
+      } else if (body.hasAttribute(FAIXA_THEME_ATTR)) {
+        this.editor.removeAttribute(body, FAIXA_THEME_ATTR);
+      }
+    });
+    this.syncThemeSheet();
+    return true;
   }
 
   applyStyle(id) {
@@ -1150,6 +1997,15 @@ var FaixaEngine = class {
         // Sem Cor: o fundo que aparece atrás do parágrafo cobre o realce que o texto tem.
         css = seg => ({ "background-color": args.value || this.previewBackdrop(seg.node) });
         break;
+      case "shading": {
+        // Sombreamento: o fundo dos parágrafos, como o clique (setShading), ou do texto, como o realce.
+        if (this.shadingTarget() == "paragraph") {
+          const blocks = this.ownParagraphBlocks({ cells: true, items: true }).filter(b => b.isConnected && !b.closest('[contenteditable="false"]'));
+          return blocks.length && blocks.length <= FAIXA_PREVIEW_MAX_BLOCKS ? { blocks, props: { "background-color": args.value || "transparent" } } : null;
+        }
+        css = seg => ({ "background-color": args.value || this.previewBackdrop(seg.node) });
+        break;
+      }
       case "style": {
         const style = (this.def.styles || []).find(st => st.id == args.value);
         if (!style) {
@@ -1324,6 +2180,16 @@ var FaixaEngine = class {
    * no style provisório. */
   previewBlocks(pv, plan) {
     const doc = this.doc;
+    if (plan.props) {
+      // Propriedades do bloco por cima das dele (sombreamento): o resto do style fica.
+      for (const block of plan.blocks) {
+        pv.blocks.push({ block, attrs: [...block.attributes].map(a => [a.name, a.value]) });
+        for (const [k, v] of Object.entries(plan.props)) {
+          block.style.setProperty(k, v, "important");
+        }
+      }
+      return;
+    }
     const style = plan.style;
     const props = this.cssToProps(style.css);
     const pMargin = this.config.paragrafoSemEspaco !== false ? "0px" : "1em";
@@ -1371,7 +2237,7 @@ var FaixaEngine = class {
       return;
     }
     const registry = win.CSS && win.CSS.highlights;
-    if (pv.cmd != "hilite" && registry && typeof win.Highlight == "function") {
+    if (pv.cmd != "hilite" && pv.cmd != "shading" && registry && typeof win.Highlight == "function") {
       try {
         const ranges = [];
         if (pv.texts.length) {
@@ -2482,6 +3348,14 @@ var FaixaEngine = class {
       }
       result.changed++;
     };
+    const dropAttr = (el, name) => {
+      log.push({ type: "attr", el, name, old: el.getAttribute(name) });
+      el.removeAttribute(name);
+      result.changed++;
+    };
+    // Espaçamento entre Parágrafos do Alterar Estilos (lido antes de o tema sair do <body>).
+    const theme = this.def.theme;
+    const spacing = theme && theme.spacing && theme.spacing.after != null ? theme.spacing : null;
     // 1. Espaço de largura zero do tamanho escolhido sem texto selecionado.
     for (const zw of this.zwsp) {
       if (zw.isConnected && zw.data.includes(FAIXA_ZWSP)) {
@@ -2507,8 +3381,10 @@ var FaixaEngine = class {
     }
     // 3. Parágrafos do autor: o lado sem margem definida (0 na tela, pela folha de
     // agente) sai com margem 0 explícita. Um espaço antes de 12 pt continua; o lado
-    // de baixo não pode herdar a margem padrão de 1em do leitor.
-    if (this.config.paragrafoSemEspaco !== false) {
+    // de baixo não pode herdar a margem padrão de 1em do leitor. Com um Espaçamento entre
+    // Parágrafos escolhido, o espaço depois e as linhas dele vão em cada parágrafo que não
+    // tem os seus (na tela, quem os mostra é a folha spacing).
+    if (spacing || this.config.paragrafoSemEspaco !== false) {
       for (const p of body.querySelectorAll("p")) {
         if (p.closest(FAIXA_FOREIGN)) {
           continue;
@@ -2518,7 +3394,14 @@ var FaixaEngine = class {
         if (!p.style.marginTop && parseFloat(cs.marginTop) == 0) {
           props["margin-top"] = "0";
         }
-        if (!p.style.marginBottom && parseFloat(cs.marginBottom) == 0) {
+        if (spacing) {
+          if (!p.style.marginBottom) {
+            props["margin-bottom"] = spacing.after ? spacing.after + "pt" : "0";
+          }
+          if (spacing.line && !p.style.lineHeight) {
+            props["line-height"] = String(spacing.line);
+          }
+        } else if (!p.style.marginBottom && parseFloat(cs.marginBottom) == 0) {
           props["margin-bottom"] = "0";
         }
         if (Object.keys(props).length) {
@@ -2575,6 +3458,28 @@ var FaixaEngine = class {
           setStyle(child, props);
         }
       }
+    }
+    // 5. Listas de vários níveis: a numeração de cada nível de dentro vai no style da lista
+    // (na tela, quem a mostra é a folha lists), e a marca da faixa sai.
+    for (const root of [...body.querySelectorAll("ol[data-faixa-ml], ul[data-faixa-ml]")]) {
+      const scheme = (this.def.multilevelLists || []).find(x => x.id == root.getAttribute("data-faixa-ml"));
+      for (const inner of scheme ? root.querySelectorAll("ol, ul") : []) {
+        if (inner.style.listStyleType) {
+          continue;
+        }
+        let depth = 1;
+        for (let n = inner.parentElement; n && n != root; n = n.parentElement) {
+          if (n.localName == "ol" || n.localName == "ul") {
+            depth++;
+          }
+        }
+        setStyle(inner, { "list-style-type": scheme.levels[depth % scheme.levels.length] });
+      }
+      dropAttr(root, "data-faixa-ml");
+    }
+    // 6. O tema do Alterar Estilos sai do <body>: o que ele muda já está no style.
+    if (body.hasAttribute(FAIXA_THEME_ATTR)) {
+      dropAttr(body, FAIXA_THEME_ATTR);
     }
     return result;
   }

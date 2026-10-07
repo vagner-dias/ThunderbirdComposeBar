@@ -1,13 +1,19 @@
 # Faixa de Opções para o Thunderbird
 
-Complemento da Bluecker que recria no Thunderbird a faixa de opções da janela de composição do Outlook, com o Pincel de Formatação. Esta é a **0.7.2**: abas Mensagem, Inserir, Formatar Texto e Ajuda, a **Visualização Dinâmica**, as **confirmações de entrega e de leitura**, o **Acompanhamento**, a opção de **ocultar a barra de menus** da janela de mensagem e a faixa em **seis idiomas** (português, inglês, espanhol, italiano, alemão e francês). Feita para o **Thunderbird ESR 153** (testada também no 156).
+Complemento da Bluecker que recria no Thunderbird a faixa de opções da janela de composição do Outlook, com o Pincel de Formatação. Esta é a **0.8.0**: abas Mensagem, Inserir, Formatar Texto e Ajuda, a **Visualização Dinâmica**, as **confirmações de entrega e de leitura**, o **Acompanhamento**, a opção de **ocultar a barra de menus** da janela de mensagem, a faixa em **seis idiomas** (português, inglês, espanhol, italiano, alemão e francês) e, nesta versão, **Alterar Estilos**, **Sombreamento**, **Bordas**, **Lista de Vários Níveis**, **Classificar**, **Mesclar Formatação** e **Selecionar Texto com Formatação Semelhante**. Feita para o **Thunderbird ESR 153** (testada também no 156).
 
-- ID: `faixa@bluecker.com` · versão 0.7.2 · Manifest V3 com WebExtension Experiment
+- ID: `faixa@bluecker.com` · versão 0.8.0 · Manifest V3 com WebExtension Experiment
+- **Alterar Estilos** (Formatar Texto → Estilos), como no Word: **Conjunto de Estilos** (Padrão, Word 2010, Word 2003, Linhas), **Cores** (Office, Office 2007–2010, Escala de Cinza, Azul, Verde, Vermelho, Violeta), **Fontes** (Office, Office 2007–2010, Arial, Georgia, Times New Roman, Verdana) e **Espaçamento entre Parágrafos** (Sem Espaço, Compacto, Estreito, Aberto, Relaxado, Duplo). Vale para a mensagem: os títulos e as ênfases que já estão no texto mudam junto, a galeria de estilos e as Cores do Tema da paleta acompanham, e cada escolha sai com um Ctrl+Z
+- **Sombreamento** e **Bordas** (Formatar Texto → Parágrafo): o fundo do parágrafo (com só uma parte selecionada, o fundo do texto) e as bordas embaixo, em cima, dos lados, em volta, entre os parágrafos ou todas. O botão Bordas repete a última escolha do menu e mostra qual é, como no Word
+- **Lista de Vários Níveis**: 1. → a. → i., I. → A. → 1., A. → 1. → a. e ● → ○ → ■; Aumentar e Diminuir Recuo mudam o nível do item. No envio, cada nível leva o seu marcador escrito, para o Gmail e o Outlook mostrarem igual
+- **Classificar**: parágrafos ou itens de lista em ordem de texto, número ou data, crescente ou decrescente. O item leva a sublista junto, a linha vazia fica no lugar e um Ctrl+Z desfaz
+- **Mesclar Formatação** (Colar ▾): o texto colado fica com a fonte, o tamanho e a cor do ponto de inserção e mantém negrito, itálico, sublinhado, links, listas e tabelas; títulos viram parágrafos
+- **Selecionar Texto com Formatação Semelhante** (Selecionar ▾): todo o texto com a formatação do cursor fica selecionado de uma vez; a formatação escolhida em seguida (negrito, itálico, cor...) vale para todos os trechos
 - **Confirmação de Entrega e de Leitura** (grupo Controle da aba Mensagem): as mesmas do menu Opções do Thunderbird. Os botões já abrem acesos quando a conta pede as confirmações por padrão e acompanham o menu Opções e a troca de conta no De:
 - **Acompanhamento ▾**, como o Sinalizar para Acompanhamento do Outlook: **Sinalizar para Mim** (depois do envio, a cópia em Enviados fica com a estrela do Thunderbird, também com Enviar mais tarde), **Sinalizar para os Destinatários** (o Outlook de quem recebe mostra o sinalizador) e **Limpar Sinalizador**. O rascunho guarda o que foi escolhido
 - **Barra de menus** (Arquivo, Editar, Exibir, Inserir, Formatar...): oculta por padrão na janela de mensagem, deixando só a faixa no topo; volta pelo menu ⋯ da faixa, pelas Opções da Faixa ou pela política. A tecla Alt (ou F10) mostra os menus enquanto são usados, como na opção Barra de Menus do próprio Thunderbird, que continua valendo
 - **Seis idiomas**: português (Brasil), inglês, espanhol, italiano, alemão e francês, com os termos do Office de cada idioma (Copiar formato, Copia formato, Format übertragen, Reproduire la mise en forme...) e as teclas escritas como no idioma (Strg+Umschalt+V, Ctrl+Maj+V); a faixa segue o idioma do Thunderbird, ou o escolhido nas Opções da Faixa
-- **Visualização Dinâmica**, como no Office: com o mouse (ou o foco do teclado) numa fonte, num tamanho, numa cor da fonte ou do realce, ou num estilo da galeria, o texto mostra como vai ficar antes do clique; saindo, volta. Vale para a seleção (com o cursor numa palavra, para a palavra; nos estilos de parágrafo, para o parágrafo). A prévia não entra no Desfazer e a mensagem não conta como alterada. Liga e desliga nas Opções da Faixa ou pela política
+- **Visualização Dinâmica**, como no Office: com o mouse (ou o foco do teclado) numa fonte, num tamanho, numa cor da fonte, do realce ou do sombreamento, ou num estilo da galeria, o texto mostra como vai ficar antes do clique; saindo, volta. Vale para a seleção (com o cursor numa palavra, para a palavra; nos estilos de parágrafo, para o parágrafo). A prévia não entra no Desfazer e a mensagem não conta como alterada. Liga e desliga nas Opções da Faixa ou pela política
 - **Aba Inserir**, como no Outlook: Anexar Arquivo, **Anexar Mensagem** (das pastas de todas as contas, vai como `.eml`), **Cartão de Visita** (o seu ou o de contatos dos catálogos), Assinatura, **Tabela** (grade de até 10 × 8 e os comandos de linhas, colunas e células), Imagens, Link, Indicador, **Partes Rápidas**, **Data e Hora**, **Emoji**, **Símbolo** e Linha Horizontal
 - **Partes Rápidas centralizadas**: a organização define trechos prontos por política, com os mesmos campos das assinaturas ({nome}, {cargo}, {telefone}...); o usuário salva a seleção na galeria e edita as dele na página **Partes Rápidas**
 - **Aba Ajuda**: Ajuda (a da organização, se a política definir), Atalhos de Teclado, Opções da Faixa e Sobre. O diagnóstico abre pelo ⋯ da faixa, pelo Sobre e pelas Opções da Faixa
@@ -30,7 +36,7 @@ O `.xpi` de cada versão está nas [Releases](https://github.com/vagner-dias/Thu
 ### Numa máquina, para testar
 
 1. No Thunderbird: **Ferramentas → Extensões e temas**.
-2. Engrenagem → **Instalar extensão a partir de arquivo…** → escolha `faixa-0.7.2.xpi`. Por cima de uma versão anterior, é só instalar: as preferências, as assinaturas e as Partes Rápidas continuam.
+2. Engrenagem → **Instalar extensão a partir de arquivo…** → escolha `faixa-0.8.0.xpi`. Por cima de uma versão anterior, é só instalar: as preferências, as assinaturas e as Partes Rápidas continuam.
 3. O Thunderbird avisa que a extensão pede **acesso total**. É esperado: a faixa é um *Experiment*, que roda dentro do Thunderbird para mexer na janela de composição.
 
 Para uma sessão só (some ao fechar o Thunderbird): **Ferramentas → Ferramentas de desenvolvimento → Depurar extensões → Este Thunderbird → Carregar extensão temporária…** e escolha o `.xpi` ou o `manifest.json` da raiz do repositório.
@@ -47,7 +53,7 @@ Crie ou complete o `policies.json` na pasta `distribution` da instalação do Th
     "ExtensionSettings": {
       "faixa@bluecker.com": {
         "installation_mode": "force_installed",
-        "install_url": "https://suporte.exemplo.com.br/faixa/faixa-0.7.2.xpi"
+        "install_url": "https://suporte.exemplo.com.br/faixa/faixa-0.8.0.xpi"
       }
     },
     "3rdparty": {
@@ -215,6 +221,10 @@ A página **Ajuda** (aba Ajuda → **Ajuda**, sem endereço da organização) re
   - Símbolo e Data e Hora no cursor, um Ctrl+Z cada;
   - Parte Rápida com o campo preenchido pela conta, desfeita com um Ctrl+Z;
   - estilo Ênfase Intensa como no Word, com a galeria acesa;
+  - Sombreamento, Bordas e Lista de Vários Níveis no parágrafo, um Ctrl+Z cada;
+  - Classificar três parágrafos (um Ctrl+Z desfaz) e Selecionar Texto com Formatação Semelhante em dois deles, em negrito;
+  - Mesclar Formatação, com um conteúdo de teste (a Área de Transferência não é usada), e o Ctrl+Z;
+  - Alterar Estilos: as cores Verde no Título 1 e a volta ao tema Office com um Ctrl+Z;
   - Texto sem Formatação e a volta com um Ctrl+Z;
   - Visualização Dinâmica de fonte, cor e estilo: o corpo e a seleção voltam iguais, o contador de alterações não muda e o Ctrl+Z seguinte ainda desfaz a última edição de verdade;
   - normalização do envio e a volta dela;
@@ -318,6 +328,20 @@ O autoteste não cobre o que depende de servidor, de outro programa ou do teclad
     - Acompanhamento ▾ → Sinalizar para os Destinatários e envie para uma caixa Outlook/Exchange: no Outlook de quem recebe, a mensagem chega sinalizada, com o texto "Acompanhar";
     - grave um rascunho com o Acompanhamento ligado (para mim e para os destinatários), feche e abra de novo pela pasta Rascunhos: o botão continua aceso e o menu mostra os dois marcados; envie: a estrela entra e o Outlook mostra o sinalizador;
     - Limpar Sinalizador apaga o botão e tira os dois.
+34. **Sombreamento, Bordas e Lista de Vários Níveis** (Formatar Texto → Parágrafo):
+    - Sombreamento num parágrafo (uma cor do tema e depois Sem Cor) e numa palavra; Bordas Externas em três parágrafos e Borda Inferior num título; o botão Bordas mostra e repete a última escolha;
+    - uma lista 1. → a. → i. com três níveis (Aumentar Recuo) e a troca para ● → ○ → ■;
+    - envie para o Gmail e para o Outlook: o fundo, as bordas e os marcadores de cada nível chegam como na tela.
+35. **Classificar**: uma lista com sublistas (com o cursor num item), parágrafos com números e parágrafos com datas (10/02/2026, 2026-01-05, 7 de março de 2026), em ordem crescente e decrescente; cada classificação sai com um Ctrl+Z.
+36. **Mesclar Formatação** (Colar ▾), no Windows e no Linux ou macOS:
+    - copie do Word e de uma página da web um trecho com título, negrito, lista e link; no meio de um texto vermelho de 14 pt, cole com Mesclar Formatação: chega vermelho, em 14 pt, com o negrito, a lista e o link; um Ctrl+Z desfaz;
+    - com texto puro na Área de Transferência, cola como Manter Somente Texto.
+37. **Selecionar Texto com Formatação Semelhante** (Selecionar ▾): numa mensagem com vários trechos em negrito e uma citação com negrito, cursor num deles: os trechos do texto ficam selecionados ao mesmo tempo (a citação não); aplique uma cor: todos mudam, com um Ctrl+Z.
+38. **Alterar Estilos**:
+    - numa mensagem com Título 1, Título 2 e Ênfase Intensa, escolha Cores Verde, Conjunto Word 2010, Fontes Georgia e Espaçamento Aberto: o texto, a galeria de estilos e as Cores do Tema da paleta mudam junto; cada escolha sai com um Ctrl+Z;
+    - grave o rascunho, feche e abra de novo: o tema continua, e o menu mostra as escolhas marcadas;
+    - com outra fonte padrão nas Opções da Faixa, Fontes → Office volta o corpo para ela;
+    - envie para o Gmail e para o Outlook: chega como na tela, com o espaçamento entre parágrafos.
 
 ## Atalhos
 
@@ -361,7 +385,13 @@ O **AltGr** (Alt da direita) sempre digita o caractere do teclado.
 - **Delete nas sugestões** apaga o endereço dos **Endereços coletados**, a lista que o Thunderbird monta com quem já recebeu mensagens, equivalente à lista de preenchimento automático do Outlook.
   - Contatos de outros catálogos (Pessoal, CardDAV, LDAP) nunca são apagados por aqui; a faixa avisa em qual catálogo o endereço está.
   - Não tem desfazer, como no Outlook. Se você escrever de novo para o endereço, o Thunderbird volta a coletá-lo.
-- **O que vem na próxima entrega da fase 2**: as abas Opções e Revisão, as janelas Fonte, Parágrafo e Propriedades, e os comandos que aparecem na faixa desativados, com a dica "Previsto para a fase 2": Lista de Vários Níveis, Classificar, Sombreamento, Bordas, Alterar Estilos, Selecionar Texto com Formatação Semelhante e Mesclar Formatação.
+- **O que vem na próxima entrega da fase 2**: as abas Opções e Revisão e as janelas Fonte, Parágrafo e Propriedades.
+- **Sombreamento e Bordas**: o sombreamento vale para parágrafos, títulos, itens de lista e células; com só uma parte do parágrafo selecionada, colore o fundo do texto, como o realce. As bordas valem para parágrafos e títulos do texto (fora de listas, tabelas, citação e assinatura), em linha fina preta contínua; não há a janela Bordas e Sombreamento (estilo, cor e largura da linha), nem as bordas diagonais e de tabela.
+- **Lista de Vários Níveis**: quatro esquemas prontos, sem Definir Nova Lista de Vários Níveis nem estilos de lista; a partir do quarto nível, os marcadores recomeçam o ciclo (1. → a. → i. → 1. ...).
+- **Classificar**: só parágrafos seguidos ou itens da mesma lista (não tabelas), sem diferenciar maiúsculas e sem classificar por campos ou colunas. Número usa o primeiro número do texto; Data reconhece aaaa-mm-dd, dd/mm/aaaa (mm/dd/aaaa em inglês) e o mês por extenso ou abreviado no idioma da faixa. O que não tem número ou data vai para o fim.
+- **Mesclar Formatação** lê a Área de Transferência no clique (o HTML do Word, das páginas e do Windows; texto puro cola como Manter Somente Texto). Imagem de fora (https) no que foi colado libera o conteúdo remoto daquela mensagem, como no Colar do Thunderbird.
+- **Selecionar Texto com Formatação Semelhante** compara fonte, tamanho, negrito, itálico, sublinhado, tachado, cor, realce, subscrito e sobrescrito. Citação, mensagem encaminhada e assinatura só entram com o cursor nelas.
+- **Alterar Estilos** vale para a mensagem aberta: não há Definir como Padrão, nem cores, fontes ou conjuntos personalizados. Texto com fonte ou cor escolhida à mão continua como está, como a formatação direta no Word. A escolha fica no `<body>` da mensagem (vai junto no rascunho e no modelo) e sai no envio, quando o espaçamento é escrito nos parágrafos.
 - **Tabela**: é a "Grade da Tabela" do Word (largura toda, bordas finas pretas, colunas iguais). Não há galeria de estilos de tabela, Desenhar Tabela, Converter Texto em Tabela nem Tabelas Rápidas. Inserir Tabela… e Propriedades da Tabela… são as janelas do Thunderbird, e a tabela vai para o Outlook como HTML comum.
 - **Anexar Mensagem** lista as 500 mensagens mais novas da pasta; a pesquisa (assunto e remetente) procura entre as 50 000 mais novas. Pasta IMAP que nunca foi aberta, ou sem índice, avisa para abri-la antes na janela principal. A mensagem vai como `.eml` (message/rfc822), como no "Encaminhar como anexo" do Thunderbird.
 - **Outros Cartões de Visita** anexa o vCard (`.vcf`) de cada contato escolhido; listas de distribuição não entram. Os arquivos são criados numa pasta temporária própria e apagados quando a mensagem fecha.
@@ -378,7 +408,7 @@ O **AltGr** (Alt da direita) sempre digita o caractere do teclado.
 - **Imagem de fora (https) numa assinatura ou Parte Rápida**: nessa mensagem, a composição passa a carregar conteúdo remoto, como o Thunderbird faz quando o usuário cola uma imagem. O que veio na citação continua bloqueado. Para não depender disso, use a imagem embutida (`data:`), que é o que as páginas Assinaturas e Partes Rápidas gravam.
 - **Campos da assinatura numa tabela**: a linha sai quando os campos dela ficam vazios, mas um rótulo numa célula separada ("Cel.:" numa coluna e {celular} na outra) fica. Ponha rótulo e campo na mesma célula.
 - **Visualização Dinâmica**:
-  - vale para fontes, tamanhos, cores da fonte e do realce e estilos (os mesmos comandos e o mesmo alvo do clique). Negrito, marcadores, espaçamento e os outros comandos não têm prévia;
+  - vale para fontes, tamanhos, cores da fonte e do realce, sombreamento e estilos (os mesmos comandos e o mesmo alvo do clique). Negrito, marcadores, espaçamento, bordas e os outros comandos não têm prévia;
   - durante a prévia, a seleção sai da tela e um cinza translúcido marca o trecho, porque a cor de seleção do sistema cobriria a cor e o realce da prévia; tirando o mouse, a seleção volta;
   - Automático e Sem Cor mostram o texto com a cor e o fundo do parágrafo, que é o que o clique deixa na maioria dos casos;
   - num parágrafo com quebras de linha (Shift+Enter), a prévia de um estilo de parágrafo mostra o parágrafo inteiro; o clique muda só as linhas da seleção;
@@ -404,13 +434,14 @@ O **AltGr** (Alt da direita) sempre digita o caractere do teclado.
 | `background.js`, `lib/config.js` | Página de eventos: configuração (política > usuário > padrão), comandos que usam a API compose (prioridade, formato de envio), Salvar Seleção na Galeria, Ajuda e Contatar o Suporte |
 | `experiments/faixa/implementation.js` | API do experiment, controlador de cada janela de composição, autoteste e fila de eventos |
 | `experiments/faixa/host.js` | Tudo o que depende de `messengercompose.xhtml` no TB 153: montagem, Enviar, comandos nativos, envio, anexos (mensagens e cartões de visita), pastas e levantamento de teclas |
-| `experiments/faixa/engine.js` | Motor de edição pelo editor do Gecko: um comando = um Ctrl+Z; pincel, tamanhos em pt, estilos, tabela, Texto sem Formatação, Visualização Dinâmica (fora do editor), normalização do envio |
+| `experiments/faixa/engine.js` | Motor de edição pelo editor do Gecko: um comando = um Ctrl+Z; pincel, tamanhos em pt, estilos, Sombreamento, Bordas, listas de vários níveis, Classificar, Selecionar Texto com Formatação Semelhante, Mesclar Formatação, Alterar Estilos, tabela, Texto sem Formatação, Visualização Dinâmica (fora do editor), normalização do envio |
+| `experiments/faixa/themes.js` | Alterar Estilos: conjuntos de estilos, cores e fontes do tema e espaçamento; a definição da faixa com o tema da mensagem |
 | `experiments/faixa/ui.js` | Interface da faixa (abas, grupos que recolhem, menus, grades de tabela, emoji e símbolos, dicas) e leitura dos atalhos |
 | `experiments/faixa/names.js`, `dialogs.js` | Verificar Nomes e Selecionar Nomes; as janelas da faixa (escolha de nomes, Selecionar Nomes, Anexar Mensagem, cartões de visita, Data e Hora, Salvar Seleção, Contatar o Suporte, Sobre) |
-| `experiments/faixa/signatures.js`, `quickparts.js`, `sanitize.js` | Assinaturas (padrão por conta, campos, troca de conta, menu), Partes Rápidas (galeria, inserção, Salvar Seleção) e a limpeza do HTML delas; também usados pelas páginas Assinaturas e Partes Rápidas |
+| `experiments/faixa/signatures.js`, `quickparts.js`, `sanitize.js` | Assinaturas (padrão por conta, campos, troca de conta, menu), Partes Rápidas (galeria, inserção, Salvar Seleção) e a limpeza do HTML delas e do que entra com Mesclar Formatação; também usados pelas páginas Assinaturas e Partes Rápidas |
 | `experiments/faixa/ribbon.css`, `icons.js` | Visual da faixa e ícones (Lucide, licença ISC em `LICENSES/`) |
 | `ribbon/definition.json` | Definição declarativa: comandos, abas, grupos, menus, estilos, emoji e símbolos, perfis de atalho e a tabela de referência do Office. Textos em pt-BR |
-| `ribbon/locales/*.json` | Inglês (`en-US`), espanhol (`es`), italiano (`it`), alemão (`de`) e francês (`fr`): por cima da definição, os textos do código (seção `strings`) e os nomes das teclas (`keyNames`) |
+| `ribbon/locales/*.json` | Inglês (`en-US`), espanhol (`es`), italiano (`it`), alemão (`de`) e francês (`fr`): por cima da definição, os textos do código (seção `strings`), os nomes das opções do Alterar Estilos (`changeStyles`) e os nomes das teclas (`keyNames`) |
 | `options/` | Opções da Faixa (`opcoes.*`), Assinaturas e Partes Rápidas (`assinaturas.*`, `partes.html`), Ajuda (`ajuda.*`), diagnóstico (`diagnostico.*`) e a tradução delas (`pagina.js`) |
 | `tools/build.py` | Empacota o `.xpi` (e o `updates.json`) |
 | `tools/check_i18n.py` | Confere se todo texto em pt-BR tem tradução, com as mesmas variáveis, e se nenhuma tradução ficou apontando para o lugar errado |

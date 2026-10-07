@@ -148,4 +148,257 @@ var FaixaSanitizer = {
   inertDocument(win) {
     return new win.DOMParser().parseFromString("<!doctype html><html><body></body></html>", "text/html");
   },
+
+  /** Mesclar Formatação, como no Word: o HTML copiado sem a formatação de origem. Passa
+   * pela limpeza de sempre e então ficam só o texto, os parágrafos e as quebras de linha,
+   * o negrito, o itálico e o sublinhado (das marcas ou do style, como no Google Docs), os
+   * links, as listas, as tabelas e as imagens. Fontes, tamanhos, cores, fundos, margens,
+   * alinhamentos e classes saem; títulos, citações e outros blocos viram parágrafos.
+   * Devolve { html, inline, remote }: inline quando tudo cabe numa linha (entra no meio
+   * do parágrafo do cursor); remote quando há imagem de fora (http, https). */
+  merge(html, win) {
+    const inert = this.inertDocument(win);
+    const src = this.clean(html, inert, win);
+    const out = inert.createElement("div");
+    const scratch = inert.createElement("span");
+    const BLOCK = /^(p|div|h[1-6]|blockquote|address|center|pre|dd|dt|dl|caption)$/;
+    // Ênfase de um elemento: a marca (b, strong, i, em, u, ins) e o style, que vence a marca
+    // (o Google Docs embrulha tudo num <b style="font-weight: normal">).
+    const emphasis = (el, f) => {
+      const tag = el.localName;
+      const next = { b: f.b || tag == "b" || tag == "strong", i: f.i || tag == "i" || tag == "em", u: f.u || tag == "u" || tag == "ins" };
+      scratch.setAttribute("style", el.getAttribute("style") || "");
+      const st = scratch.style;
+      if (st.fontWeight) {
+        next.b = st.fontWeight == "bold" || st.fontWeight == "bolder" || parseInt(st.fontWeight, 10) >= 600;
+      }
+      if (st.fontStyle) {
+        next.i = /^(italic|oblique)/.test(st.fontStyle);
+      }
+      const line = st.textDecorationLine || st.textDecoration;
+      if (line) {
+        next.u = /underline/.test(line);
+      }
+      return next;
+    };
+    const wrap = (node, f, href) => {
+      let n = node;
+      for (const [on, tag] of [[f.u, "u"], [f.i, "i"], [f.b, "b"]]) {
+        if (on) {
+          const el = inert.createElement(tag);
+          el.append(n);
+          n = el;
+        }
+      }
+      if (href) {
+        const a = inert.createElement("a");
+        a.setAttribute("href", href);
+        a.append(n);
+        n = a;
+      }
+      return n;
+    };
+    const image = img => {
+      const el = inert.createElement("img");
+      for (const name of ["src", "alt", "width", "height"]) {
+        if (img.hasAttribute(name)) {
+          el.setAttribute(name, img.getAttribute(name));
+        }
+      }
+      return el;
+    };
+    // Conteúdo de linha (num parágrafo, item de lista ou célula): blocos de dentro viram
+    // quebras de linha; listas de dentro de um item continuam listas.
+    const inline = (node, target, f, href, ctx) => {
+      if (node.nodeType == 3) {
+        const text = node.data;
+        if (ctx.pre && text.includes("\n")) {
+          text.split("\n").forEach((line, k) => {
+            if (k) {
+              target.append(inert.createElement("br"));
+            }
+            if (line) {
+              target.append(wrap(inert.createTextNode(line), f, href));
+            }
+          });
+        } else if (text) {
+          target.append(wrap(inert.createTextNode(text), f, href));
+        }
+        return;
+      }
+      if (node.nodeType != 1) {
+        return;
+      }
+      const tag = node.localName;
+      if (tag == "br") {
+        target.append(inert.createElement("br"));
+        return;
+      }
+      if (tag == "img") {
+        target.append(wrap(image(node), {}, href));
+        return;
+      }
+      if ((tag == "ul" || tag == "ol") && ctx.allowLists) {
+        target.append(list(node, f));
+        return;
+      }
+      if (tag == "table" || tag == "hr") {
+        return; // tabela dentro de um item ou célula: só o texto (pelos filhos, abaixo)
+      }
+      const block = BLOCK.test(tag) || tag == "li" || tag == "ul" || tag == "ol" || tag == "tr";
+      const lineBreak = () => {
+        if (block && target.lastChild && target.lastChild.localName != "br") {
+          target.append(inert.createElement("br"));
+        }
+      };
+      lineBreak();
+      const link = tag == "a" && node.hasAttribute("href") ? node.getAttribute("href") : href;
+      const g = emphasis(node, f);
+      const sub = Object.assign({}, ctx, { pre: ctx.pre || tag == "pre" });
+      for (const c of [...node.childNodes]) {
+        inline(c, target, g, link, sub);
+      }
+      lineBreak();
+    };
+    const list = (node, f) => {
+      const el = inert.createElement(node.localName);
+      if (node.localName == "ol" && /^\d+$/.test(node.getAttribute("start") || "")) {
+        el.setAttribute("start", node.getAttribute("start"));
+      }
+      for (const c of [...node.childNodes]) {
+        if (c.nodeType == 1 && c.localName == "li") {
+          const li = inert.createElement("li");
+          for (const k of [...c.childNodes]) {
+            inline(k, li, emphasis(c, f), null, { allowLists: true });
+          }
+          while (li.lastChild && li.lastChild.localName == "br") {
+            li.lastChild.remove();
+          }
+          el.append(li);
+        } else if (c.nodeType == 1 && (c.localName == "ul" || c.localName == "ol")) {
+          // Lista dentro de lista sem <li> (HTML de alguns programas): fica no último item.
+          if (el.lastChild) {
+            el.lastChild.append(list(c, f));
+          }
+        }
+      }
+      return el;
+    };
+    const table = node => {
+      const el = inert.createElement("table");
+      for (const name of ["border", "cellpadding", "cellspacing"]) {
+        if (node.hasAttribute(name)) {
+          el.setAttribute(name, node.getAttribute(name));
+        }
+      }
+      const body = inert.createElement("tbody");
+      for (const tr of node.querySelectorAll("tr")) {
+        if (tr.closest("table") != node) {
+          continue;
+        }
+        const row = inert.createElement("tr");
+        for (const cell of tr.children) {
+          if (cell.localName != "td" && cell.localName != "th") {
+            continue;
+          }
+          const c = inert.createElement(cell.localName);
+          for (const name of ["colspan", "rowspan"]) {
+            if (cell.hasAttribute(name)) {
+              c.setAttribute(name, cell.getAttribute(name));
+            }
+          }
+          for (const k of [...cell.childNodes]) {
+            inline(k, c, emphasis(cell, {}), null, {});
+          }
+          while (c.lastChild && c.lastChild.localName == "br") {
+            c.lastChild.remove();
+          }
+          row.append(c);
+        }
+        body.append(row);
+      }
+      el.append(body);
+      return el;
+    };
+    // Fluxo de primeiro nível: blocos viram parágrafos; texto solto entra no parágrafo atual.
+    let para = null;
+    const flush = () => {
+      if (para) {
+        while (para.lastChild && para.lastChild.localName == "br") {
+          para.lastChild.remove();
+        }
+        const text = para.textContent;
+        if (/[^ \t\n\r\f]/.test(text) || para.querySelector("img")) {
+          // Linha só com &nbsp; (a linha em branco do Word): parágrafo vazio.
+          if (!text.replace(/ /g, "").trim() && !para.querySelector("img")) {
+            para.replaceChildren(inert.createElement("br"));
+          }
+          out.append(para);
+        }
+        para = null;
+      }
+    };
+    const flow = (node, f, href) => {
+      if (node.nodeType == 3) {
+        para = para || inert.createElement("p");
+        inline(node, para, f, href, {});
+        return;
+      }
+      if (node.nodeType != 1) {
+        return;
+      }
+      const tag = node.localName;
+      if (tag == "ul" || tag == "ol") {
+        flush();
+        out.append(list(node, f));
+        return;
+      }
+      if (tag == "table") {
+        flush();
+        out.append(table(node));
+        return;
+      }
+      if (tag == "hr") {
+        flush();
+        out.append(inert.createElement("hr"));
+        return;
+      }
+      if (BLOCK.test(tag) || tag == "li") {
+        flush();
+        if (tag == "pre") {
+          para = inert.createElement("p");
+          inline(node, para, f, href, { pre: true });
+          flush();
+          return;
+        }
+        const g = emphasis(node, f);
+        for (const c of [...node.childNodes]) {
+          flow(c, g, href);
+        }
+        flush();
+        return;
+      }
+      if (tag == "br" || tag == "img" || !node.childNodes.length) {
+        para = para || inert.createElement("p");
+        inline(node, para, f, href, {});
+        return;
+      }
+      // Elemento de linha (span, font, a, b...): os filhos seguem no fluxo com a ênfase dele.
+      const link = tag == "a" && node.hasAttribute("href") ? node.getAttribute("href") : href;
+      const g = emphasis(node, f);
+      for (const c of [...node.childNodes]) {
+        flow(c, g, link);
+      }
+    };
+    for (const c of [...src.childNodes]) {
+      flow(c, {}, null);
+    }
+    flush();
+    const remote = this.hasRemoteImages(out);
+    const only = out.children.length == 1 && out.firstElementChild.localName == "p" ? out.firstElementChild : null;
+    if (only) {
+      return { html: only.innerHTML, inline: true, remote };
+    }
+    return { html: out.innerHTML, inline: false, remote };
+  },
 };
