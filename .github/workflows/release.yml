@@ -1,0 +1,79 @@
+name: Release
+
+# Publica a release com o .xpi quando chega ao main um manifest.json com uma versão
+# que ainda não foi publicada (a tag v<versão> é criada aqui), ou quando chega uma
+# tag v<versão>. Ver "Publicar uma versão" no README.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: Publicar o .xpi
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Versão do manifest.json
+        id: versao
+        run: |
+          versao=$(python -c "import json; print(json.load(open('manifest.json', encoding='utf-8'))['version'])")
+          tag="v$versao"
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_REF_NAME" != "$tag" ]; then
+            echo "::error::A tag $GITHUB_REF_NAME não bate com a versão $versao do manifest.json."
+            exit 1
+          fi
+          echo "VERSAO=$versao" >> "$GITHUB_ENV"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          if gh release view "$tag" --json assets --jq '.assets[].name' 2>/dev/null | grep -qx "faixa-$versao.xpi"; then
+            echo "A release $tag já tem faixa-$versao.xpi: nada a publicar."
+            echo "publicar=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicar=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Conferir as traduções
+        if: steps.versao.outputs.publicar == 'true'
+        run: python tools/check_i18n.py
+      - name: Gerar o .xpi
+        if: steps.versao.outputs.publicar == 'true'
+        run: python tools/build.py
+      - name: Montar as notas (seção da versão no CHANGELOG.md)
+        if: steps.versao.outputs.publicar == 'true'
+        run: |
+          awk -v v="## $VERSAO" '$0 == v { on = 1; next } /^## / { on = 0 } on' CHANGELOG.md > notas.md
+          if ! grep -q '[^[:space:]]' notas.md; then
+            echo "::error::O CHANGELOG.md não tem a seção ## $VERSAO."
+            exit 1
+          fi
+          {
+            echo
+            echo "### Instalar"
+            echo
+            echo "Baixe \`faixa-$VERSAO.xpi\` abaixo. No Thunderbird: **Ferramentas → Extensões e temas** → engrenagem → **Instalar extensão a partir de arquivo…**. Na frota, por política: ver o [README](https://github.com/$GITHUB_REPOSITORY/blob/$TAG/README.md#na-frota-por-política)."
+            echo
+            echo "SHA-256 do pacote: \`$(sha256sum "dist/faixa-$VERSAO.xpi" | cut -d' ' -f1)\`"
+          } >> notas.md
+          cat notas.md
+      - name: Publicar a release
+        if: steps.versao.outputs.publicar == 'true'
+        run: |
+          xpi="dist/faixa-$VERSAO.xpi"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            # Release criada antes (pela página de Releases, por exemplo): só falta o pacote.
+            gh release upload "$TAG" "$xpi" --clobber
+          else
+            gh release create "$TAG" "$xpi" --target "$GITHUB_SHA" --title "Faixa de Opções $VERSAO" --notes-file notas.md
+          fi

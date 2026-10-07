@@ -5,7 +5,7 @@ Sobe um servidor local na raiz do complemento e abre test/harness/compose.html.
 Sem --gecko roda no Chromium; com --gecko, no Firefox do Playwright, que tem o
 editor do Gecko (o mesmo motor do Thunderbird): espaços, &nbsp; e desfazer como lá.
 """
-import asyncio, json, os, re, sys, threading, http.server, functools, socketserver
+import asyncio, base64, json, os, re, sys, threading, http.server, functools, socketserver
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
@@ -40,8 +40,15 @@ def check(name, ok, detail=""):
     if not ok:
         FAILS.append(name)
 
+# Sem internet: as imagens de fora dos testes (assinaturas, Partes Rápidas) recebem um PNG de 1 px.
+PNG_1PX = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")
+
+async def offline(route):
+    await route.fulfill(status=200, content_type="image/png", body=PNG_1PX)
+
 async def open_page(b, query="", width=1440, height=900):
     pg = await b.new_page(viewport={"width": width, "height": height})
+    await pg.route("https://example.com/**", offline)
     logs = []
     pg.on("console", lambda m: logs.append(f"{m.type}: {m.text}") if m.type in ("error", "warning") else None)
     pg.on("pageerror", lambda e: logs.append(f"PAGEERROR: {e}"))
@@ -593,7 +600,8 @@ async def main():
         check("Arquivo: menu com Salvar Rascunho, Modelo, Imprimir, Opções da Faixa e Fechar",
               any("Salvar Rascunho" in i for i in items) and any("Salvar como Modelo" in i for i in items) and any("Imprimir" in i for i in items)
               and any("Opções da Faixa" in i for i in items) and any(i.startswith("Fechar") or "Fechar" in i for i in items), items)
-        icons = await pg.evaluate("document.querySelectorAll('.fx-mfile .fx-mic').length")
+        check("Arquivo: sem Propriedades… nem outro item previsto para outra fase", not any("Propriedades" in i or "(fase" in i for i in items), items)
+        icons =await pg.evaluate("document.querySelectorAll('.fx-mfile .fx-mic').length")
         check("Arquivo: itens com ícone", icons >= 5, icons)
         await pg.screenshot(path=os.path.join(OUT, "11_arquivo.png"), clip={"x": 0, "y": 0, "width": 520, "height": 420})
         await pg.get_by_role("menuitem", name="Salvar como Modelo").click()
@@ -2445,3 +2453,4 @@ async def main():
     print("\n%d falhas" % len(FAILS), FAILS)
 
 asyncio.run(main())
+sys.exit(1 if FAILS else 0)

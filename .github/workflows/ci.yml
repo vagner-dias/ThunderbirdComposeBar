@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pacote:
+    name: Traduções e pacote
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Conferir as traduções
+        run: python tools/check_i18n.py
+      - name: Gerar o .xpi
+        run: python tools/build.py
+      - name: Guardar o .xpi
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/faixa-*.xpi
+          archive: false
+          if-no-files-found: error
+
+  simulador:
+    name: Simulador (${{ matrix.navegador }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - navegador: chromium
+            opcao: ""
+          # No Firefox, o editor é o do Gecko, o mesmo do Thunderbird.
+          - navegador: firefox
+            opcao: --gecko
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Instalar o Playwright
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps ${{ matrix.navegador }}
+      - name: Faixa (run_tests.py)
+        run: python test/harness/run_tests.py test/out/faixa ${{ matrix.opcao }}
+      - name: Páginas do complemento e background (diag_test.py)
+        if: success() || failure()
+        run: python test/harness/diag_test.py test/out/paginas ${{ matrix.opcao }}
+      - name: Guardar as capturas
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: capturas-${{ matrix.navegador }}
+          path: test/out/
