@@ -1,0 +1,14 @@
+# Pacotes gerados por tools/build.py (o .xpi vai para as Releases do GitHub)
+dist/
+
+# Capturas de tela do simulador (pasta padrão de test/harness/*.py)
+test/out/
+
+# Python
+__pycache__/
+*.pyc
+
+# Sistema e editores
+.DS_Store
+Thumbs.db
+*.swp
