@@ -1,8 +1,8 @@
 # Faixa de Opções para o Thunderbird
 
-Complemento da Bluecker que recria no Thunderbird a faixa de opções da janela de composição do Outlook, com o Pincel de Formatação. Esta é a **0.7.1**: abas Mensagem, Inserir, Formatar Texto e Ajuda, a **Visualização Dinâmica**, as **confirmações de entrega e de leitura**, o **Acompanhamento**, a opção de **ocultar a barra de menus** da janela de mensagem e a faixa em **seis idiomas** (português, inglês, espanhol, italiano, alemão e francês). Feita para o **Thunderbird ESR 153** (testada também no 156).
+Complemento da Bluecker que recria no Thunderbird a faixa de opções da janela de composição do Outlook, com o Pincel de Formatação. Esta é a **0.7.2**: abas Mensagem, Inserir, Formatar Texto e Ajuda, a **Visualização Dinâmica**, as **confirmações de entrega e de leitura**, o **Acompanhamento**, a opção de **ocultar a barra de menus** da janela de mensagem e a faixa em **seis idiomas** (português, inglês, espanhol, italiano, alemão e francês). Feita para o **Thunderbird ESR 153** (testada também no 156).
 
-- ID: `faixa@bluecker.com` · versão 0.7.1 · Manifest V3 com WebExtension Experiment
+- ID: `faixa@bluecker.com` · versão 0.7.2 · Manifest V3 com WebExtension Experiment
 - **Confirmação de Entrega e de Leitura** (grupo Controle da aba Mensagem): as mesmas do menu Opções do Thunderbird. Os botões já abrem acesos quando a conta pede as confirmações por padrão e acompanham o menu Opções e a troca de conta no De:
 - **Acompanhamento ▾**, como o Sinalizar para Acompanhamento do Outlook: **Sinalizar para Mim** (depois do envio, a cópia em Enviados fica com a estrela do Thunderbird, também com Enviar mais tarde), **Sinalizar para os Destinatários** (o Outlook de quem recebe mostra o sinalizador) e **Limpar Sinalizador**. O rascunho guarda o que foi escolhido
 - **Barra de menus** (Arquivo, Editar, Exibir, Inserir, Formatar...): oculta por padrão na janela de mensagem, deixando só a faixa no topo; volta pelo menu ⋯ da faixa, pelas Opções da Faixa ou pela política. A tecla Alt (ou F10) mostra os menus enquanto são usados, como na opção Barra de Menus do próprio Thunderbird, que continua valendo
@@ -30,7 +30,7 @@ O `.xpi` de cada versão está nas [Releases](https://github.com/vagner-dias/Thu
 ### Numa máquina, para testar
 
 1. No Thunderbird: **Ferramentas → Extensões e temas**.
-2. Engrenagem → **Instalar extensão a partir de arquivo…** → escolha `faixa-0.7.1.xpi`. Por cima de uma versão anterior, é só instalar: as preferências, as assinaturas e as Partes Rápidas continuam.
+2. Engrenagem → **Instalar extensão a partir de arquivo…** → escolha `faixa-0.7.2.xpi`. Por cima de uma versão anterior, é só instalar: as preferências, as assinaturas e as Partes Rápidas continuam.
 3. O Thunderbird avisa que a extensão pede **acesso total**. É esperado: a faixa é um *Experiment*, que roda dentro do Thunderbird para mexer na janela de composição.
 
 Para uma sessão só (some ao fechar o Thunderbird): **Ferramentas → Ferramentas de desenvolvimento → Depurar extensões → Este Thunderbird → Carregar extensão temporária…** e escolha o `.xpi` ou o `manifest.json` da raiz do repositório.
@@ -47,7 +47,7 @@ Crie ou complete o `policies.json` na pasta `distribution` da instalação do Th
     "ExtensionSettings": {
       "faixa@bluecker.com": {
         "installation_mode": "force_installed",
-        "install_url": "https://suporte.exemplo.com.br/faixa/faixa-0.7.1.xpi"
+        "install_url": "https://suporte.exemplo.com.br/faixa/faixa-0.7.2.xpi"
       }
     },
     "3rdparty": {

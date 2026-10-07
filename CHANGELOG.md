@@ -2,6 +2,11 @@
 
 O `.xpi` de cada versão fica nas [Releases](https://github.com/vagner-dias/ThunderbirdComposeBar/releases). A seção de cada versão vira as notas da release (ver [Publicar uma versão](README.md#publicar-uma-versão)).
 
+## 0.7.2
+
+- Menu Arquivo: sai o item **Propriedades…**, que aparecia desativado, com "(fase 2)" no rótulo. A janela Propriedades continua prevista para a fase 2.
+- O `.xpi` de cada versão passa a ser publicado nas Releases do GitHub, gerado a partir da tag pelo workflow Release.
+
 ## 0.7.1
 
 Barra de menus oculta por padrão; a aba Ajuda perde Contatar o Suporte e Diagnóstico da Faixa (o diagnóstico continua no ⋯, no Sobre e nas Opções da Faixa).
