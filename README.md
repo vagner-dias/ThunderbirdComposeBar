@@ -417,7 +417,7 @@ O **AltGr** (Alt da direita) sempre digita o caractere do teclado.
 | `tools/gen_icons.py` | Gera `icons.js` |
 | `test/harness/` | Simulador com o controlador real e um host simulado; `background.html` roda o `background.js` com uma API simulada |
 | `CHANGELOG.md` | Histórico de versões; a seção de cada versão vira as notas da release |
-| `.github/workflows/` | `ci.yml`: traduções, pacote e simulador (Chromium e Firefox) a cada push; `release.yml`: publica a release com o `.xpi` quando chega uma tag `v<versão>` |
+| `.github/workflows/` | `ci.yml`: traduções, pacote e simulador (Chromium e Firefox) a cada push; `release.yml`: publica a release com o `.xpi` quando uma versão nova chega ao `main` |
 
 ## Testes no simulador
 
@@ -451,7 +451,8 @@ O que mudou em cada versão está no [CHANGELOG.md](CHANGELOG.md), e os pacotes,
 
 1. Suba a versão no `manifest.json` e no começo deste README (a versão atual e o nome do `.xpi` nos exemplos).
 2. No topo do `CHANGELOG.md`, escreva o que mudou numa seção `## <versão>`.
-3. Rode a conferência das traduções e os testes no simulador, faça o commit e leve para o `main`.
-4. Crie e envie a tag: `git tag v<versão>` e `git push origin v<versão>`.
+3. Rode a conferência das traduções e os testes no simulador, faça o commit e leve para o `main` (pull request).
 
-O workflow **Release** (`.github/workflows/release.yml`) confere se a tag bate com a versão do `manifest.json`, roda o `tools/check_i18n.py`, gera `faixa-<versão>.xpi` com o `tools/build.py` e publica a release com o pacote, o sha256 dele e a seção da versão no `CHANGELOG.md` como notas.
+Quando o `main` recebe um `manifest.json` com uma versão que ainda não tem release, o workflow **Release** (`.github/workflows/release.yml`) roda o `tools/check_i18n.py`, gera `faixa-<versão>.xpi` com o `tools/build.py`, cria a tag `v<versão>` e publica a release com o pacote, o sha256 dele e a seção da versão no `CHANGELOG.md` como notas. Sem seção no `CHANGELOG.md`, nada é publicado e o workflow falha.
+
+Para publicar de outro branch, envie a tag: `git tag v<versão>` e `git push origin v<versão>` (a tag precisa bater com a versão do `manifest.json`).
