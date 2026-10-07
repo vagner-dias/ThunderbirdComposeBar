@@ -3,7 +3,7 @@
   "name": "__MSG_extName__",
   "short_name": "Faixa",
   "description": "__MSG_extDescription__",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "default_locale": "pt_BR",
   "author": "Bluecker",
   "browser_specific_settings": {

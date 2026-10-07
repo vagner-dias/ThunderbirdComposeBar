@@ -30,28 +30,28 @@
 
     "bullets": { "label": "Marcadores", "icon": "list", "enabled": "html", "pressed": { "list": "ul" }, "menu": "bulletLibrary", "tip": "Cria uma lista com marcadores." },
     "numbering": { "label": "Numeração", "icon": "list-ordered", "enabled": "html", "pressed": { "list": "ol" }, "menu": "numberLibrary", "tip": "Cria uma lista numerada." },
-    "multilevel": { "label": "Lista de Vários Níveis", "icon": "list-tree", "phase": 2, "tip": "Organiza itens em vários níveis (1. → a. → i.)." },
+    "multilevel": { "label": "Lista de Vários Níveis", "icon": "list-tree", "enabled": "html", "menu": "multilevel", "tip": "Cria uma lista com vários níveis (1. → a. → i.). Aumentar Recuo e Diminuir Recuo mudam o nível do item; cada nível tem a sua numeração." },
     "outdent": { "label": "Diminuir Recuo", "icon": "list-indent-decrease", "enabled": "html", "tip": "Aproxima o parágrafo da margem." },
     "indent": { "label": "Aumentar Recuo", "icon": "list-indent-increase", "enabled": "html", "tip": "Afasta o parágrafo da margem." },
-    "sort": { "label": "Classificar", "icon": "arrow-down-a-z", "phase": 2, "tip": "Coloca parágrafos ou itens em ordem alfabética." },
+    "sort": { "label": "Classificar", "icon": "arrow-down-a-z", "enabled": "html", "tip": "Coloca em ordem os parágrafos ou os itens de lista selecionados, por texto, número ou data." },
     "showMarks": { "label": "Mostrar Tudo", "icon": "pilcrow", "enabled": "html", "pressed": "marks", "tip": "Mostra as marcas de parágrafo. As marcas não vão na mensagem.", "anyFocus": true },
     "alignLeft": { "label": "Alinhar à Esquerda", "icon": "text-align-start", "enabled": "html", "pressed": { "align": "left" }, "tip": "Alinha o conteúdo à margem esquerda." },
     "alignCenter": { "label": "Centralizar", "icon": "text-align-center", "enabled": "html", "pressed": { "align": "center" }, "tip": "Centraliza o conteúdo na página." },
     "alignRight": { "label": "Alinhar à Direita", "icon": "text-align-end", "enabled": "html", "pressed": { "align": "right" }, "tip": "Alinha o conteúdo à margem direita." },
     "alignJustify": { "label": "Justificar", "icon": "text-align-justify", "enabled": "html", "pressed": { "align": "justify" }, "tip": "Distribui o texto igualmente entre as margens." },
     "lineSpacing": { "label": "Espaçamento de Linha e Parágrafo", "icon": "spacing", "type": "menu", "menu": "lineSpacing", "enabled": "html", "tip": "Escolhe o espaço entre as linhas do parágrafo." },
-    "shading": { "label": "Sombreamento", "icon": "paint-bucket", "phase": 2, "tip": "Colore o fundo do parágrafo." },
-    "borders": { "label": "Bordas", "icon": "square-dashed", "phase": 2, "tip": "Adiciona bordas ao parágrafo." },
+    "shading": { "label": "Sombreamento", "icon": "paint-bucket", "type": "color", "palette": "shading", "default": "#D9E2F3", "enabled": "html", "tip": "Colore o fundo do parágrafo. Com só uma parte do parágrafo selecionada, colore o fundo desse texto." },
+    "borders": { "label": "Bordas", "icon": "border-bottom", "iconBy": { "state": "lastBorder", "icons": { "bottom": "border-bottom", "top": "border-top", "left": "border-left", "right": "border-right", "none": "border-none", "all": "border-all", "outside": "border-outside", "insideH": "border-inside-h" } }, "enabled": "html", "menu": "borders", "tip": "Adiciona bordas ao parágrafo: embaixo, em cima, dos lados ou em volta. O botão repete a última escolha do menu." },
 
     "styles": { "label": "Estilos", "type": "gallery", "enabled": "html", "tip": "Aplica um estilo ao parágrafo." },
     "style": { "label": "Estilo", "enabled": "html", "hidden": true },
-    "changeStyles": { "label": "Alterar Estilos", "icon": "swatch-book", "phase": 2, "tip": "Troca o conjunto de estilos, cores e fontes do tema." },
+    "changeStyles": { "label": "Alterar Estilos", "icon": "swatch-book", "enabled": "html", "menu": "changeStyles", "tip": "Troca o conjunto de estilos, as cores e as fontes do tema e o espaçamento entre parágrafos desta mensagem. Os títulos e as ênfases que já estão no texto mudam junto." },
 
     "find": { "label": "Localizar", "icon": "search", "native": "cmd_find", "focus": "editor", "tbKeys": ["Ctrl+F"], "tip": "Localiza texto na mensagem." },
     "replace": { "label": "Substituir", "icon": "replace", "native": "cmd_findReplace", "focus": "editor", "enabled": "editor", "tbKeys": ["Ctrl+H"], "tip": "Pesquisa e substitui texto na mensagem." },
     "select": { "label": "Selecionar", "icon": "text-select", "type": "menu", "menu": "select", "tip": "Seleciona texto na mensagem." },
     "selectAll": { "label": "Selecionar Tudo", "native": "cmd_selectAll", "focus": "editor", "tbKeys": ["Ctrl+A"], "hidden": true },
-    "selectSimilar": { "label": "Selecionar Texto com Formatação Semelhante", "phase": 2, "hidden": true },
+    "selectSimilar": { "label": "Selecionar Texto com Formatação Semelhante", "enabled": "html", "hidden": true },
     "zoom": { "label": "Zoom", "icon": "zoom-in", "type": "menu", "menu": "zoom", "tip": "Aumenta ou diminui a exibição da mensagem. Não altera o que é enviado." },
 
     "addressBook": { "label": "Catálogo de Endereços", "icon": "book-user", "tip": "Escolhe destinatários para Para, Cc e Cco nos catálogos de endereços. O F9 mostra os contatos ao lado da mensagem." },
@@ -132,7 +132,7 @@
     "attachCloud": { "label": "Filelink", "icon": "cloud-upload", "hidden": true },
     "attachVCard": { "label": "Meu Cartão de Visita (vCard)", "icon": "id-card", "hidden": true },
     "attachPublicKey": { "label": "Minha Chave Pública OpenPGP", "icon": "key-round", "hidden": true },
-    "mergeFormatting": { "label": "Mesclar Formatação", "phase": 2, "hidden": true }
+    "mergeFormatting": { "label": "Mesclar Formatação", "icon": "paintbrush", "enabled": "html", "hidden": true }
   },
 
   "fileTab": { "label": "Arquivo", "menu": "file", "tip": "Salvar, imprimir, opções da faixa e fechar a mensagem." },
@@ -297,8 +297,8 @@
           "id": "paragraph", "label": "Parágrafo", "icon": "pilcrow",
           "items": [
             { "type": "rows", "rows": [
-              [ { "type": "iconSplit", "cmd": "bullets" }, { "type": "iconSplit", "cmd": "numbering" }, { "type": "icon", "cmd": "multilevel" }, { "type": "sep" }, { "type": "icon", "cmd": "outdent" }, { "type": "icon", "cmd": "indent" }, { "type": "sep" }, { "type": "icon", "cmd": "sort" }, { "type": "icon", "cmd": "showMarks" } ],
-              [ { "type": "icon", "cmd": "alignLeft" }, { "type": "icon", "cmd": "alignCenter" }, { "type": "icon", "cmd": "alignRight" }, { "type": "icon", "cmd": "alignJustify" }, { "type": "sep" }, { "type": "iconMenu", "cmd": "lineSpacing" }, { "type": "sep" }, { "type": "icon", "cmd": "shading" }, { "type": "icon", "cmd": "borders" } ]
+              [ { "type": "iconSplit", "cmd": "bullets" }, { "type": "iconSplit", "cmd": "numbering" }, { "type": "iconMenu", "cmd": "multilevel" }, { "type": "sep" }, { "type": "icon", "cmd": "outdent" }, { "type": "icon", "cmd": "indent" }, { "type": "sep" }, { "type": "icon", "cmd": "sort" }, { "type": "icon", "cmd": "showMarks" } ],
+              [ { "type": "icon", "cmd": "alignLeft" }, { "type": "icon", "cmd": "alignCenter" }, { "type": "icon", "cmd": "alignRight" }, { "type": "icon", "cmd": "alignJustify" }, { "type": "sep" }, { "type": "iconMenu", "cmd": "lineSpacing" }, { "type": "sep" }, { "type": "color", "cmd": "shading" }, { "type": "iconSplit", "cmd": "borders" } ]
             ] }
           ]
         },
@@ -306,7 +306,7 @@
           "id": "stylesGroup", "label": "Estilos", "icon": "swatch-book",
           "items": [
             { "type": "gallery", "cmd": "styles" },
-            { "type": "large", "cmd": "changeStyles" }
+            { "type": "largeMenu", "cmd": "changeStyles" }
           ]
         },
         {
@@ -440,6 +440,29 @@
       { "cmd": "numbering", "args": { "listStyle": "lower-roman" }, "label": "i. ii. iii." },
       { "cmd": "numbering", "args": { "listStyle": "upper-roman" }, "label": "I. II. III." }
     ],
+    "multilevel": [
+      { "head": "Biblioteca de Listas" },
+      { "cmd": "multilevel", "args": { "scheme": "1ai" }, "label": "1. → a. → i.", "checked": { "multilevel": "1ai" } },
+      { "cmd": "multilevel", "args": { "scheme": "IA1" }, "label": "I. → A. → 1.", "checked": { "multilevel": "IA1" } },
+      { "cmd": "multilevel", "args": { "scheme": "A1a" }, "label": "A. → 1. → a.", "checked": { "multilevel": "A1a" } },
+      { "cmd": "multilevel", "args": { "scheme": "bullets" }, "label": "● → ○ → ■", "checked": { "multilevel": "bullets" } }
+    ],
+    "borders": [
+      { "cmd": "borders", "args": { "side": "bottom" }, "icon": "border-bottom", "label": "Borda Inferior", "checked": "borderBottom" },
+      { "cmd": "borders", "args": { "side": "top" }, "icon": "border-top", "label": "Borda Superior", "checked": "borderTop" },
+      { "cmd": "borders", "args": { "side": "left" }, "icon": "border-left", "label": "Borda Esquerda", "checked": "borderLeft" },
+      { "cmd": "borders", "args": { "side": "right" }, "icon": "border-right", "label": "Borda Direita", "checked": "borderRight" },
+      { "sep": true },
+      { "cmd": "borders", "args": { "side": "none" }, "icon": "border-none", "label": "Sem Borda" },
+      { "cmd": "borders", "args": { "side": "all" }, "icon": "border-all", "label": "Todas as Bordas", "checked": "borderAll" },
+      { "cmd": "borders", "args": { "side": "outside" }, "icon": "border-outside", "label": "Bordas Externas", "checked": "borderOutside" },
+      { "cmd": "borders", "args": { "side": "insideH" }, "icon": "border-inside-h", "label": "Borda Horizontal Interna", "checked": "borderInsideH" },
+      { "sep": true },
+      { "cmd": "hline" }
+    ],
+    "changeStyles": [
+      { "custom": "changeStyles" }
+    ],
     "lineSpacing": [
       { "cmd": "lineSpacing", "args": { "value": "1.0" }, "label": "1,0", "checked": { "lineSpacing": "1.0" } },
       { "cmd": "lineSpacing", "args": { "value": "1.15" }, "label": "1,15", "checked": { "lineSpacing": "1.15" } },
@@ -534,23 +557,89 @@
     "highlight": {
       "none": "Sem Cor",
       "colors": ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#0000FF", "#FF0000", "#000080", "#008080", "#008000", "#800080", "#800000", "#808000", "#808080", "#C0C0C0", "#000000"]
+    },
+    "shading": {
+      "none": "Sem Cor"
     }
   },
 
   "styles": [
     { "id": "normal", "label": "Normal", "tag": "p", "css": "", "preview": "" },
     { "id": "nospace", "label": "Sem Espaçamento", "tag": "p", "css": "margin: 0; line-height: 1", "preview": "", "match": { "lineHeight": "1" } },
-    { "id": "h1", "label": "Título 1", "tag": "h1", "css": "margin: 12pt 0 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 16pt; font-weight: normal; color: #2F5496", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 16px; color: #2F5496" },
-    { "id": "h2", "label": "Título 2", "tag": "h2", "css": "margin: 2pt 0 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 13pt; font-weight: normal; color: #2F5496", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 14px; color: #2F5496" },
-    { "id": "h3", "label": "Título 3", "tag": "h3", "css": "margin: 2pt 0 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 12pt; font-weight: normal; color: #1F3763", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 13px; color: #1F3763" },
-    { "id": "title", "label": "Título", "tag": "h1", "css": "margin: 0; font-family: 'Calibri Light', Carlito, Arial, sans-serif; font-size: 28pt; font-weight: normal; letter-spacing: -0.5pt; line-height: 1", "preview": "font-family: 'Calibri Light', Carlito, sans-serif; font-size: 20px; letter-spacing: -0.3px", "match": { "fontSize": "28pt" } },
+    { "id": "h1", "label": "Título 1", "tag": "h1", "css": "margin: 12pt 0 0; font-family: {headings}; font-size: 16pt; font-weight: normal; color: {accent1-25}", "preview": "font-family: {headings}; font-size: 16px; color: {accent1-25}" },
+    { "id": "h2", "label": "Título 2", "tag": "h2", "css": "margin: 2pt 0 0; font-family: {headings}; font-size: 13pt; font-weight: normal; color: {accent1-25}", "preview": "font-family: {headings}; font-size: 14px; color: {accent1-25}" },
+    { "id": "h3", "label": "Título 3", "tag": "h3", "css": "margin: 2pt 0 0; font-family: {headings}; font-size: 12pt; font-weight: normal; color: {accent1-50}", "preview": "font-family: {headings}; font-size: 13px; color: {accent1-50}" },
+    { "id": "title", "label": "Título", "tag": "h1", "css": "margin: 0; font-family: {headings}; font-size: 28pt; font-weight: normal; letter-spacing: -0.5pt; line-height: 1", "preview": "font-family: {headings}; font-size: 20px; letter-spacing: -0.3px", "match": { "fontSize": "28pt" } },
     { "id": "subtitle", "label": "Subtítulo", "tag": "p", "css": "margin: 0 0 8pt; color: #5A5A5A; letter-spacing: 0.75pt", "preview": "color: #5A5A5A; letter-spacing: 0.6px", "match": { "letterSpacing": "0.75pt" } },
     { "id": "subtleEmphasis", "label": "Ênfase Sutil", "kind": "char", "tag": "em", "color": "#404040", "preview": "font-style: italic; color: #404040" },
     { "id": "emphasis", "label": "Ênfase", "kind": "char", "tag": "em", "preview": "font-style: italic" },
-    { "id": "intenseEmphasis", "label": "Ênfase Intensa", "kind": "char", "tag": "em", "color": "#4472C4", "preview": "font-style: italic; color: #4472C4" },
+    { "id": "intenseEmphasis", "label": "Ênfase Intensa", "kind": "char", "tag": "em", "color": "{accent1}", "preview": "font-style: italic; color: {accent1}" },
     { "id": "strong", "label": "Forte", "kind": "char", "tag": "strong", "preview": "font-weight: bold" },
     { "id": "quote", "label": "Citação", "tag": "p", "css": "margin: 10pt 43pt; font-style: italic; color: #404040; text-align: center", "preview": "font-style: italic; color: #404040", "match": { "fontStyle": "italic", "textAlign": "center" } }
   ],
+
+  "multilevelLists": [
+    { "id": "1ai", "tag": "ol", "levels": ["decimal", "lower-alpha", "lower-roman"] },
+    { "id": "IA1", "tag": "ol", "levels": ["upper-roman", "upper-alpha", "decimal"] },
+    { "id": "A1a", "tag": "ol", "levels": ["upper-alpha", "decimal", "lower-alpha"] },
+    { "id": "bullets", "tag": "ul", "levels": ["disc", "circle", "square"] }
+  ],
+
+  "changeStyles": {
+    "comment": "Alterar Estilos: cada mensagem guarda a escolha no atributo data-faixa-estilos do <body>. Nos estilos, {headings} é a fonte dos títulos do tema; {accent1}, {accent1-25} (25% mais escura), {accent1-50} e {text2} vêm das cores do tema.",
+    "styleSets": [
+      { "id": "default", "label": "Padrão" },
+      { "id": "word2010", "label": "Word 2010", "styles": {
+        "h1": { "css": "margin: 24pt 0 0; font-family: {headings}; font-size: 14pt; font-weight: bold; color: {accent1-25}", "preview": "font-family: {headings}; font-size: 14px; font-weight: bold; color: {accent1-25}" },
+        "h2": { "css": "margin: 10pt 0 0; font-family: {headings}; font-size: 13pt; font-weight: bold; color: {accent1}", "preview": "font-family: {headings}; font-size: 13px; font-weight: bold; color: {accent1}" },
+        "h3": { "css": "margin: 10pt 0 0; font-family: {headings}; font-size: 11pt; font-weight: bold; color: {accent1}", "preview": "font-family: {headings}; font-size: 12px; font-weight: bold; color: {accent1}" },
+        "title": { "css": "margin: 0 0 15pt; padding-bottom: 4pt; border-bottom: 1pt solid {accent1}; font-family: {headings}; font-size: 26pt; font-weight: normal; color: {text2}; letter-spacing: 0.25pt; line-height: 1", "preview": "font-family: {headings}; font-size: 19px; color: {text2}", "match": { "fontSize": "26pt" } },
+        "subtitle": { "css": "margin: 0 0 8pt; font-family: {headings}; font-size: 12pt; font-style: italic; color: {accent1}; letter-spacing: 0.75pt", "preview": "font-family: {headings}; font-style: italic; color: {accent1}; letter-spacing: 0.6px" },
+        "quote": { "css": "margin: 10pt 43pt; font-style: italic; color: #000000; text-align: center", "preview": "font-style: italic" }
+      } },
+      { "id": "word2003", "label": "Word 2003", "styles": {
+        "h1": { "css": "margin: 12pt 0 3pt; font-family: Arial, Helvetica, sans-serif; font-size: 16pt; font-weight: bold; color: #000000", "preview": "font-family: Arial, sans-serif; font-size: 16px; font-weight: bold" },
+        "h2": { "css": "margin: 12pt 0 3pt; font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-weight: bold; font-style: italic; color: #000000", "preview": "font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; font-style: italic" },
+        "h3": { "css": "margin: 12pt 0 3pt; font-family: Arial, Helvetica, sans-serif; font-size: 13pt; font-weight: bold; color: #000000", "preview": "font-family: Arial, sans-serif; font-size: 13px; font-weight: bold" },
+        "title": { "css": "margin: 12pt 0 3pt; font-family: Arial, Helvetica, sans-serif; font-size: 16pt; font-weight: bold; color: #000000; text-align: center; line-height: 1", "preview": "font-family: Arial, sans-serif; font-size: 16px; font-weight: bold", "match": { "fontSize": "16pt", "textAlign": "center" } },
+        "subtitle": { "css": "margin: 0 0 3pt; font-family: Arial, Helvetica, sans-serif; font-size: 12pt; color: #000000; text-align: center; letter-spacing: 0.75pt", "preview": "font-family: Arial, sans-serif; letter-spacing: 0.6px" },
+        "quote": { "css": "margin: 10pt 43pt; font-style: italic; color: #000000; text-align: center", "preview": "font-style: italic" }
+      } },
+      { "id": "lines", "label": "Linhas", "styles": {
+        "h1": { "css": "margin: 12pt 0 4pt; padding-bottom: 2pt; border-bottom: 1pt solid {accent1}; font-family: {headings}; font-size: 16pt; font-weight: normal; color: {accent1-25}", "preview": "font-family: {headings}; font-size: 16px; color: {accent1-25}; border-bottom: 1px solid {accent1}" },
+        "h2": { "css": "margin: 8pt 0 2pt; padding-bottom: 1pt; border-bottom: 0.5pt solid {accent1}; font-family: {headings}; font-size: 13pt; font-weight: normal; color: {accent1-25}", "preview": "font-family: {headings}; font-size: 14px; color: {accent1-25}; border-bottom: 1px solid {accent1}" },
+        "h3": { "css": "margin: 6pt 0 0; font-family: {headings}; font-size: 12pt; font-weight: bold; color: {accent1-50}", "preview": "font-family: {headings}; font-size: 13px; font-weight: bold; color: {accent1-50}" },
+        "title": { "css": "margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 2pt solid {accent1}; font-family: {headings}; font-size: 28pt; font-weight: normal; letter-spacing: -0.5pt; line-height: 1", "preview": "font-family: {headings}; font-size: 20px; letter-spacing: -0.3px; border-bottom: 2px solid {accent1}" },
+        "quote": { "css": "margin: 10pt 43pt; padding: 4pt 0; border-top: 0.5pt solid {accent1}; border-bottom: 0.5pt solid {accent1}; font-style: italic; color: {accent1}; text-align: center", "preview": "font-style: italic; color: {accent1}" }
+      } }
+    ],
+    "colors": [
+      { "id": "office", "label": "Office", "colors": ["#000000", "#FFFFFF", "#44546A", "#E7E6E6", "#4472C4", "#ED7D31", "#A5A5A5", "#FFC000", "#5B9BD5", "#70AD47"], "tokens": { "accent1-25": "#2F5496", "accent1-50": "#1F3763" } },
+      { "id": "office2007", "label": "Office 2007–2010", "colors": ["#000000", "#FFFFFF", "#1F497D", "#EEECE1", "#4F81BD", "#C0504D", "#9BBB59", "#8064A2", "#4BACC6", "#F79646"], "tokens": { "accent1-25": "#365F91", "accent1-50": "#243F60" } },
+      { "id": "grayscale", "label": "Escala de Cinza", "colors": ["#000000", "#FFFFFF", "#000000", "#F8F8F8", "#DDDDDD", "#B2B2B2", "#969696", "#808080", "#5F5F5F", "#4D4D4D"] },
+      { "id": "blue", "label": "Azul", "colors": ["#000000", "#FFFFFF", "#17406D", "#DBEFF9", "#0F6FC6", "#009DD9", "#0BD0D9", "#10CF9B", "#7CCA62", "#A5C249"] },
+      { "id": "green", "label": "Verde", "colors": ["#000000", "#FFFFFF", "#455F51", "#E3DED1", "#549E39", "#8AB833", "#C0CF3A", "#029676", "#4AB5C4", "#0989B1"] },
+      { "id": "red", "label": "Vermelho", "colors": ["#000000", "#FFFFFF", "#323232", "#E5C243", "#A5300F", "#D55816", "#E19825", "#B19C7D", "#7F5F52", "#B27D49"] },
+      { "id": "violet", "label": "Violeta", "colors": ["#000000", "#FFFFFF", "#373545", "#DCD8DC", "#AD84C6", "#8784C7", "#5D739A", "#6997AF", "#84ACB6", "#6F8183"] }
+    ],
+    "fonts": [
+      { "id": "office", "label": "Office", "major": "Calibri Light", "minor": "Calibri", "headings": "'Calibri Light', Carlito, Arial, sans-serif" },
+      { "id": "office2007", "label": "Office 2007–2010", "major": "Cambria", "minor": "Calibri" },
+      { "id": "arial", "label": "Arial", "major": "Arial", "minor": "Arial" },
+      { "id": "georgia", "label": "Georgia", "major": "Georgia", "minor": "Georgia" },
+      { "id": "tnr", "label": "Times New Roman", "major": "Times New Roman", "minor": "Times New Roman" },
+      { "id": "verdana", "label": "Verdana", "major": "Verdana", "minor": "Verdana" }
+    ],
+    "spacing": [
+      { "id": "default", "label": "Padrão (Conjunto de Estilos)" },
+      { "id": "none", "label": "Sem Espaço entre Parágrafos", "after": 0 },
+      { "id": "compact", "label": "Compacto", "after": 4 },
+      { "id": "tight", "label": "Estreito", "after": 6, "line": 1.15 },
+      { "id": "open", "label": "Aberto", "after": 10, "line": 1.15 },
+      { "id": "relaxed", "label": "Relaxado", "after": 6, "line": 1.5 },
+      { "id": "double", "label": "Duplo", "after": 8, "line": 2 }
+    ]
+  },
 
   "shortcutProfiles": {
     "thunderbird-office": {

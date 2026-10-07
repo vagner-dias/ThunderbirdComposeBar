@@ -475,6 +475,50 @@ var FaixaDialogs = {
     return p;
   },
 
+  /** Classificar Texto, como no Word: o que vai ser ordenado (parágrafos ou itens de lista),
+   * o tipo (texto, número ou data) e a ordem (crescente ou decrescente). Devolve
+   * { type, order } ou null. O último tipo e a última ordem voltam na próxima vez. */
+  sort(ui, { what }) {
+    const t = FaixaI18n.t.bind(FaixaI18n);
+    const last = FaixaDialogs.lastSort || { type: "text", order: "asc" };
+    const dlg = new FaixaDialog(ui, {
+      title: t("sort.title", "Classificar Texto"),
+      cls: "fx-dsmall",
+      build(d) {
+        const h = ui.h.bind(ui);
+        const id = "fx-dlg-sort-" + FaixaDialog.seq;
+        const type = h("select", { class: "fx-dbook", id: id + "-type" },
+          h("option", { value: "text", text: t("sort.text", "Texto") }),
+          h("option", { value: "number", text: t("sort.number", "Número") }),
+          h("option", { value: "date", text: t("sort.date", "Data") }));
+        type.value = last.type;
+        const radio = (value, label) => {
+          const input = h("input", { type: "radio", name: id + "-order", value, id: id + "-" + value });
+          input.checked = last.order == value;
+          return h("label", { class: "fx-dradio", for: id + "-" + value }, input, h("span", { text: label }));
+        };
+        d.body.append(
+          h("div", { class: "fx-drow" }, h("span", { class: "fx-dlabel", text: t("sort.by", "Classificar") }), h("span", { text: what })),
+          h("div", { class: "fx-drow" }, h("label", { class: "fx-dlabel", for: id + "-type", text: t("sort.type", "Tipo") }), type),
+          h("div", { class: "fx-drow", role: "radiogroup", "aria-label": t("sort.order", "Ordem") },
+            radio("asc", t("sort.asc", "Crescente")), radio("desc", t("sort.desc", "Decrescente"))));
+        const ok = () => {
+          const order = d.el.querySelector("input[name='" + id + "-order']:checked");
+          const choice = { type: type.value, order: order ? order.value : "asc" };
+          FaixaDialogs.lastSort = choice;
+          d.close(choice);
+        };
+        d.button(t("dialog.ok", "OK"), ok, { primary: true });
+        d.button(t("dialog.cancel", "Cancelar"), () => d.close(null));
+        d.initialFocus = type;
+        d.type = type;
+      },
+    });
+    const p = dlg.open();
+    p.dialog = dlg;
+    return p;
+  },
+
   /** Formatos de data e hora de Data e Hora, como no Word, no idioma dado. */
   dateFormats(date, locale) {
     const f = o => {

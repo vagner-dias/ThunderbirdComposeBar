@@ -2,6 +2,20 @@
 
 O `.xpi` de cada versão fica nas [Releases](https://github.com/vagner-dias/ThunderbirdComposeBar/releases). A seção de cada versão vira as notas da release (ver [Publicar uma versão](README.md#publicar-uma-versão)).
 
+## 0.8.0
+
+Os sete comandos que apareciam desativados na faixa, com a dica "Previsto para a fase 2", passam a funcionar.
+
+- **Alterar Estilos** (Formatar Texto → Estilos): Conjunto de Estilos, Cores, Fontes e Espaçamento entre Parágrafos para a mensagem, como no Word. Os títulos e as ênfases que já estão no texto mudam junto, a galeria de estilos e as Cores do Tema da paleta acompanham; a escolha vai junto no rascunho e sai no envio.
+- **Sombreamento**: o fundo do parágrafo, com Sem Cor e a paleta do tema; com só uma parte do parágrafo selecionada, o fundo do texto. Também na Visualização Dinâmica.
+- **Bordas**: inferior, superior, esquerda, direita, sem borda, todas, externas e horizontal interna, com a Linha Horizontal no fim do menu. O botão repete a última escolha e mostra qual é.
+- **Lista de Vários Níveis**: quatro esquemas (1. → a. → i., I. → A. → 1., A. → 1. → a. e ● → ○ → ■); Aumentar e Diminuir Recuo mudam o nível. No envio, cada nível leva o seu marcador escrito.
+- **Classificar**: parágrafos ou itens de lista por texto, número ou data, em ordem crescente ou decrescente.
+- **Mesclar Formatação** (Colar ▾): o colado fica com a formatação do ponto de inserção e mantém negrito, itálico, sublinhado, links, listas e tabelas.
+- **Selecionar Texto com Formatação Semelhante** (Selecionar ▾): seleciona de uma vez todo o texto com a formatação do cursor.
+- Quatro itens novos no autoteste; textos nos seis idiomas. A conferência das traduções passa a cobrir as paletas e as opções do Alterar Estilos.
+- A seta dos botões com menu sem título (Bordas) tem nome próprio para leitores de tela: "Mais opções de Bordas".
+
 ## 0.7.2
 
 - Menu Arquivo: sai o item **Propriedades…**, que aparecia desativado, com "(fase 2)" no rótulo. A janela Propriedades continua prevista para a fase 2.

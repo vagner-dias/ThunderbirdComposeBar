@@ -5,7 +5,8 @@ ribbon/locales/<idioma>.json, com as mesmas variáveis {assim}.
 - textos do código: t("chave", "texto"), FaixaI18n.t(...), T(...) do autoteste
   (prefixo test.), data-i18n* das páginas e o mapa TB_ACTION do diagnóstico;
 - ribbon/definition.json: comandos (label, labelOn, tip), abas, grupos, itens de
-  menu com rótulo, estilos, paletas, fontes do tema, perfis e officeReference.
+  menu com rótulo, estilos, paletas, fontes do tema, perfis, officeReference e as
+  opções do Alterar Estilos.
 
 Uso: python3 tools/check_i18n.py   (sai com erro se faltar alguma coisa)
 """
@@ -84,6 +85,25 @@ def check_definition(defn, ov, problems):
     for st in defn["styles"]:
         if st["id"] not in ov.get("styles", {}):
             problems.append(f"estilo {st['id']}")
+    # Paletas: os campos de texto ("Automático", "Sem Cor"); as listas de cores não têm texto.
+    palettes = defn.get("palettes", {})
+    for pid, p in palettes.items():
+        for field, value in p.items():
+            if isinstance(value, str) and f"{pid}.{field}" not in ov.get("palettes", {}):
+                problems.append(f"paleta {pid}.{field} ({value})")
+    for key in ov.get("palettes", {}):
+        pid, _, field = key.partition(".")
+        if not isinstance(palettes.get(pid, {}).get(field), str):
+            problems.append(f"paleta {key}: sobrando (não existe na definição)")
+    # Alterar Estilos: o nome de cada opção, "seção.id" (styleSets.default, colors.blue...).
+    options = {f"{section}.{o['id']}": o.get("label", "")
+               for section, items in defn.get("changeStyles", {}).items() if isinstance(items, list) for o in items}
+    for key, label in options.items():
+        if key not in ov.get("changeStyles", {}):
+            problems.append(f"Alterar Estilos {key} ({label})")
+    for key in ov.get("changeStyles", {}):
+        if key not in options:
+            problems.append(f"Alterar Estilos {key}: sobrando (não existe na definição)")
     for f in defn.get("themeFonts", []):
         if f["name"] not in ov.get("themeFonts", {}):
             problems.append(f"fonte do tema {f['name']}")

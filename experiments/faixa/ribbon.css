@@ -531,6 +531,16 @@ button:disabled .fx-ic.fx-red { color: var(--fx-faint); }
 .fx-glyphs.fx-emojis .fx-glyph { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; font-size: 18px; }
 .fx-glyph:hover:not(:disabled) { background: var(--fx-hover); box-shadow: inset 0 0 0 1px var(--fx-line2); }
 
+/* Alterar Estilos: Conjunto de Estilos, Cores, Fontes e Espaçamento lado a lado. */
+.fx-csgrid { display: grid; grid-template-columns: repeat(4, minmax(170px, 1fr)); gap: 2px 8px; max-width: calc(100vw - 24px); }
+.fx-cscol { display: flex; flex-direction: column; min-width: 0; }
+.fx-cscol .fx-mi { white-space: normal; }
+.fx-csstrip { display: inline-flex; gap: 1px; flex: none; }
+.fx-csstrip i { width: 9px; height: 14px; border: 1px solid rgba(0, 0, 0, 0.15); }
+@media (max-width: 780px) {
+  .fx-csgrid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+}
+
 /* Aviso dentro de um grupo (Formato: "Formatação desativada"). */
 .fx-note { display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 6px; color: var(--fx-muted); font-size: 11.5px; white-space: nowrap; }
 .fx-note[hidden] { display: none; }
@@ -675,6 +685,7 @@ button:disabled .fx-ic.fx-red { color: var(--fx-faint); }
   /* Amostras de cor e prévias de estilo mostram a cor de verdade, com borda. */
   .fx-sw,
   .fx-swb,
+  .fx-csstrip i,
   .fx-cbar { border: 1px solid CanvasText; box-shadow: none; }
   .fx-tprev { color: CanvasText; }
 }
@@ -739,6 +750,7 @@ button:disabled .fx-ic.fx-red { color: var(--fx-faint); }
 .fx-dmsg { margin: 0; }
 .fx-drow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fx-dlabel { color: var(--fx-muted); }
+.fx-dradio { display: inline-flex; align-items: center; gap: 4px; margin-inline-end: 12px; }
 .fx-dsearch { flex: 1; min-width: 180px; }
 .fx-dsearch,
 .fx-dbook,

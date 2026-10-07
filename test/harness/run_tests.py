@@ -127,7 +127,7 @@ async def main():
             print(("  ok    " if r["ok"] else "  FALHA ") + r["label"] + " — " + r["detail"])
         must = {"montagem", "barras", "menus", "enviar", "arquivo", "idioma", "editor", "foco", "negrito", "palavra", "estado", "fontePadrao", "tamanho",
                 "maiusculas", "espaco", "pincel", "pincelTravado", "enter", "marcas", "fontes", "atalhos", "mv3", "prioridade", "controle", "acompanhamento", "nomes", "catalogo",
-                "assinatura", "tabela", "inserir", "partes", "estilos", "textoPuro", "previa", "envio", "desempenho"}
+                "assinatura", "tabela", "inserir", "partes", "estilos", "paragrafo", "classificar", "mesclar", "alterarEstilos", "textoPuro", "previa", "envio", "desempenho"}
         got = {r["id"]: r["ok"] for r in results}
         for k in sorted(must):
             check("autoteste: " + k, got.get(k) is True, next((r["detail"] for r in results if r["id"] == k), "ausente"))
@@ -2447,6 +2447,413 @@ async def main():
           .map(b => [b.getAttribute('aria-label'), b.querySelector('.fx-lbl').textContent, b.getAttribute('aria-pressed')]))()""")
         check("de: Übermittlungs- und Lesebestätigung, acesos pelo padrão da conta", st == [["Übermittlungsbestätigung anfordern", "Übermittlungsbestätigung", "true"],
                                                                                     ["Lesebestätigung anfordern", "Lesebestätigung", "true"]], st)
+        await pg.close()
+
+        # ---------- 23. Sombreamento, Bordas, Lista de Vários Níveis, Classificar, Selecionar
+        #            Semelhante, Mesclar Formatação e Alterar Estilos ----------
+        pg, logs = await open_page(b, "?cursor=1")
+        frame = pg.frame_locator("#messageEditor")
+        await frame.locator("body").click(position={"x": 30, "y": 14})
+        await pg.get_by_role("tab", name="Formatar Texto").click()
+        await pg.wait_for_timeout(120)
+        PANEL = pg.locator("#fx-panel-formatar")
+
+        async def put(html):
+            """Corpo novo, cursor no começo do primeiro parágrafo, desfazer zerado."""
+            await pg.evaluate("""(html) => { const d = document.getElementById('messageEditor').contentDocument; d.body.innerHTML = html;
+              const e = controller.host.editor; e.undoStack = []; e.redoStack = [];
+              const t = d.createTreeWalker(d.body, 4).nextNode(); d.getSelection().collapse(t, 0);
+              controller.engine.scheduleState(0); }""", html)
+            await pg.wait_for_timeout(120)
+
+        async def select_span(first, last):
+            """Do começo de first ao fim de last (a primeira ocorrência depois de first)."""
+            await pg.evaluate("""([a, z]) => { const d = document.getElementById('messageEditor').contentDocument;
+              const tw = d.createTreeWalker(d.body, 4); let n, start = null;
+              while ((n = tw.nextNode())) {
+                if (!start) { const i = n.data.indexOf(a); if (i < 0) continue; start = [n, i]; }
+                const j = n.data.indexOf(z, n == start[0] ? start[1] : 0);
+                if (j >= 0) { const r = d.createRange(); r.setStart(start[0], start[1]); r.setEnd(n, j + z.length);
+                  const s = d.getSelection(); s.removeAllRanges(); s.addRange(r); break; } }
+              controller.engine.scheduleState(0); }""", [first, last])
+            await pg.wait_for_timeout(120)
+
+        async def caret(word, offset=1):
+            await pg.evaluate("""([w, k]) => { const d = document.getElementById('messageEditor').contentDocument;
+              const tw = d.createTreeWalker(d.body, 4); let n;
+              while ((n = tw.nextNode())) { const i = n.data.indexOf(w); if (i >= 0) { d.getSelection().collapse(n, i + k); break; } }
+              controller.engine.scheduleState(0); }""", [word, offset])
+            await pg.wait_for_timeout(120)
+
+        async def menu_items():
+            return await pg.evaluate("[...document.querySelectorAll('.fx-popup [role^=menuitem]')].map(b => (b.querySelector('.fx-mlab') || b).textContent.trim() + (b.getAttribute('aria-checked') == 'true' ? ' [x]' : ''))")
+
+        async def undo_count():
+            return await pg.evaluate("controller.host.editor.undoStack.length")
+
+        async def blocks(prop):
+            return await pg.evaluate(f"[...{EDITOR}.body.querySelectorAll('p')].map(p => p.style[{json.dumps(prop)}] || '')")
+
+        status = "controller.ui.statusEl.textContent"
+        THREE = '<p>Alfa beta</p><p>Gama delta</p><p>Épsilon zeta</p><div class="moz-signature">-- <br>Ana</div>'
+
+        # Sombreamento: com o cursor parado, o fundo do parágrafo; Sem Cor tira; em parte do texto, o fundo do texto
+        await put(THREE)
+        await caret("Alfa")
+        h0 = await body_html(pg)
+        PBG = f"getComputedStyle({EDITOR}.body.querySelector('p')).backgroundColor"
+        await PANEL.get_by_role("button", name="Mais opções de Sombreamento").click()
+        await pg.wait_for_timeout(150)
+        await pg.locator(".fx-popup .fx-sw[aria-label='#FFC000']").first.hover()
+        await pg.wait_for_timeout(400)
+        pv = await pg.evaluate(PBG)
+        await pg.mouse.move(700, 800)
+        await pg.wait_for_timeout(250)
+        back = await pg.evaluate(PBG)
+        await pg.keyboard.press("Escape")
+        await pg.wait_for_timeout(100)
+        check("Sombreamento na Visualização Dinâmica: o parágrafo mostra a cor sob o mouse; fora da amostra, volta como estava",
+              pv == "rgb(255, 192, 0)" and back == "rgba(0, 0, 0, 0)" and await body_html(pg) == h0 and await undo_count() == 0, [pv, back])
+        await PANEL.get_by_role("button", name="Sombreamento", exact=True).click()
+        await pg.wait_for_timeout(120)
+        bg = await blocks("backgroundColor")
+        check("Sombreamento: o botão pinta o fundo do parágrafo do cursor (azul-claro do Word), um passo no desfazer",
+              bg == ["rgb(217, 226, 243)", "", ""] and await undo_count() == 1, [bg, await undo_count()])
+        await PANEL.get_by_role("button", name="Mais opções de Sombreamento").click()
+        await pg.wait_for_timeout(150)
+        first = await pg.evaluate("(() => { const m = document.querySelector('.fx-popup .fx-mi'); return m ? m.textContent.trim() : null; })()")
+        await pg.screenshot(path=os.path.join(OUT, "60_sombreamento.png"), clip={"x": 300, "y": 0, "width": 760, "height": 420})
+        await pg.locator(".fx-popup .fx-mi", has_text="Sem Cor").click()
+        await pg.wait_for_timeout(120)
+        bg = await blocks("backgroundColor")
+        check("Sombreamento: o menu começa com Sem Cor, que tira o fundo", first == "Sem Cor" and bg == ["", "", ""], [first, bg])
+        await select_word(pg, "beta")
+        await PANEL.get_by_role("button", name="Mais opções de Sombreamento").click()
+        await pg.wait_for_timeout(150)
+        await pg.locator(".fx-popup .fx-sw[aria-label='#FFC000']").first.click()
+        await pg.wait_for_timeout(120)
+        tb = await computed(pg, "beta", "backgroundColor")
+        bg = await blocks("backgroundColor")
+        check("Sombreamento: com parte do parágrafo selecionada, só o fundo desse texto", tb == "rgb(255, 192, 0)" and bg == ["", "", ""], [tb, bg])
+        await pg.evaluate("controller.command('undo')")
+        await pg.wait_for_timeout(100)
+
+        # Bordas: menu, Bordas Externas em dois parágrafos, marcado no menu; o botão repete (e tira); Sem Borda
+        await put(THREE)
+        await select_span("Alfa", "delta")
+        await PANEL.get_by_role("button", name="Mais opções de Bordas").click()
+        await pg.wait_for_timeout(150)
+        items = await menu_items()
+        await pg.screenshot(path=os.path.join(OUT, "61_bordas.png"), clip={"x": 300, "y": 0, "width": 760, "height": 420})
+        check("Bordas: o menu do Word (inferior, superior, esquerda, direita, sem borda, todas, externas, horizontal interna) e Linha Horizontal",
+              items == ["Borda Inferior", "Borda Superior", "Borda Esquerda", "Borda Direita", "Sem Borda", "Todas as Bordas", "Bordas Externas", "Borda Horizontal Interna", "Linha Horizontal"], items)
+        await pg.get_by_role("menuitemcheckbox", name="Bordas Externas").click()
+        await pg.wait_for_timeout(120)
+        sides = await pg.evaluate(f"[...{EDITOR}.body.querySelectorAll('p')].map(p => ['Top', 'Right', 'Bottom', 'Left'].map(s => p.style['border' + s + 'Style'] == 'solid' ? 1 : 0).join(''))")
+        check("Bordas Externas: uma caixa em volta dos dois parágrafos (sem linha entre eles)", sides == ["1101", "0111", "0000"], sides)
+        await PANEL.get_by_role("button", name="Mais opções de Bordas").click()
+        await pg.wait_for_timeout(150)
+        items = await menu_items()
+        await pg.keyboard.press("Escape")
+        icon = await pg.evaluate("controller.ui.controls.find(c => c.cmd == 'borders' && c.el.closest('#fx-panel-formatar')).iconName")
+        check("Bordas: o menu marca Bordas Externas, Esquerda e Direita; o botão passa a mostrar Bordas Externas",
+              "Bordas Externas [x]" in items and "Borda Esquerda [x]" in items and "Borda Direita [x]" in items and "Borda Horizontal Interna" in items and icon == "border-outside", [items, icon])
+        await select_span("Alfa", "delta")
+        await PANEL.get_by_role("button", name="Bordas", exact=True).click()
+        await pg.wait_for_timeout(120)
+        off = await blocks("borderLeftStyle")
+        await PANEL.get_by_role("button", name="Bordas", exact=True).click()
+        await pg.wait_for_timeout(120)
+        on = await blocks("borderLeftStyle")
+        check("Bordas: o botão repete a última escolha do menu, e tira quando ela já está lá", off == ["", "", ""] and on == ["solid", "solid", ""], [off, on])
+        await PANEL.get_by_role("button", name="Mais opções de Bordas").click()
+        await pg.wait_for_timeout(150)
+        await pg.get_by_role("menuitem", name="Sem Borda").click()
+        await pg.wait_for_timeout(120)
+        h = await body_html(pg)
+        check("Sem Borda tira todas as bordas; cada escolha é um passo no desfazer", "border" not in h and await undo_count() == 4, [h[:200], await undo_count()])
+        await caret("Ana")
+        await PANEL.get_by_role("button", name="Mais opções de Bordas").click()
+        await pg.wait_for_timeout(150)
+        await pg.get_by_role("menuitemcheckbox", name="Borda Inferior").click()
+        await pg.wait_for_timeout(120)
+        msg = await pg.evaluate(status)
+        check("Bordas na assinatura: nada muda e a faixa avisa", "border" not in await body_html(pg) and bool(msg), msg)
+
+        # Lista de Vários Níveis: Biblioteca de Listas, níveis 1. → a. → i., troca do esquema e envio
+        await put(THREE)
+        await select_span("Alfa", "zeta")
+        await PANEL.get_by_role("button", name="Lista de Vários Níveis").click()
+        await pg.wait_for_timeout(150)
+        items = await pg.evaluate("[...document.querySelectorAll('.fx-popup .fx-mhead, .fx-popup [role^=menuitem]')].map(b => b.textContent.trim())")
+        await pg.screenshot(path=os.path.join(OUT, "62_lista_niveis.png"), clip={"x": 300, "y": 0, "width": 760, "height": 420})
+        check("Lista de Vários Níveis: Biblioteca de Listas com quatro esquemas", items == ["Biblioteca de Listas", "1. → a. → i.", "I. → A. → 1.", "A. → 1. → a.", "● → ○ → ■"], items)
+        await pg.get_by_role("menuitemcheckbox", name="1. → a. → i.").click()
+        await pg.wait_for_timeout(120)
+        await caret("Gama")
+        await PANEL.get_by_role("button", name="Aumentar Recuo").click()
+        await pg.wait_for_timeout(120)
+        LEVELS = f"""(() => {{ const d = {EDITOR}; const root = d.body.querySelector('ol, ul'); const inner = root && root.querySelector('ol, ul');
+          return [root && root.localName, root && root.getAttribute('data-faixa-ml'), root && getComputedStyle(root).listStyleType, inner && inner.localName, inner && getComputedStyle(inner).listStyleType, d.body.querySelectorAll('li').length]; }})()"""
+        lv = await pg.evaluate(LEVELS)
+        check("1. → a. → i.: o item recuado vira a. (nível 2); o nível 1 continua 1.", lv == ["ol", "1ai", "decimal", "ol", "lower-alpha", 3], lv)
+        await PANEL.get_by_role("button", name="Lista de Vários Níveis").click()
+        await pg.wait_for_timeout(150)
+        items = await menu_items()
+        await pg.get_by_role("menuitemcheckbox", name="I. → A. → 1.").click()
+        await pg.wait_for_timeout(120)
+        lv2 = await pg.evaluate(LEVELS)
+        check("o menu marca o esquema da lista; I. → A. → 1. troca os dois níveis", "1. → a. → i. [x]" in items and lv2 == ["ol", "IA1", "upper-roman", "ol", "upper-alpha", 3], [items, lv2])
+        await PANEL.get_by_role("button", name="Lista de Vários Níveis").click()
+        await pg.wait_for_timeout(150)
+        await pg.get_by_role("menuitemcheckbox", name="● → ○ → ■").click()
+        await pg.wait_for_timeout(120)
+        lv3 = await pg.evaluate(LEVELS)
+        check("● → ○ → ■: a lista vira de marcadores, com ○ no nível 2", lv3 == ["ul", "bullets", "disc", "ul", "circle", 3], lv3)
+        sent = await pg.evaluate(f"""(() => {{ const d = {EDITOR}; const before = d.body.innerHTML; const n = controller.engine.normalizeForSend();
+          const inner = d.body.querySelector('ul ul'); const out = [inner && inner.style.listStyleType, d.body.querySelectorAll('[data-faixa-ml]').length];
+          n.undo(); out.push(d.body.innerHTML == before); return out; }})()""")
+        check("envio: cada nível leva o seu marcador escrito (para quem recebe) e a marca da faixa sai; desfazer o envio volta", sent == ["circle", 0, True], sent)
+        n = await undo_count()
+        for _ in range(n):
+            await pg.evaluate("controller.command('undo')")
+        await pg.wait_for_timeout(120)
+        h = await body_html(pg)
+        check("desfazer tudo: os três parágrafos de volta", h == THREE, [n, h[:200]])
+
+        # Classificar: parágrafos (o vazio fica no lugar), número decrescente, itens com sublista, datas
+        await put('<p>Pera</p><p>banana</p><p><br></p><p>Abacaxi 10</p><p>Uva 9</p><div class="moz-signature">-- <br>Ana</div>')
+        await select_span("Pera", "Uva")
+        await PANEL.get_by_role("button", name="Classificar").click()
+        await pg.wait_for_timeout(200)
+        dlg = await pg.evaluate("(() => { const d = document.querySelector('.fx-dialog'); return d ? d.innerText : null; })()")
+        await pg.screenshot(path=os.path.join(OUT, "63_classificar.png"))
+        check("Classificar: a janela Classificar Texto, com o que vai ser classificado, Tipo e Crescente/Decrescente",
+              bool(dlg) and "Classificar Texto" in dlg and "5 parágrafos" in dlg and "Tipo" in dlg and "Crescente" in dlg and "Decrescente" in dlg, dlg)
+        await pg.get_by_role("button", name="OK").click()
+        await pg.wait_for_timeout(150)
+        PTEXT = f"[...{EDITOR}.body.querySelectorAll('p')].map(p => p.textContent).join(' | ')"
+        r1 = await pg.evaluate(PTEXT)
+        check("Texto, Crescente: ordem alfabética sem diferenciar maiúsculas; a linha vazia fica onde estava", r1 == "Abacaxi 10 | banana |  | Pera | Uva 9", r1)
+        await select_span("Abacaxi", "Uva")
+        await PANEL.get_by_role("button", name="Classificar").click()
+        await pg.wait_for_timeout(200)
+        await pg.locator(".fx-dialog select").select_option("number")
+        await pg.get_by_role("radio", name="Decrescente", exact=True).check()
+        await pg.get_by_role("button", name="OK").click()
+        await pg.wait_for_timeout(150)
+        r2 = await pg.evaluate(PTEXT)
+        check("Número, Decrescente: 10 antes de 9; sem número vão para o fim", r2 == "Abacaxi 10 | Uva 9 |  | banana | Pera", r2)
+        await pg.evaluate("controller.command('undo')")
+        await pg.evaluate("controller.command('undo')")
+        await pg.wait_for_timeout(120)
+        r3 = await pg.evaluate(PTEXT)
+        check("Classificar: cada vez é um passo no desfazer", r3 == "Pera | banana |  | Abacaxi 10 | Uva 9", r3)
+        await put('<ol><li>Gama</li><ol><li>g1</li><li>g2</li></ol><li>alfa</li><li>Beta</li></ol>')
+        await caret("Gama")
+        await PANEL.get_by_role("button", name="Classificar").click()
+        await pg.wait_for_timeout(200)
+        dlg = await pg.evaluate("document.querySelector('.fx-dialog') && document.querySelector('.fx-dialog').innerText")
+        await pg.locator(".fx-dialog select").select_option("text")
+        await pg.get_by_role("radio", name="Crescente", exact=True).check()
+        await pg.get_by_role("button", name="OK").click()
+        await pg.wait_for_timeout(150)
+        h = await body_html(pg)
+        check("lista: com o cursor num item, classifica os itens da lista; a sublista vai junto com o item",
+              "3 itens de lista" in (dlg or "") and h == "<ol><li>alfa</li><li>Beta</li><li>Gama</li><ol><li>g1</li><li>g2</li></ol></ol>", [dlg, h])
+        await put("<p>10/02/2026 reunião</p><p>2026-01-05 início</p><p>7 de março de 2026 fim</p><p>sem data</p>")
+        await select_span("10/02", "sem data")
+        await PANEL.get_by_role("button", name="Classificar").click()
+        await pg.wait_for_timeout(200)
+        await pg.locator(".fx-dialog select").select_option("date")
+        await pg.get_by_role("button", name="OK").click()
+        await pg.wait_for_timeout(150)
+        r4 = await pg.evaluate(PTEXT)
+        check("Data: ISO, dd/mm/aaaa e por extenso, em ordem; sem data no fim", r4 == "2026-01-05 início | 10/02/2026 reunião | 7 de março de 2026 fim | sem data", r4)
+        await put("<p>Um</p><ul><li>dois</li></ul><p>três</p>")
+        await select_span("Um", "três")
+        await PANEL.get_by_role("button", name="Classificar").click()
+        await pg.wait_for_timeout(200)
+        msg = await pg.evaluate(status)
+        dlg = await pg.evaluate("!!document.querySelector('.fx-dialog')")
+        check("parágrafos e itens de lista misturados: sem janela, a faixa explica", not dlg and "Selecione só um desses grupos" in msg, [dlg, msg])
+
+        # Selecionar Texto com Formatação Semelhante (menu Selecionar)
+        await put('<p>Um <b>dois</b> três <b>quatro</b></p><p><b>cinco</b> seis</p><blockquote type="cite"><p><b>citado</b></p></blockquote>')
+        await caret("dois", 1)
+        await PANEL.get_by_role("button", name="Selecionar").click()
+        await pg.wait_for_timeout(150)
+        items = await menu_items()
+        await pg.get_by_role("menuitem", name="Selecionar Texto com Formatação Semelhante").click()
+        await pg.wait_for_timeout(150)
+        sel = await pg.evaluate(f"(() => {{ const s = {EDITOR}.getSelection(); return [...Array(s.rangeCount).keys()].map(i => s.getRangeAt(i).toString()); }})()")
+        found = await pg.evaluate(f"(() => {{ const d = {EDITOR}; const b = d.querySelector('b'); d.getSelection().collapse(b.firstChild, 1); return controller.engine.run('selectSimilar').map(r => r.toString()); }})()")
+        # O Chromium guarda uma seleção só; o Gecko (Thunderbird) guarda as três.
+        check("Selecionar Texto com Formatação Semelhante: os trechos em negrito do texto (a citação fica fora)",
+              "Selecionar Texto com Formatação Semelhante" in items and found == ["dois", "quatro", "cinco"] and (sel == ["dois", "quatro", "cinco"] if GECKO else sel[:1] == ["dois"]), [items, sel, found])
+        await PANEL.get_by_role("button", name="Itálico").click()
+        await pg.wait_for_timeout(120)
+        it = [await computed(pg, w, "fontStyle") for w in ("dois", "quatro", "cinco", "Um", "citado")]
+        check("em seguida, o Itálico vale para todos os trechos selecionados (o Chromium guarda só o primeiro)",
+              it == (["italic", "italic", "italic", "normal", "normal"] if GECKO else ["italic", "normal", "normal", "normal", "normal"]), it)
+
+        # Mesclar Formatação (Opções de Colar): o texto colado fica com a formatação do ponto de inserção
+        RED = '<p>Antes <span style="color: rgb(192, 0, 0); font-size: 14pt;">vermelhoXfim</span> depois</p>'
+        await put(RED)
+        await caret("vermelhoXfim", 8)
+        await pg.evaluate("""window.simClipboard = { html: '<html><body><!--StartFragment--><span style="font-family: Arial; font-size: 20pt; color: blue; font-weight: 700">Negrito</span> e <i style="color: green">itálico</i> <a href="https://exemplo.com/">link</a><!--EndFragment--></body></html>' }""")
+        await PANEL.get_by_role("button", name="Opções de Colar").click()
+        await pg.wait_for_timeout(150)
+        items = await menu_items()
+        await pg.screenshot(path=os.path.join(OUT, "64_mesclar.png"), clip={"x": 0, "y": 0, "width": 760, "height": 420})
+        await pg.get_by_role("menuitem", name="Mesclar Formatação").click()
+        await pg.wait_for_timeout(150)
+        fmt = await pg.evaluate("""(() => { const d = document.getElementById('messageEditor').contentDocument;
+          const f = w => { const tw = d.createTreeWalker(d.body, 4); let n; while ((n = tw.nextNode())) if (n.data.includes(w)) { const c = getComputedStyle(n.parentElement); return [c.color, c.fontSize, c.fontWeight, c.fontStyle, c.fontFamily.startsWith('Arial')]; } return null; };
+          return { negrito: f('Negrito'), italico: f('itálico'), link: !!d.querySelector('a[href="https://exemplo.com/"]'), text: d.body.textContent }; })()""")
+        check("Opções de Colar: Manter Formatação Original, Mesclar Formatação, Manter Somente Texto e Colar como Citação",
+              items[:3] == ["Manter Formatação Original", "Mesclar Formatação", "Manter Somente Texto"], items)
+        check("Mesclar Formatação: cor e tamanho do destino; negrito, itálico e link do que veio; a fonte de fora não",
+              fmt["negrito"] == ["rgb(192, 0, 0)", "18.6667px", "700", "normal", False] and fmt["italico"][:4] == ["rgb(192, 0, 0)", "18.6667px", "400", "italic"] and fmt["link"]
+              and fmt["text"].replace("\u00a0", " ") == "Antes vermelhoNegrito e itálico linkXfim depois", fmt)
+        await pg.evaluate("controller.command('undo')")
+        await pg.wait_for_timeout(120)
+        check("Mesclar Formatação: um Ctrl+Z desfaz a colagem", await body_html(pg) == RED, await body_html(pg))
+        await put("<p>Começo</p>")
+        await caret("Começo", 6)
+        await pg.evaluate("""window.simClipboard = { html: '<h1 style="color:red">Título</h1><p class=MsoNormal><span style="font-family:Calibri">Um <b>dois</b><o:p></o:p></span></p><ul><li style="color:red">item <b>forte</b></li></ul><p>&nbsp;</p>' }""")
+        await PANEL.get_by_role("button", name="Opções de Colar").click()
+        await pg.wait_for_timeout(150)
+        await pg.get_by_role("menuitem", name="Mesclar Formatação").click()
+        await pg.wait_for_timeout(150)
+        h = await body_html(pg)
+        check("Mesclar Formatação do Word: títulos viram parágrafos, a lista fica, <o:p> e as cores de fora saem",
+              "<h1" not in h and "o:p" not in h and "red" not in h and "<li" in h and "<b>dois</b>" in h and "<b>forte</b>" in h, h)
+        await put("<p>X</p>")
+        await caret("X", 1)
+        await pg.evaluate("window.simClipboard = { text: ' texto puro' }; window.simCommands = []")
+        await PANEL.get_by_role("button", name="Opções de Colar").click()
+        await pg.wait_for_timeout(150)
+        await pg.get_by_role("menuitem", name="Mesclar Formatação").click()
+        await pg.wait_for_timeout(150)
+        h = await body_html(pg)
+        check("Mesclar Formatação com texto puro: cola como Manter Somente Texto", h in ("<p>X texto puro</p>", "<p>X&nbsp;texto puro</p>"), h)
+
+        # Alterar Estilos: conjunto de estilos, cores, fontes e espaçamento; tudo volta com o desfazer
+        await put('<p>Intro</p><p>Seção</p><p>Texto com ênfase</p><p>Fim</p><div class="moz-signature">-- <br>Ana</div>')
+        async def apply_style(label):
+            await PANEL.get_by_role("button", name="Todos os estilos").click()
+            await pg.wait_for_timeout(120)
+            await pg.locator(".fx-popup .fx-tile[aria-label='" + label + "']").click()
+            await pg.wait_for_timeout(120)
+        await caret("Seção")
+        await apply_style("Título 1")
+        await select_word(pg, "ênfase")
+        await apply_style("Ênfase Intensa")
+        await caret("Intro")
+        start = await undo_count()
+        CS = PANEL.get_by_role("button", name="Alterar Estilos")
+        await CS.click()
+        await pg.wait_for_timeout(200)
+        cols = await pg.evaluate("[...document.querySelectorAll('.fx-popup .fx-cscol')].map(c => [c.querySelector('.fx-mhead').textContent, [...c.querySelectorAll('[role^=menuitem]')].filter(b => b.getAttribute('aria-checked') == 'true').map(b => b.querySelector('.fx-mlab').textContent)])")
+        await pg.screenshot(path=os.path.join(OUT, "65_alterar_estilos.png"))
+        check("Alterar Estilos: Conjunto de Estilos, Cores, Fontes e Espaçamento entre Parágrafos, com o padrão marcado",
+              [c[0] for c in cols] == ["Conjunto de Estilos", "Cores", "Fontes", "Espaçamento entre Parágrafos"] and all(len(c[1]) == 1 for c in cols), cols)
+        await pg.locator(".fx-popup [role^=menuitem]", has_text="Verde").click()
+        await pg.wait_for_timeout(150)
+        HS = f"""(() => {{ const d = {EDITOR}; const h1 = d.body.querySelector('h1'); const c = getComputedStyle(h1); const p = d.body.querySelector('p'); const pc = getComputedStyle(p);
+          const tw = d.createTreeWalker(d.body, 4); let n, em = null; while ((n = tw.nextNode())) if (n.data.includes('ênfase')) {{ em = getComputedStyle(n.parentElement).color; break; }}
+          return {{ h1: [c.color, c.fontSize, c.fontWeight, c.fontFamily.split(',')[0], c.marginTop], em, body: [d.body.getAttribute('data-faixa-estilos'), getComputedStyle(d.body).fontFamily.split(',')[0]],
+                   p: [pc.marginBottom, pc.lineHeight], tile: (document.querySelector('#fx-panel-formatar .fx-tile[aria-label="Título 1"] .fx-tprev') || {{}}).style?.color || null }}; }})()"""
+        g = await pg.evaluate(HS)
+        check("Cores Verde: os títulos e a Ênfase Intensa que já estão no texto ficam verdes; a galeria também",
+              g["h1"][0] == "rgb(63, 118, 42)" and g["em"] == "rgb(84, 158, 57)" and g["body"][0] == "colors=green" and g["tile"] == "rgb(63, 118, 42)", g)
+        await PANEL.get_by_role("button", name="Mais opções de Cor da Fonte").click()
+        await pg.wait_for_timeout(150)
+        sw = await pg.evaluate("[...document.querySelectorAll('.fx-popup .fx-sw')].slice(0, 10).map(s => s.getAttribute('aria-label'))")
+        await pg.keyboard.press("Escape")
+        check("Cores do Tema da paleta: as do tema Verde", sw[4] == "#549E39" and sw[0] == "#FFFFFF", sw)
+        await CS.click()
+        await pg.wait_for_timeout(150)
+        await pg.locator(".fx-popup [role^=menuitem]", has_text="Word 2010").click()
+        await pg.wait_for_timeout(150)
+        g = await pg.evaluate(HS)
+        check("Conjunto Word 2010: Título 1 de 14 pt em negrito, 24 pt antes; a cor do tema continua",
+              g["h1"][:3] == ["rgb(63, 118, 42)", "18.6667px", "700"] and g["h1"][4] == "32px", g)
+        await CS.click()
+        await pg.wait_for_timeout(150)
+        await pg.locator(".fx-popup [role^=menuitem]", has_text="Georgia").first.click()
+        await pg.wait_for_timeout(150)
+        g = await pg.evaluate(HS)
+        check("Fontes Georgia: títulos e corpo em Georgia", g["h1"][3] == "Georgia" and g["body"][1] == "Georgia", g)
+        await CS.click()
+        await pg.wait_for_timeout(150)
+        await pg.locator(".fx-popup [role^=menuitem]", has_text="Aberto").click()
+        await pg.wait_for_timeout(150)
+        g = await pg.evaluate(HS)
+        check("Espaçamento Aberto: 10 pt depois do parágrafo e 1,15 entre linhas", g["p"] == ["13.3333px", "16.8667px" if not GECKO else g["p"][1]] and g["body"][0] == "set=word2010;colors=green;fonts=georgia;spacing=open", g)
+        await CS.click()
+        await pg.wait_for_timeout(150)
+        cols = await pg.evaluate("[...document.querySelectorAll('.fx-popup .fx-cscol')].map(c => [...c.querySelectorAll('[role^=menuitem]')].filter(b => b.getAttribute('aria-checked') == 'true').length)")
+        await pg.keyboard.press("Escape")
+        await caret("Fim")
+        await apply_style("Título 2")
+        h2 = await pg.evaluate(f"(() => {{ const c = getComputedStyle({EDITOR}.querySelector('h2')); return [c.color, c.fontFamily.split(',')[0]]; }})()")
+        check("Título 2 aplicado depois usa o tema escolhido", h2 == ["rgb(84, 158, 57)", "Georgia"], h2)
+        sent = await pg.evaluate(f"""(() => {{ const d = {EDITOR}; const before = d.body.innerHTML; const n = controller.engine.normalizeForSend();
+          const p = d.body.querySelector('p'); const out = [d.body.getAttribute('data-faixa-estilos'), p.style.marginBottom, p.style.lineHeight];
+          n.undo(); out.push(d.body.innerHTML == before, d.body.getAttribute('data-faixa-estilos')); return out; }})()""")
+        check("envio: o espaçamento vai escrito nos parágrafos e a marca do tema sai; desfazer o envio volta",
+              sent == [None, "10pt", "1.15", True, "set=word2010;colors=green;fonts=georgia;spacing=open"], sent)
+        steps = await undo_count() - start
+        for _ in range(steps):
+            await pg.evaluate("controller.command('undo')")
+        await pg.wait_for_timeout(150)
+        g = await pg.evaluate(HS)
+        check("Alterar Estilos: cada escolha é um passo no desfazer; desfazer tudo volta ao tema Office",
+              steps == 5 and g["h1"][:3] == ["rgb(47, 84, 150)", "21.3333px", "400"] and g["body"][0] is None and g["em"] == "rgb(68, 114, 196)" and g["tile"] == "rgb(47, 84, 150)", [steps, g])
+        check("0.8.0: sem erros no console", not logs, logs)
+        await pg.close()
+
+        # Fonte padrão Arial nas Opções da Faixa: as Fontes do Office (o padrão) voltam a ela
+        from urllib.parse import quote
+        pg, logs = await open_page(b, "?cursor=1&cfg=" + quote(json.dumps({"fontePadrao": {"familia": "Arial", "tamanhoPt": 10}})))
+        await pg.frame_locator("#messageEditor").locator("body").click(position={"x": 30, "y": 14})
+        await pg.get_by_role("tab", name="Formatar Texto").click()
+        await pg.wait_for_timeout(120)
+        BODYFONT = f"{EDITOR}.body.style.fontFamily.split(',')[0]"
+        f0 = await pg.evaluate(BODYFONT)
+        await pg.evaluate("controller.engine.run('changeStyles', { part: 'fonts', id: 'georgia' })")
+        f1 = await pg.evaluate(BODYFONT)
+        await pg.locator("#fx-panel-formatar").get_by_role("button", name="Alterar Estilos").click()
+        await pg.wait_for_timeout(150)
+        office = await pg.evaluate("(() => { const b = [...document.querySelectorAll('.fx-popup .fx-cscol')][2].querySelector('[role^=menuitem]'); return [b.querySelector('.fx-mlab').textContent, b.querySelector('.fx-msub').textContent]; })()")
+        await pg.locator(".fx-popup .fx-cscol").nth(2).locator("[role^=menuitem]").first.click()
+        await pg.wait_for_timeout(150)
+        f2 = await pg.evaluate(BODYFONT)
+        check("Fontes: com Arial nas Opções da Faixa, Office mostra e devolve o corpo em Arial", [f0, f1, f2] == ["Arial", "Georgia", "Arial"] and office == ["Office", "Títulos: Calibri Light · Corpo: Arial"], [f0, f1, f2, office])
+        check("fonte padrão Arial: sem erros no console", not logs, logs)
+        await pg.close()
+
+        # en-US: os menus e a janela novos em inglês
+        pg, logs = await open_page(b, "?idioma=en-US&cursor=1")
+        await pg.frame_locator("#messageEditor").locator("body").click(position={"x": 30, "y": 14})
+        await pg.get_by_role("tab", name="Format Text").click()
+        await pg.wait_for_timeout(120)
+        PANEL = pg.locator("#fx-panel-formatar")
+        await PANEL.get_by_role("button", name="Change Styles").click()
+        await pg.wait_for_timeout(150)
+        heads = await pg.evaluate("[...document.querySelectorAll('.fx-popup .fx-cscol .fx-mhead')].map(h => h.textContent)")
+        names = await pg.evaluate("[...document.querySelectorAll('.fx-popup [role^=menuitem] .fx-mlab')].map(b => b.textContent)")
+        await pg.keyboard.press("Escape")
+        await PANEL.get_by_role("button", name="More Borders options").click()
+        await pg.wait_for_timeout(150)
+        borders = await menu_items()
+        await pg.keyboard.press("Escape")
+        check("en-US: Change Styles e Borders em inglês",
+              heads == ["Style Set", "Colors", "Fonts", "Paragraph Spacing"] and "Grayscale" in names and "No Paragraph Space" in names
+              and borders[6] == "Outside Borders", [heads, names[:12], borders])
+        check("0.8.0 em inglês: sem erros no console", not logs, logs)
         await pg.close()
 
         await b.close()

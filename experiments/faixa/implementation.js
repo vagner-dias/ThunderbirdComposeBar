@@ -15,7 +15,7 @@ var { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys
 var { ExtensionUtils } = ChromeUtils.importESModule("resource://gre/modules/ExtensionUtils.sys.mjs");
 
 var FAIXA_COMPOSE_URL = "chrome://messenger/content/messengercompose/messengercompose.xhtml";
-var FAIXA_PARTS = ["icons.js", "ui.js", "dialogs.js", "engine.js", "names.js", "sanitize.js", "signatures.js", "quickparts.js", "host.js"];
+var FAIXA_PARTS = ["icons.js", "themes.js", "ui.js", "dialogs.js", "engine.js", "names.js", "sanitize.js", "signatures.js", "quickparts.js", "host.js"];
 
 /* Padrões usados até o background enviar a configuração efetiva. */
 /* Teclas que só andam pela faixa: não tiram a Visualização Dinâmica. */
@@ -731,7 +731,7 @@ var FaixaComposeController = class {
         quickParts: this.quickParts.menuList(),
         canMergeCells: inCell && this.host.nativeEnabled("cmd_JoinTableCells"),
         canSplitCell: inCell && this.host.nativeEnabled("cmd_SplitTableCell"),
-      });
+      }, this.engine ? this.engine.menuState() : {});
     } catch (e) {
       this.lastError = e;
     }
@@ -990,6 +990,16 @@ var FaixaComposeController = class {
         case "about":
           this.showAbout().catch(e => this.fail(e, def));
           return;
+        case "mergeFormatting":
+          if (this.engine && this.ui.isEnabled(cmd)) {
+            this.pasteMerged();
+          }
+          return;
+        case "sort":
+          if (this.engine && this.ui.isEnabled(cmd)) {
+            this.sortText().catch(e => this.fail(e, def));
+          }
+          return;
       }
       if (def.native) {
         if (def.enabled && !this.ui.isEnabled(cmd)) {
@@ -1114,6 +1124,46 @@ var FaixaComposeController = class {
     }
     this.api.emitCommand(this.tabId, "saveQuickPart", { id: existing ? existing.id : null, nome: name, html: sel.html });
     this.ui.flash(t("qp.saved", "“{name}” está na galeria de Partes Rápidas.", { name }));
+  }
+
+  /** Mesclar Formatação: o HTML da Área de Transferência entra com a formatação do destino.
+   * Sem HTML (texto copiado de um editor de texto puro), é o Colar sem Formatação do
+   * Thunderbird, que já usa a formatação do cursor. */
+  pasteMerged() {
+    let content = null;
+    try {
+      content = this.host.readClipboard();
+    } catch (e) {
+      this.lastError = e;
+    }
+    if (content && content.html && this.engine.run("mergeFormatting", content)) {
+      return;
+    }
+    this.host.nativeCommand("cmd_pasteNoFormatting", "editor");
+    this.engine.scheduleState();
+  }
+
+  /** Classificar Texto, como no Word: confere o que vai ser ordenado, pergunta como (texto,
+   * número ou data; crescente ou decrescente) e ordena num passo do desfazer. */
+  async sortText() {
+    const t = FaixaI18n.t.bind(FaixaI18n);
+    const target = this.engine.sortTargets();
+    if (target.error) {
+      this.ui.flash(target.error, 6000);
+      return;
+    }
+    const isList = target.units[0].localName == "li";
+    const opts = await FaixaDialogs.sort(this.ui, {
+      what: isList ? t("sort.items", "{n} itens de lista", { n: target.units.length }) : t("sort.paragraphs", "{n} parágrafos", { n: target.units.length }),
+    });
+    if (!opts || !this.engine || this.disposed) {
+      return;
+    }
+    this.host.focusEditor();
+    const r = this.engine.run("sort", opts);
+    if (r && r.error) {
+      this.ui.flash(r.error, 6000);
+    }
   }
 
   /** Data e Hora: o formato escolhido, no ponto do cursor. */
@@ -2213,6 +2263,166 @@ var FaixaComposeController = class {
         T("estilos.detail", "Subtítulo, Ênfase Sutil, Ênfase, Ênfase Intensa e Forte na galeria: {five}; “beta” em <em> azul: {em}; galeria acesa: {shown}; desfeito: {undo}", {
           five: Y(newStyles), em: Y(emOk), shown: Y(emShown), undo: Y(emBack),
         }));
+
+      // Sombreamento, Bordas e Lista de Vários Níveis no parágrafo do cursor, cada um num
+      // passo do desfazer.
+      const blockAt = word => {
+        const f = find(word);
+        return f ? this.engine.blockOf(f.node) : null;
+      };
+      {
+        await toBody();
+        caretIn("beta", 2);
+        const beforePara = body.innerHTML;
+        this.command("shading", { value: "#D9E2F3" });
+        await wait(30);
+        const shaded = !!blockAt("beta") && this.engine.rgbToHex(cs(blockAt("beta")).backgroundColor) == "#D9E2F3";
+        ed.undo();
+        await wait(30);
+        const shadeBack = body.innerHTML == beforePara;
+        caretIn("beta", 2);
+        this.command("borders", { side: "bottom" });
+        await wait(30);
+        const bordered = !!blockAt("beta") && blockAt("beta").style.borderBottomStyle == "solid";
+        ed.undo();
+        await wait(30);
+        const borderBack = body.innerHTML == beforePara;
+        caretIn("beta", 2);
+        this.command("multilevel", { scheme: "1ai" });
+        await wait(30);
+        const fb = find("beta");
+        const mlList = fb ? fb.node.parentElement.closest("ol[data-faixa-ml='1ai']") : null;
+        const listOk = !!mlList && cs(mlList).listStyleType == "decimal";
+        ed.undo();
+        await wait(30);
+        const listBack = body.innerHTML == beforePara;
+        add("paragrafo", T("paragrafo", "Sombreamento, Bordas e Lista de Vários Níveis no parágrafo; cada um desfeito com um Ctrl+Z"),
+          shaded && bordered && listOk && shadeBack && borderBack && listBack,
+          T("paragrafo.detail", "sombreamento: {shade}; borda inferior: {border}; lista 1. → a. → i.: {list}; desfeitos: {undo}", {
+            shade: Y(shaded), border: Y(bordered), list: Y(listOk), undo: Y(shadeBack && borderBack && listBack),
+          }));
+      }
+
+      // Classificar: três parágrafos novos em ordem alfabética, num passo do desfazer.
+      // Selecionar Texto com Formatação Semelhante: dois deles em negrito.
+      {
+        await toBody();
+        const beforeSort = body.innerHTML;
+        const anchor = blockAt("zeta");
+        const parent = anchor && anchor != body ? anchor.parentNode : body;
+        let at = anchor && anchor != body ? [...parent.childNodes].indexOf(anchor) + 1 : parent.childNodes.length;
+        ed.beginTransaction();
+        try {
+          for (const word of ["Pera", "banana", "Abacaxi"]) {
+            const p = edDoc.createElement("p");
+            p.textContent = word;
+            ed.insertNode(p, parent, at++);
+          }
+        } finally {
+          ed.endTransaction();
+        }
+        // Em ordem quando cada parágrafo vem logo depois do anterior.
+        const inOrder = words => words.every((word, i) => !i || (!!blockAt(word) && blockAt(words[i - 1]).nextElementSibling == blockAt(word)));
+        const from = find("Pera");
+        const to = find("Abacaxi");
+        if (from && to) {
+          const r = edDoc.createRange();
+          r.setStart(from.node, 0);
+          r.setEnd(to.node, to.node.length);
+          sel.removeAllRanges();
+          sel.addRange(r);
+          this.engine.run("sort", { type: "text", order: "asc" });
+          await wait(30);
+        }
+        const sorted = !!from && !!to && inOrder(["Abacaxi", "banana", "Pera"]);
+        for (const word of ["Abacaxi", "Pera"]) {
+          selectWord(word);
+          await wait(30);
+          this.command("bold");
+          await wait(30);
+        }
+        caretIn("Abacaxi", 2);
+        await wait(30);
+        const ranges = this.engine.run("selectSimilar") || [];
+        const texts = ranges.map(r => r.toString());
+        const rangeCount = sel.rangeCount;
+        // Os dois em negrito, sem o banana (outro texto da janela no mesmo formato também
+        // entra). O Gecko guarda todas as seleções; um navegador que só guarda uma fica com a primeira.
+        const similarOk = texts.includes("Abacaxi") && texts.includes("Pera") && !texts.includes("banana") &&
+          (rangeCount == texts.length || (rangeCount == 1 && String(sel) == texts[0]));
+        ed.undo();
+        ed.undo();
+        await wait(30);
+        ed.undo();
+        await wait(30);
+        const unsorted = !!from && !!to && inOrder(["Pera", "banana", "Abacaxi"]);
+        ed.undo();
+        await wait(30);
+        const sortBack = body.innerHTML == beforeSort;
+        add("classificar", T("classificar", "Classificar parágrafos e Selecionar Texto com Formatação Semelhante; um Ctrl+Z desfaz a classificação"),
+          sorted && unsorted && sortBack && similarOk,
+          T("classificar.detail", "Abacaxi, banana, Pera: {sorted}; desfeito: {undo}; semelhantes a “Abacaxi”: {texts} ({n} seleções)", {
+            sorted: Y(sorted), undo: Y(unsorted && sortBack), texts: texts.join(", ") || "—", n: rangeCount,
+          }));
+      }
+
+      // Mesclar Formatação: o texto colado fica com a cor do ponto de inserção e mantém o
+      // negrito que veio; a fonte de fora não passa. Um Ctrl+Z desfaz a colagem.
+      {
+        await toBody();
+        const beforeMerge = body.innerHTML;
+        selectWord("gama");
+        this.command("foreColor", { value: "#C00000" });
+        await wait(30);
+        caretIn("gama", 2);
+        const pasted = this.engine.run("mergeFormatting", { html: '<span style="font-family: Arial; color: #0000FF">colado</span> <b>forte</b>' });
+        await wait(30);
+        const c1 = wordEl("colado");
+        const c2 = wordEl("forte");
+        const red = el => !!el && this.engine.rgbToHex(cs(el).color) == "#C00000";
+        const colorOk = red(c1) && red(c2);
+        const boldOk = !!c2 && parseInt(cs(c2).fontWeight, 10) >= 600;
+        const font = c1 ? cs(c1).fontFamily.split(",")[0] : "—";
+        const mergedOk = !!pasted && colorOk && boldOk && !/^["']?arial/i.test(font);
+        ed.undo();
+        await wait(30);
+        const unpasted = !find("colado");
+        ed.undo();
+        await wait(30);
+        const mergeBack = unpasted && body.innerHTML == beforeMerge;
+        add("mesclar", T("mesclar", "Mesclar Formatação: o colado fica com a formatação do ponto de inserção; um Ctrl+Z desfaz"), mergedOk && mergeBack,
+          T("mesclar.detail", "cor do destino: {color}; negrito que veio: {bold}; fonte: {font}; desfeito: {undo}", {
+            color: Y(colorOk), bold: Y(boldOk), font, undo: Y(mergeBack),
+          }));
+      }
+
+      // Alterar Estilos: as cores do tema mudam o Título 1 que já está no texto; o tema fica
+      // no <body> e o desfazer volta ao do Office.
+      {
+        await toBody();
+        const beforeTheme = body.innerHTML;
+        caretIn("beta", 2);
+        this.command("style", { value: "h1" });
+        await wait(30);
+        const color = () => (blockAt("beta") ? this.engine.rgbToHex(cs(blockAt("beta")).color) : "");
+        const office = color();
+        this.command("changeStyles", { part: "colors", id: "green" });
+        await wait(30);
+        const green = color();
+        const attr = body.getAttribute(FAIXA_THEME_ATTR);
+        ed.undo();
+        await wait(30);
+        const back = color();
+        const attrBack = !body.hasAttribute(FAIXA_THEME_ATTR);
+        ed.undo();
+        await wait(30);
+        const themeBack = body.innerHTML == beforeTheme;
+        add("alterarEstilos", T("alterarEstilos", "Alterar Estilos: as cores do tema mudam os títulos do texto; um Ctrl+Z volta ao tema Office"),
+          office == "#2F5496" && green == "#3F762A" && attr == "colors=green" && back == office && attrBack && themeBack,
+          T("alterarEstilos.detail", "Título 1 no tema Office: {office}; nas cores Verde: {green} ({attr}); desfeito: {undo}", {
+            office: office || "—", green: green || "—", attr: attr || "—", undo: Y(back == office && attrBack && themeBack),
+          }));
+      }
 
       // Texto sem Formatação: a formatação sai do corpo inteiro num passo; um Ctrl+Z volta.
       before = body.innerHTML;
