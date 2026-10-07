@@ -593,7 +593,8 @@ async def main():
         check("Arquivo: menu com Salvar Rascunho, Modelo, Imprimir, Opções da Faixa e Fechar",
               any("Salvar Rascunho" in i for i in items) and any("Salvar como Modelo" in i for i in items) and any("Imprimir" in i for i in items)
               and any("Opções da Faixa" in i for i in items) and any(i.startswith("Fechar") or "Fechar" in i for i in items), items)
-        icons = await pg.evaluate("document.querySelectorAll('.fx-mfile .fx-mic').length")
+        check("Arquivo: sem Propriedades… nem outro item previsto para outra fase", not any("Propriedades" in i or "(fase" in i for i in items), items)
+        icons =await pg.evaluate("document.querySelectorAll('.fx-mfile .fx-mic').length")
         check("Arquivo: itens com ícone", icons >= 5, icons)
         await pg.screenshot(path=os.path.join(OUT, "11_arquivo.png"), clip={"x": 0, "y": 0, "width": 520, "height": 420})
         await pg.get_by_role("menuitem", name="Salvar como Modelo").click()

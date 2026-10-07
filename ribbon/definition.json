@@ -358,7 +358,6 @@
       { "sep": true },
       { "cmd": "print" },
       { "sep": true },
-      { "cmd": "properties" },
       { "cmd": "ribbonOptions" },
       { "sep": true },
       { "cmd": "close" }
