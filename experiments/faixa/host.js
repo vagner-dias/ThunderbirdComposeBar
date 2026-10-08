@@ -407,6 +407,95 @@ var FaixaTBHost = class {
     return true;
   }
 
+  /* ---------- rótulos do cabeçalho (De, Para, Cc, Cco, Assunto) ---------- */
+
+  /** Até a ESR 153 (e nas versões seguintes, até o bug 2069617 do Thunderbird), cada caixa de
+   * rótulo do cabeçalho tem no style a largura do pacote de idioma (headersSpace2.style, 8em
+   * em inglês), pensada para o maior rótulo de qualquer campo: com o Enviar ao lado, sobra um
+   * vão entre ele e os rótulos. O Thunderbird que já ajusta sozinho não tem essa largura. */
+  headerLabelsFixed() {
+    const from = this.chromeDoc.getElementById("identityLabel-box");
+    return !!from && !!from.style.width;
+  }
+
+  /** A coluna dos rótulos na largura do maior rótulo visível, como o Thunderbird passou a
+   * fazer depois: --faixa-label-width no #MsgHeadersToolbar, que o ribbon.css aplica. */
+  fitHeaderLabels() {
+    const headers = this.chromeDoc.getElementById("MsgHeadersToolbar");
+    if (!headers || !this.headerLabelsFixed()) {
+      return false;
+    }
+    const win = this.chromeWin;
+    const px = v => parseFloat(v) || 0;
+    // Mede com a largura do Thunderbird, maior que qualquer rótulo: nenhum fica espremido.
+    headers.removeAttribute("faixa-labels");
+    let widest = 0;
+    for (const box of headers.querySelectorAll("#identityLabel-box, #subjectLabel-box, .address-label-container")) {
+      const label = box.querySelector("label");
+      // Linha escondida (Responder a, Grupos de notícias...): fica de fora, como no Thunderbird novo.
+      if (!label || !label.getClientRects().length) {
+        continue;
+      }
+      const ls = win.getComputedStyle(label);
+      const bs = win.getComputedStyle(box);
+      widest = Math.max(widest, label.getBoundingClientRect().width + px(ls.marginLeft) + px(ls.marginRight) +
+        px(bs.paddingLeft) + px(bs.paddingRight) + px(bs.borderLeftWidth) + px(bs.borderRightWidth));
+    }
+    if (!widest) {
+      return false;
+    }
+    headers.style.setProperty("--faixa-label-width", Math.ceil(widest) + "px");
+    headers.setAttribute("faixa-labels", "true");
+    return true;
+  }
+
+  /** Ajusta agora e de novo quando uma linha aparece ou some (Cc, Cco, Responder a, um
+   * cabeçalho personalizado): uma vez por quadro, por mais mudanças que venham juntas. */
+  observeHeaderLabels() {
+    const headers = this.chromeDoc.getElementById("MsgHeadersToolbar");
+    if (!headers || !this.headerLabelsFixed()) {
+      return;
+    }
+    const win = this.chromeWin;
+    let pending = false;
+    let active = true;
+    const refit = () => {
+      if (pending) {
+        return;
+      }
+      pending = true;
+      win.requestAnimationFrame(() => {
+        pending = false;
+        // Um ajuste já agendado não volta depois de a faixa sair da janela.
+        if (active) {
+          this.fitHeaderLabels();
+        }
+      });
+    };
+    this.fitHeaderLabels();
+    // A janela pode abrir antes de o cabeçalho ser desenhado: de novo no primeiro quadro e
+    // quando a janela muda de tamanho (também quando aparece).
+    refit();
+    const mo = new win.MutationObserver(refit);
+    // Os atributos que a própria faixa muda (faixa-labels e o style) ficam de fora do filtro.
+    mo.observe(headers, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "hidden", "collapsed", "value"] });
+    win.addEventListener("resize", refit);
+    this.observers.push(mo, {
+      disconnect: () => {
+        active = false;
+        win.removeEventListener("resize", refit);
+      },
+    });
+  }
+
+  restoreHeaderLabels() {
+    const headers = this.chromeDoc.getElementById("MsgHeadersToolbar");
+    if (headers) {
+      headers.removeAttribute("faixa-labels");
+      headers.style.removeProperty("--faixa-label-width");
+    }
+  }
+
   sendEnabled() {
     const cmd = this.chromeDoc.getElementById("cmd_sendButton");
     return !cmd || !cmd.hasAttribute("disabled");
@@ -1401,6 +1490,9 @@ var FaixaTBHost = class {
     this.observers = [];
     try {
       this.restoreMenubar();
+    } catch (e) {}
+    try {
+      this.restoreHeaderLabels();
     } catch (e) {}
     for (const id of [...this.sheets.keys()]) {
       this.removeAgentSheet(id);

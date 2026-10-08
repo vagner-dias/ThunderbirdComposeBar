@@ -585,12 +585,20 @@ button:disabled .fx-ic.fx-red { color: var(--fx-faint); }
 .fx-hint[hidden] { display: none; }
 .fx-hint .fx-ic { width: 15px; height: 15px; }
 
-/* ===== botão Enviar ao lado dos destinatários ===== */
+/* ===== botão Enviar ao lado dos destinatários =====
+ * Coluna 1: o Enviar. As outras três são as do cabeçalho do Thunderbird depois do bug 2069617
+ * (o × que tira o campo, o rótulo e o campo), que as linhas usam como subgrade; no cabeçalho
+ * da ESR 153 as linhas ocupam as três juntas. */
 #MsgHeadersToolbar:has(> #faixa-send) {
-  grid-template-columns: auto minmax(0, 1fr) !important;
+  grid-template-columns: auto auto fit-content(11.5rem) minmax(0, 1fr) !important;
 }
 #MsgHeadersToolbar:has(> #faixa-send) > :not(#faixa-send) {
-  grid-column: 2;
+  grid-column: 2 / -1;
+}
+/* ESR 153: os rótulos na largura do maior rótulo visível, e não na do pacote de idioma
+ * (ver fitHeaderLabels no host). */
+#MsgHeadersToolbar[faixa-labels] :is(#identityLabel-box, #subjectLabel-box, .address-label-container) {
+  width: var(--faixa-label-width) !important;
 }
 #faixa-send {
   grid-column: 1;

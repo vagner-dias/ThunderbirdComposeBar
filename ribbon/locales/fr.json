@@ -905,6 +905,10 @@
     "test.mesclar": "Fusionner la mise en forme : le texte collé prend la mise en forme du point d'insertion ; un Ctrl+Z l'annule",
     "test.mesclar.detail": "couleur de la destination : {color} ; gras d'origine : {bold} ; police : {font} ; annulé : {undo}",
     "test.alterarEstilos": "Modifier les styles : les couleurs du thème changent les titres du texte ; un Ctrl+Z revient au thème Office",
-    "test.alterarEstilos.detail": "Titre 1 dans le thème Office : {office} ; avec les couleurs Vert : {green} ({attr}) ; annulé : {undo}"
+    "test.alterarEstilos.detail": "Titre 1 dans le thème Office : {office} ; avec les couleurs Vert : {green} ({attr}) ; annulé : {undo}",
+    "test.cabecalho": "En-tête : libellés (De, À, Objet) à la taille du plus long et champs alignés",
+    "test.cabecalho.detail": "colonne des libellés : {col} px ; libellé le plus long, « {label} » : {need} px ({by}) ; champs alignés : {aligned}",
+    "test.cabecalho.byRibbon": "ajustée par le ruban",
+    "test.cabecalho.byTb": "ajustée par Thunderbird"
   }
 }

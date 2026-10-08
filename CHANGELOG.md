@@ -2,6 +2,14 @@
 
 O `.xpi` de cada versão fica nas [Releases](https://github.com/vagner-dias/ThunderbirdComposeBar/releases). A seção de cada versão vira as notas da release (ver [Publicar uma versão](README.md#publicar-uma-versão)).
 
+## 0.9.0
+
+Cabeçalho da mensagem mais compacto.
+
+- A coluna dos rótulos do cabeçalho (De, Para, Cc, Cco, Assunto) fica no tamanho do maior rótulo visível. Na ESR 153, o Thunderbird reserva para cada rótulo uma largura fixa do pacote de idioma (8em em inglês), o que deixava um vão grande entre o Enviar e os rótulos. A coluna se ajusta quando Cc, Cco ou Responder a aparecem ou somem, e volta ao normal com a faixa desligada.
+- O Enviar ao lado dos destinatários também funciona com o cabeçalho novo do Thunderbird (uma grade com subgrade, que chega nas versões depois da ESR 153 e já ajusta os rótulos sozinho).
+- Item novo no autoteste: rótulos do cabeçalho no tamanho do maior e campos alinhados.
+
 ## 0.8.0
 
 Os sete comandos que apareciam desativados na faixa, com a dica "Previsto para a fase 2", passam a funcionar.

@@ -905,6 +905,10 @@
     "test.mesclar": "Unisci formattazione: il testo incollato prende la formattazione del punto di inserimento; un Ctrl+Z annulla",
     "test.mesclar.detail": "colore della destinazione: {color}; grassetto arrivato: {bold}; carattere: {font}; annullato: {undo}",
     "test.alterarEstilos": "Cambia stili: i colori del tema cambiano i titoli del testo; un Ctrl+Z torna al tema Office",
-    "test.alterarEstilos.detail": "Titolo 1 nel tema Office: {office}; con i colori Verde: {green} ({attr}); annullato: {undo}"
+    "test.alterarEstilos.detail": "Titolo 1 nel tema Office: {office}; con i colori Verde: {green} ({attr}); annullato: {undo}",
+    "test.cabecalho": "Intestazione: etichette (Da, A, Oggetto) larghe quanto la più lunga e campi allineati",
+    "test.cabecalho.detail": "colonna delle etichette: {col} px; etichetta più lunga, “{label}”: {need} px ({by}); campi allineati: {aligned}",
+    "test.cabecalho.byRibbon": "adattata dalla barra multifunzione",
+    "test.cabecalho.byTb": "adattata da Thunderbird"
   }
 }

@@ -904,6 +904,10 @@
     "test.mesclar": "Merge Formatting: the pasted text takes the formatting of the insertion point; one Ctrl+Z undoes it",
     "test.mesclar.detail": "destination color: {color}; bold that came along: {bold}; font: {font}; undone: {undo}",
     "test.alterarEstilos": "Change Styles: the theme colors change the headings in the text; one Ctrl+Z goes back to the Office theme",
-    "test.alterarEstilos.detail": "Heading 1 in the Office theme: {office}; with the Green colors: {green} ({attr}); undone: {undo}"
+    "test.alterarEstilos.detail": "Heading 1 in the Office theme: {office}; with the Green colors: {green} ({attr}); undone: {undo}",
+    "test.cabecalho": "Header: labels (From, To, Subject) sized to the longest one, fields aligned",
+    "test.cabecalho.detail": "label column: {col} px; longest label, “{label}”: {need} px ({by}); fields aligned: {aligned}",
+    "test.cabecalho.byRibbon": "fitted by the ribbon",
+    "test.cabecalho.byTb": "fitted by Thunderbird"
   }
 }

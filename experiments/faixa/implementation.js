@@ -559,6 +559,8 @@ var FaixaComposeController = class {
     // Ao enviar, o Thunderbird trava a janela e desativa os comandos (cmd_sendButton
     // incluído): a faixa acompanha a trava pelo mesmo sinal.
     this.host.observeSendEnabled(enabled => this.ui.setState({ sendEnabled: enabled, locked: !!win.gWindowLocked }));
+    // Com o Enviar ao lado, a coluna dos rótulos do cabeçalho fica no tamanho do maior rótulo.
+    this.host.observeHeaderLabels();
 
     // Como no Outlook, a formatação só vale com o foco no corpo: no Para, no Assunto
     // ou nos anexos os botões de formatação ficam desativados. Mexer na faixa não muda isso.
@@ -1643,6 +1645,38 @@ var FaixaComposeController = class {
         sr && rc
           ? T("enviar.detail", "Enviar em x={a}–{b}; destinatários a partir de x={c}", { a: Math.round(sr.left), b: Math.round(sr.right), c: Math.round(rc.left) })
           : T("enviar.none", "elemento ausente"));
+
+      // Cabeçalho: a coluna dos rótulos (De, Para, Cc, Assunto) no tamanho do maior rótulo
+      // visível, pela faixa (ESR 153) ou pelo próprio Thunderbird (depois), e os campos alinhados.
+      {
+        const px = v => parseFloat(v) || 0;
+        const boxes = [...doc.querySelectorAll("#MsgHeadersToolbar :is(#identityLabel-box, #subjectLabel-box, .address-label-container)")]
+          .filter(b => b.getClientRects().length && b.querySelector("label"));
+        let need = 0;
+        let widestLabel = "";
+        for (const b of boxes) {
+          const label = b.querySelector("label");
+          const ls = w.getComputedStyle(label);
+          const n = label.getBoundingClientRect().width + px(ls.marginLeft) + px(ls.marginRight);
+          if (n > need) {
+            need = n;
+            widestLabel = label.value || label.textContent.trim();
+          }
+        }
+        const widths = boxes.map(b => b.getBoundingClientRect().width);
+        const col = widths.length ? Math.max(...widths) : 0;
+        const fields = [doc.getElementById("msgIdentity"), doc.getElementById("msgSubject"),
+          ...doc.querySelectorAll("#recipientsContainer .address-row:not(.hidden) .address-container")]
+          .filter(f => f && f.getClientRects().length).map(f => f.getBoundingClientRect().left);
+        const aligned = fields.length > 1 && Math.max(...fields) - Math.min(...fields) < 2;
+        const fitted = boxes.length > 0 && widths.every(x => Math.abs(x - col) < 1) && col <= need + 4;
+        // O alinhamento dos campos vai no detalhe: quem o garante é a mesma largura das caixas.
+        add("cabecalho", T("cabecalho", "Cabeçalho: rótulos (De, Para, Assunto) no tamanho do maior e campos alinhados"), fitted,
+          T("cabecalho.detail", "coluna dos rótulos: {col} px; maior rótulo, “{label}”: {need} px ({by}); campos alinhados: {aligned}", {
+            col: Math.round(col), label: widestLabel || "—", need: Math.round(need), aligned: Y(aligned),
+            by: this.host.headerLabelsFixed() ? T("cabecalho.byRibbon", "ajustada pela faixa") : T("cabecalho.byTb", "ajustada pelo Thunderbird"),
+          }));
+      }
 
       // Arquivo e barra de acesso rápido
       const fileBtn = doc.getElementById("fx-tab-file");
