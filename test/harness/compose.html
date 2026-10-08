@@ -18,13 +18,30 @@
   #composeToolbar2 span { border:1px solid #bbb; border-radius:4px; padding:6px 10px; }
   #composeContentBox { flex:1; min-height:0; display:grid;
     grid-template: "headers" minmax(auto, min-content) "format-toolbar" min-content "message" minmax(33%, 1fr) / minmax(auto, 1fr); }
+  /* Cabeçalho como no messengercompose.css da ESR 153 (antes do bug 2069617 do Thunderbird):
+   * linhas em flex, e cada caixa de rótulo com a largura do pacote de idioma no style
+   * (headersSpace2.style, 8em em inglês). ?cabecalho=novo (html.tbnovo): o layout que veio
+   * depois, uma grade com subgrade em que a coluna dos rótulos tem o tamanho do maior. */
   #MsgHeadersToolbar { grid-area: headers; display:grid; grid-template-rows: min-content minmax(0, min-content) min-content; grid-template-columns: auto; background: var(--layout-background-1); }
-  .hrow { display:flex; align-items:center; gap:8px; min-height:34px; padding:0 10px; }
-  .hrow label { width:70px; text-align:right; color: var(--layout-color-2); }
-  .hrow input, .hrow select { flex:1; height:26px; }
+  .address-identity-recipient, #subject-box { display:flex; align-items:center; min-height:34px; margin-inline-end:8px; }
+  .recipients-container { display:block; }
+  .address-row { display:flex; margin-block:6px; margin-inline-end:8px; align-items:self-start; }
   .address-row.hidden { display:none; }
-  .address-container { flex:1; display:flex; flex-wrap:wrap; gap:4px; align-items:center; border:1px solid #bbb; border-radius:4px; padding:1px 4px; min-height:26px; background:#fff; }
+  .aw-firstColBox { box-sizing:border-box; padding:0 4px; inline-size:28px; flex:0 0 auto; align-self:center; }
+  :is(#identityLabel-box, #subjectLabel-box, .address-label-container) { display:flex; justify-content:flex-end; align-items:center; flex:0 0 auto; align-self:stretch; }
+  :is(#identityLabel-box, #subjectLabel-box, .address-label-container) > label { flex:0 0 auto; margin-inline:6px; white-space:nowrap; color: var(--layout-color-2); }
+  #msgIdentity { flex:1; height:26px; margin-inline:4px 10px; }
+  #msgSubjectContainer { flex:1; display:flex; align-items:center; }
+  #msgSubject { flex:1; height:26px; margin-inline:4px 8px; }
+  .address-container { flex:1 1 auto; margin-inline:4px 0; display:flex; flex-wrap:wrap; gap:4px; align-items:center; border:1px solid #bbb; border-radius:4px; padding:1px 4px; min-height:26px; background:#fff; }
   .address-container input { border:0; outline:0; min-width:120px; height:22px; flex:1; }
+  html.tbnovo #MsgHeadersToolbar { grid-template-columns: auto fit-content(11.5rem) minmax(0, 1fr); }
+  html.tbnovo #top-gradient-box, html.tbnovo #recipientsContainer, html.tbnovo .address-row, html.tbnovo #subject-box { display:grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+  html.tbnovo .address-row.hidden { display:none; }
+  html.tbnovo .recipients-container { align-content:start; row-gap:6px; padding-block:6px; }
+  html.tbnovo .address-row { margin-block:0; }
+  html.tbnovo :is(#identityLabel-box, #subjectLabel-box, .address-label-container) { min-inline-size:0; max-inline-size:11.5rem; }
+  html.tbnovo #identity-container { display:flex; min-inline-size:0; }
   .sim-pill { background:#e3ecfb; border-radius:10px; padding:1px 8px; font-size:12px; }
   .sim-pill.invalid-address { background:#fde2e2; color:#a40000; text-decoration: underline wavy #c00000; }
   #FormatToolbox { grid-area: format-toolbar; }
@@ -57,13 +74,14 @@
 </div>
 <div id="composeContentBox">
   <div id="MsgHeadersToolbar">
-    <div id="top-gradient-box" class="hrow"><label>De</label><select id="msgIdentity"><option>Ana Souza &lt;ana@exemplo.com.br&gt;</option></select></div>
-    <div id="recipientsContainer">
-      <div class="hrow address-row" id="addressRowTo" data-recipienttype="addr_to"><label>Para</label><div class="address-container"><span class="sim-pill" data-address="mariana@cliente.com.br" data-email="mariana@cliente.com.br">mariana@cliente.com.br</span><input id="to" class="address-row-input mail-input"></div></div>
-      <div class="hrow address-row" id="addressRowCc" data-recipienttype="addr_cc"><label>Cc</label><div class="address-container"><input id="cc" class="address-row-input mail-input"></div></div>
-      <div class="hrow address-row hidden" id="addressRowBcc" data-recipienttype="addr_bcc"><label>Cco</label><div class="address-container"><input id="bcc" class="address-row-input mail-input"></div></div>
+    <div id="top-gradient-box" class="address-identity-recipient"><div class="aw-firstColBox"></div><div id="identityLabel-box" style="width: 8em;"><label id="identityLabel">De</label></div><select id="msgIdentity"><option>Ana Souza &lt;ana@exemplo.com.br&gt;</option></select></div>
+    <div id="recipientsContainer" class="recipients-container">
+      <div class="address-row hidden" id="addressRowReply" data-recipienttype="addr_reply"><div class="aw-firstColBox"></div><div class="address-label-container" style="width: 8em;"><label>Responder a</label></div><div class="address-container"><input id="replyAddrInput" class="address-row-input mail-input"></div></div>
+      <div class="address-row" id="addressRowTo" data-recipienttype="addr_to"><div class="aw-firstColBox"></div><div class="address-label-container" style="width: 8em;"><label>Para</label></div><div class="address-container"><span class="sim-pill" data-address="mariana@cliente.com.br" data-email="mariana@cliente.com.br">mariana@cliente.com.br</span><input id="to" class="address-row-input mail-input"></div></div>
+      <div class="address-row" id="addressRowCc" data-recipienttype="addr_cc"><div class="aw-firstColBox"></div><div class="address-label-container" style="width: 8em;"><label>Cc</label></div><div class="address-container"><input id="cc" class="address-row-input mail-input"></div></div>
+      <div class="address-row hidden" id="addressRowBcc" data-recipienttype="addr_bcc"><div class="aw-firstColBox"></div><div class="address-label-container" style="width: 8em;"><label>Cco</label></div><div class="address-container"><input id="bcc" class="address-row-input mail-input"></div></div>
     </div>
-    <div id="subject-box" class="hrow"><label>Assunto</label><input id="msgSubject" value="Proposta de renovação do contrato"></div>
+    <div id="subject-box"><div class="aw-firstColBox"></div><div id="subjectLabel-box" style="width: 8em;"><label id="subjectLabel">Assunto</label></div><div id="msgSubjectContainer"><input id="msgSubject" value="Proposta de renovação do contrato"></div></div>
   </div>
   <div id="FormatToolbox"><div id="FormatToolbar">[barra de formatação nativa do Thunderbird]</div></div>
   <div id="messageArea"><iframe id="messageEditor" title="Corpo da mensagem"></iframe></div>

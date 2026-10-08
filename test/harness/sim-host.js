@@ -706,14 +706,17 @@ var FaixaSimHost = class {
     for (const mo of this.observers) mo.disconnect();
     this.observers = [];
     this.restoreMenubar();
+    this.restoreHeaderLabels();
     for (const id of [...this.sheets.keys()]) this.removeAgentSheet(id);
     for (const id of this.styleIds) this.chromeDoc.getElementById(id)?.remove();
   }
 };
 
-// A barra de menus, as confirmações e o Acompanhamento usam o código do host de verdade
-// (atributos, xulstore, campos da mensagem, observadores e o ouvinte do envio).
-for (const name of ["menubar", "menubarHidden", "nativeMenubarHidden", "setMenubarHidden", "applyMenubar", "observeMenubar", "restoreMenubar",
+// A barra de menus, as confirmações, o Acompanhamento e a coluna dos rótulos do cabeçalho
+// usam o código do host de verdade (atributos, xulstore, campos da mensagem, observadores e o
+// ouvinte do envio).
+for (const name of ["headerLabelsFixed", "fitHeaderLabels", "observeHeaderLabels", "restoreHeaderLabels",
+  "menubar", "menubarHidden", "nativeMenubarHidden", "setMenubarHidden", "applyMenubar", "observeMenubar", "restoreMenubar",
   "compFields", "receiptState", "toggleReturnReceipt", "toggleDSN", "observeReceipts", "recipientFlag", "setRecipientFlag", "onSavedCopy", "messageId", "extraCopyFolder", "onAfterSend"]) {
   Object.defineProperty(FaixaSimHost.prototype, name, Object.getOwnPropertyDescriptor(FaixaTBHost.prototype, name));
 }

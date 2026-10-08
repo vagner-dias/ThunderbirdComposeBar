@@ -127,7 +127,7 @@ async def main():
             print(("  ok    " if r["ok"] else "  FALHA ") + r["label"] + " — " + r["detail"])
         must = {"montagem", "barras", "menus", "enviar", "arquivo", "idioma", "editor", "foco", "negrito", "palavra", "estado", "fontePadrao", "tamanho",
                 "maiusculas", "espaco", "pincel", "pincelTravado", "enter", "marcas", "fontes", "atalhos", "mv3", "prioridade", "controle", "acompanhamento", "nomes", "catalogo",
-                "assinatura", "tabela", "inserir", "partes", "estilos", "paragrafo", "classificar", "mesclar", "alterarEstilos", "textoPuro", "previa", "envio", "desempenho"}
+                "assinatura", "tabela", "inserir", "partes", "estilos", "paragrafo", "classificar", "mesclar", "alterarEstilos", "textoPuro", "previa", "envio", "desempenho", "cabecalho"}
         got = {r["id"]: r["ok"] for r in results}
         for k in sorted(must):
             check("autoteste: " + k, got.get(k) is True, next((r["detail"] for r in results if r["id"] == k), "ausente"))
@@ -2854,6 +2854,58 @@ async def main():
               heads == ["Style Set", "Colors", "Fonts", "Paragraph Spacing"] and "Grayscale" in names and "No Paragraph Space" in names
               and borders[6] == "Outside Borders", [heads, names[:12], borders])
         check("0.8.0 em inglês: sem erros no console", not logs, logs)
+        await pg.close()
+
+        # ---------- 24. cabeçalho: a coluna dos rótulos no tamanho do maior rótulo ----------
+        # Na ESR 153 cada caixa de rótulo (De, Para, Cc, Assunto) tem no style a largura do pacote
+        # de idioma (8em): a faixa ajusta a coluna ao maior rótulo visível. Com ?cabecalho=novo, o
+        # layout do Thunderbird depois do bug 2069617, ele mesmo ajusta (grade com subgrade).
+        HDR = """(() => {
+          const px = v => parseFloat(v) || 0;
+          const tb = document.getElementById('MsgHeadersToolbar');
+          const boxes = [...tb.querySelectorAll('#identityLabel-box, #subjectLabel-box, .address-label-container')].filter(b => b.getClientRects().length);
+          let need = 0;
+          for (const b of boxes) { const l = b.querySelector('label'); const s = getComputedStyle(l); need = Math.max(need, l.getBoundingClientRect().width + px(s.marginLeft) + px(s.marginRight)); }
+          const fields = [document.getElementById('msgIdentity'), document.getElementById('msgSubject'), ...tb.querySelectorAll('.address-row:not(.hidden) .address-container')]
+            .map(f => Math.round(f.getBoundingClientRect().left));
+          const rows = [...tb.querySelectorAll('#top-gradient-box, .address-row:not(.hidden), #subject-box')].map(r => Math.round(r.getBoundingClientRect().height));
+          const send = document.getElementById('faixa-send');
+          return { attr: tb.getAttribute('faixa-labels'), widths: boxes.map(b => Math.round(b.getBoundingClientRect().width)), need: Math.ceil(need),
+                   labels: boxes.map(b => b.textContent.trim()), fields, rows, em8: Math.round(px(getComputedStyle(boxes[0]).fontSize) * 8),
+                   sendRight: send ? Math.round(send.getBoundingClientRect().right) : null, boxLeft: Math.round(boxes[0].getBoundingClientRect().left) };
+        })()"""
+        pg, logs = await open_page(b, "?cursor=1")
+        h1 = await pg.evaluate(HDR)
+        await pg.screenshot(path=os.path.join(OUT, "70_cabecalho_esr153.png"), clip={"x": 0, "y": 130, "width": 720, "height": 170})
+        check("cabeçalho da ESR 153: a coluna dos rótulos fica no tamanho do maior rótulo visível (Assunto), e não nos 8em do Thunderbird; campos alinhados",
+              h1["attr"] == "true" and len(set(h1["widths"])) == 1 and abs(h1["widths"][0] - h1["need"]) <= 1 and h1["need"] < h1["em8"] and h1["labels"] == ["De", "Para", "Cc", "Assunto"]
+              and len(set(h1["fields"])) == 1 and h1["sendRight"] <= h1["boxLeft"], h1)
+        await pg.evaluate("document.getElementById('addressRowReply').classList.remove('hidden')")
+        await pg.wait_for_timeout(150)
+        h2 = await pg.evaluate(HDR)
+        await pg.evaluate("document.getElementById('addressRowBcc').classList.remove('hidden')")
+        await pg.wait_for_timeout(150)
+        h3 = await pg.evaluate(HDR)
+        await pg.evaluate("document.getElementById('addressRowReply').classList.add('hidden')")
+        await pg.wait_for_timeout(150)
+        h4 = await pg.evaluate(HDR)
+        check("uma linha com rótulo maior (Responder a) alarga a coluna; uma com rótulo menor (Cco) não; escondida a maior, a coluna volta",
+              "Responder a" in h2["labels"] and len(set(h2["widths"])) == 1 and abs(h2["widths"][0] - h2["need"]) <= 1 and h2["need"] > h1["need"]
+              and len(set(h2["fields"])) == 1 and set(h3["widths"]) == {h2["widths"][0]} and "Cco" in h3["labels"]
+              and set(h4["widths"]) == {h1["widths"][0]} and len(set(h4["fields"])) == 1,
+              [h1["need"], h2["need"], h3["widths"], h4["widths"]])
+        await pg.evaluate("controller.dispose()")
+        await pg.wait_for_timeout(100)
+        h5 = await pg.evaluate(HDR)
+        check("sem a faixa (desligada ou desinstalada), o cabeçalho volta à largura do Thunderbird", h5["attr"] is None and set(h5["widths"]) == {h5["em8"]}, h5)
+        check("cabeçalho da ESR 153: sem erros no console", not logs, logs)
+        await pg.close()
+        pg, logs = await open_page(b, "?cursor=1&cabecalho=novo")
+        h6 = await pg.evaluate(HDR)
+        await pg.screenshot(path=os.path.join(OUT, "71_cabecalho_novo.png"), clip={"x": 0, "y": 130, "width": 720, "height": 170})
+        check("cabeçalho novo do Thunderbird (bug 2069617): o Enviar fica na sua coluna, as linhas continuam em subgrade, alinhadas, e a coluna é a do Thunderbird",
+              h6["attr"] is None and len(set(h6["widths"])) == 1 and abs(h6["widths"][0] - h6["need"]) <= 1 and len(set(h6["fields"])) == 1 and h6["sendRight"] <= h6["boxLeft"] and max(h6["rows"]) < 45, h6)
+        check("cabeçalho novo: sem erros no console", not logs, logs)
         await pg.close()
 
         await b.close()

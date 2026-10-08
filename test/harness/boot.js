@@ -5,6 +5,19 @@
   if (params.get("tema") == "escuro") document.documentElement.classList.add("dark");
   // ?semcc=1: linha Cc escondida, como numa mensagem nova do Thunderbird.
   if (params.get("semcc") == "1") document.getElementById("addressRowCc").classList.add("hidden");
+  // ?cabecalho=novo: o cabeçalho do Thunderbird depois do bug 2069617 (grade com subgrade,
+  // rótulos sem a largura do pacote de idioma, o De: e os botões num #identity-container).
+  if (params.get("cabecalho") == "novo") {
+    document.documentElement.classList.add("tbnovo");
+    for (const box of document.querySelectorAll("#identityLabel-box, #subjectLabel-box, .address-label-container")) {
+      box.style.removeProperty("width");
+    }
+    const identity = document.getElementById("msgIdentity");
+    const wrap = document.createElement("div");
+    wrap.id = "identity-container";
+    identity.before(wrap);
+    wrap.append(identity);
+  }
   // ?menusTb=oculta: a barra de menus oculta pela opção do próprio Thunderbird (guardada no
   // xulstore e aplicada na abertura da janela, como o XULPersist faz).
   const menubar = document.getElementById("compose-toolbar-menubar2");

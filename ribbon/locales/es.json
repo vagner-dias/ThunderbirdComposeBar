@@ -905,6 +905,10 @@
     "test.mesclar": "Combinar formato: lo pegado toma el formato del punto de inserción; un Ctrl+Z lo deshace",
     "test.mesclar.detail": "color del destino: {color}; negrita que venía: {bold}; fuente: {font}; deshecho: {undo}",
     "test.alterarEstilos": "Cambiar estilos: los colores del tema cambian los títulos del texto; un Ctrl+Z vuelve al tema Office",
-    "test.alterarEstilos.detail": "Título 1 en el tema Office: {office}; con los colores Verde: {green} ({attr}); deshecho: {undo}"
+    "test.alterarEstilos.detail": "Título 1 en el tema Office: {office}; con los colores Verde: {green} ({attr}); deshecho: {undo}",
+    "test.cabecalho": "Encabezado: etiquetas (De, Para, Asunto) del tamaño de la más larga y campos alineados",
+    "test.cabecalho.detail": "columna de etiquetas: {col} px; etiqueta más larga, “{label}”: {need} px ({by}); campos alineados: {aligned}",
+    "test.cabecalho.byRibbon": "ajustada por la cinta",
+    "test.cabecalho.byTb": "ajustada por Thunderbird"
   }
 }

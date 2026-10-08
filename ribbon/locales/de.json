@@ -905,6 +905,10 @@
     "test.mesclar": "Formatierung zusammenführen: Der eingefügte Text übernimmt die Formatierung der Einfügemarke; ein Strg+Z macht es rückgängig",
     "test.mesclar.detail": "Farbe am Ziel: {color}; mitgebrachte Fettschrift: {bold}; Schriftart: {font}; rückgängig gemacht: {undo}",
     "test.alterarEstilos": "Formatvorlagen ändern: Die Designfarben ändern die Überschriften im Text; ein Strg+Z kehrt zum Office-Design zurück",
-    "test.alterarEstilos.detail": "Überschrift 1 im Office-Design: {office}; mit den Farben Grün: {green} ({attr}); rückgängig gemacht: {undo}"
+    "test.alterarEstilos.detail": "Überschrift 1 im Office-Design: {office}; mit den Farben Grün: {green} ({attr}); rückgängig gemacht: {undo}",
+    "test.cabecalho": "Kopfzeile: Beschriftungen (Von, An, Betreff) so breit wie die längste, Felder ausgerichtet",
+    "test.cabecalho.detail": "Spalte der Beschriftungen: {col} px; längste Beschriftung, „{label}“: {need} px ({by}); Felder ausgerichtet: {aligned}",
+    "test.cabecalho.byRibbon": "vom Menüband angepasst",
+    "test.cabecalho.byTb": "von Thunderbird angepasst"
   }
 }

@@ -1,8 +1,8 @@
 # Faixa de Opções para o Thunderbird
 
-Complemento da Bluecker que recria no Thunderbird a faixa de opções da janela de composição do Outlook, com o Pincel de Formatação. Esta é a **0.8.0**: abas Mensagem, Inserir, Formatar Texto e Ajuda, a **Visualização Dinâmica**, as **confirmações de entrega e de leitura**, o **Acompanhamento**, a opção de **ocultar a barra de menus** da janela de mensagem, a faixa em **seis idiomas** (português, inglês, espanhol, italiano, alemão e francês) e, nesta versão, **Alterar Estilos**, **Sombreamento**, **Bordas**, **Lista de Vários Níveis**, **Classificar**, **Mesclar Formatação** e **Selecionar Texto com Formatação Semelhante**. Feita para o **Thunderbird ESR 153** (testada também no 156).
+Complemento da Bluecker que recria no Thunderbird a faixa de opções da janela de composição do Outlook, com o Pincel de Formatação. Esta é a **0.9.0**: abas Mensagem, Inserir, Formatar Texto e Ajuda, a **Visualização Dinâmica**, as **confirmações de entrega e de leitura**, o **Acompanhamento**, a opção de **ocultar a barra de menus** da janela de mensagem, a faixa em **seis idiomas** (português, inglês, espanhol, italiano, alemão e francês), **Alterar Estilos**, **Sombreamento**, **Bordas**, **Lista de Vários Níveis**, **Classificar**, **Mesclar Formatação** e **Selecionar Texto com Formatação Semelhante**. Feita para o **Thunderbird ESR 153** (testada também no 156).
 
-- ID: `faixa@bluecker.com` · versão 0.8.0 · Manifest V3 com WebExtension Experiment
+- ID: `faixa@bluecker.com` · versão 0.9.0 · Manifest V3 com WebExtension Experiment
 - **Alterar Estilos** (Formatar Texto → Estilos), como no Word: **Conjunto de Estilos** (Padrão, Word 2010, Word 2003, Linhas), **Cores** (Office, Office 2007–2010, Escala de Cinza, Azul, Verde, Vermelho, Violeta), **Fontes** (Office, Office 2007–2010, Arial, Georgia, Times New Roman, Verdana) e **Espaçamento entre Parágrafos** (Sem Espaço, Compacto, Estreito, Aberto, Relaxado, Duplo). Vale para a mensagem: os títulos e as ênfases que já estão no texto mudam junto, a galeria de estilos e as Cores do Tema da paleta acompanham, e cada escolha sai com um Ctrl+Z
 - **Sombreamento** e **Bordas** (Formatar Texto → Parágrafo): o fundo do parágrafo (com só uma parte selecionada, o fundo do texto) e as bordas embaixo, em cima, dos lados, em volta, entre os parágrafos ou todas. O botão Bordas repete a última escolha do menu e mostra qual é, como no Word
 - **Lista de Vários Níveis**: 1. → a. → i., I. → A. → 1., A. → 1. → a. e ● → ○ → ■; Aumentar e Diminuir Recuo mudam o nível do item. No envio, cada nível leva o seu marcador escrito, para o Gmail e o Outlook mostrarem igual
@@ -26,7 +26,7 @@ Complemento da Bluecker que recria no Thunderbird a faixa de opções da janela 
 - Como no Outlook, a formatação só vale com o foco no corpo: no Para ou no Assunto os botões de formatação e o que entra no corpo ficam desativados
 - **Teclado** como no Office: F6 passa pela faixa, as setas andam dentro dela (também nas grades de tabela, emoji e símbolos), Esc volta; **alto contraste** do Windows
 - Fonte padrão Calibri 11; Enter cria parágrafo sem espaçamento, como no Outlook, mesmo com "Usar formato Parágrafo" desligado no Thunderbird
-- A barra principal do Thunderbird fica oculta e o botão Enviar fica ao lado dos destinatários
+- A barra principal do Thunderbird fica oculta e o botão Enviar fica ao lado dos destinatários; a coluna dos rótulos (De, Para, Cc, Assunto) fica no tamanho do maior rótulo, sem o vão que o Thunderbird da ESR 153 deixa ali
 - Delete numa sugestão destacada do autocompletar de destinatários tira o endereço da lista, como no Outlook
 
 ## Instalar
@@ -36,7 +36,7 @@ O `.xpi` de cada versão está nas [Releases](https://github.com/vagner-dias/Thu
 ### Numa máquina, para testar
 
 1. No Thunderbird: **Ferramentas → Extensões e temas**.
-2. Engrenagem → **Instalar extensão a partir de arquivo…** → escolha `faixa-0.8.0.xpi`. Por cima de uma versão anterior, é só instalar: as preferências, as assinaturas e as Partes Rápidas continuam.
+2. Engrenagem → **Instalar extensão a partir de arquivo…** → escolha `faixa-0.9.0.xpi`. Por cima de uma versão anterior, é só instalar: as preferências, as assinaturas e as Partes Rápidas continuam.
 3. O Thunderbird avisa que a extensão pede **acesso total**. É esperado: a faixa é um *Experiment*, que roda dentro do Thunderbird para mexer na janela de composição.
 
 Para uma sessão só (some ao fechar o Thunderbird): **Ferramentas → Ferramentas de desenvolvimento → Depurar extensões → Este Thunderbird → Carregar extensão temporária…** e escolha o `.xpi` ou o `manifest.json` da raiz do repositório.
@@ -53,7 +53,7 @@ Crie ou complete o `policies.json` na pasta `distribution` da instalação do Th
     "ExtensionSettings": {
       "faixa@bluecker.com": {
         "installation_mode": "force_installed",
-        "install_url": "https://suporte.exemplo.com.br/faixa/faixa-0.8.0.xpi"
+        "install_url": "https://suporte.exemplo.com.br/faixa/faixa-0.9.0.xpi"
       }
     },
     "3rdparty": {
@@ -202,6 +202,7 @@ A página **Ajuda** (aba Ajuda → **Ajuda**, sem endereço da organização) re
 
 - **Executar autoteste** abre uma mensagem de teste, confere os itens e fecha a mensagem sem salvar. Os itens:
   - montagem, barras ocultas, barra de menus como configurada e Enviar ao lado dos destinatários;
+  - rótulos do cabeçalho (De, Para, Assunto) no tamanho do maior e campos alinhados;
   - menu Arquivo e Salvar na barra de acesso rápido;
   - idioma da faixa;
   - formatação desativada com o foco no Assunto;
@@ -342,6 +343,9 @@ O autoteste não cobre o que depende de servidor, de outro programa ou do teclad
     - grave o rascunho, feche e abra de novo: o tema continua, e o menu mostra as escolhas marcadas;
     - com outra fonte padrão nas Opções da Faixa, Fontes → Office volta o corpo para ela;
     - envie para o Gmail e para o Outlook: chega como na tela, com o espaçamento entre parágrafos.
+39. **Cabeçalho**: numa mensagem nova, os rótulos De, Para, Cc e Assunto ficam logo depois do Enviar (antes só da coluna do ×, que tira o Cc e o Cco), com os campos alinhados.
+    - pelos botões à direita do De:, mostre o Cco e, no ⋯, o Responder a: a coluna se ajusta ao rótulo maior e volta quando ele é tirado;
+    - com o Thunderbird em outro idioma, o mesmo.
 
 ## Atalhos
 
@@ -433,7 +437,7 @@ O **AltGr** (Alt da direita) sempre digita o caractere do teclado.
 | `manifest.json`, `_locales/` | Manifesto MV3 e o nome e a descrição nos seis idiomas |
 | `background.js`, `lib/config.js` | Página de eventos: configuração (política > usuário > padrão), comandos que usam a API compose (prioridade, formato de envio), Salvar Seleção na Galeria, Ajuda e Contatar o Suporte |
 | `experiments/faixa/implementation.js` | API do experiment, controlador de cada janela de composição, autoteste e fila de eventos |
-| `experiments/faixa/host.js` | Tudo o que depende de `messengercompose.xhtml` no TB 153: montagem, Enviar, comandos nativos, envio, anexos (mensagens e cartões de visita), pastas e levantamento de teclas |
+| `experiments/faixa/host.js` | Tudo o que depende de `messengercompose.xhtml` no TB 153: montagem, Enviar, coluna dos rótulos do cabeçalho, comandos nativos, envio, anexos (mensagens e cartões de visita), pastas e levantamento de teclas |
 | `experiments/faixa/engine.js` | Motor de edição pelo editor do Gecko: um comando = um Ctrl+Z; pincel, tamanhos em pt, estilos, Sombreamento, Bordas, listas de vários níveis, Classificar, Selecionar Texto com Formatação Semelhante, Mesclar Formatação, Alterar Estilos, tabela, Texto sem Formatação, Visualização Dinâmica (fora do editor), normalização do envio |
 | `experiments/faixa/themes.js` | Alterar Estilos: conjuntos de estilos, cores e fontes do tema e espaçamento; a definição da faixa com o tema da mensagem |
 | `experiments/faixa/ui.js` | Interface da faixa (abas, grupos que recolhem, menus, grades de tabela, emoji e símbolos, dicas) e leitura dos atalhos |
@@ -461,7 +465,7 @@ python3 test/harness/diag_test.py /tmp/faixa-capturas --gecko    # as mesmas pá
 python3 tools/check_i18n.py                                      # traduções
 ```
 
-O `run_tests.py` roda o `implementation.js`, a `ui.js` e o `engine.js` de verdade, trocando só o host (`sim-host.js`), que imita o que o Thunderbird faz (a divisão do parágrafo em volta de uma tabela, os comandos de tabela, as pastas e os anexos). O `diag_test.py` abre as Opções da Faixa, as Assinaturas, as Partes Rápidas (com outra janela gravando ao mesmo tempo), a Ajuda e o diagnóstico, e roda o `background.js` com os comandos da faixa. As capturas de tela ficam na pasta indicada. Com `--gecko`, o editor é o mesmo do Thunderbird (espaços, `&nbsp;`, `insertText`), o que pega erros que o Chromium esconde.
+O `run_tests.py` roda o `implementation.js`, a `ui.js` e o `engine.js` de verdade, trocando só o host (`sim-host.js`), que imita o que o Thunderbird faz (a divisão do parágrafo em volta de uma tabela, os comandos de tabela, as pastas e os anexos). O cabeçalho do simulador é o da ESR 153, com cada rótulo na largura do pacote de idioma; com `?cabecalho=novo`, é o do Thunderbird depois do bug 2069617, uma grade com subgrade. O `diag_test.py` abre as Opções da Faixa, as Assinaturas, as Partes Rápidas (com outra janela gravando ao mesmo tempo), a Ajuda e o diagnóstico, e roda o `background.js` com os comandos da faixa. As capturas de tela ficam na pasta indicada. Com `--gecko`, o editor é o mesmo do Thunderbird (espaços, `&nbsp;`, `insertText`), o que pega erros que o Chromium esconde.
 
 Os dois terminam com erro quando algum item falha e não dependem da internet: as imagens de fora que os testes usam (`https://example.com/...`) são respondidas pelo próprio teste. No GitHub, o workflow **CI** roda as traduções, o pacote e os dois testes, no Chromium e no Firefox, a cada push e pull request; o `.xpi` e as capturas ficam nos artefatos da execução.
 
